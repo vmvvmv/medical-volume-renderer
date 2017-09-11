@@ -1,0 +1,19 @@
+{
+  "name": "sharevol",
+  "version": "1.0.0",
+  "description": "ShareVol\r ========\r Lightweight volume viewer in WebGL http://okaluza.github.io/sharevol",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OKaluza/sharevol.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OKaluza/sharevol/issues"
+  },
+  "homepage": "https://github.com/OKaluza/sharevol#readme"
+}
