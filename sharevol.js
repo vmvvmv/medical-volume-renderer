@@ -9943,13 +9943,15 @@ function Volume(props, image, interactive, parentEl) {
 
   //Bounding boxes for intersections 
   this.interSectionBoxes = {  };
-  this.currentIntersectBox = { box: {
-    boxPositionBuffer : null,
-    boxIndexBuffer: null,
+  this.currentIntersectBox = {
+    minVertices : null,
+    maxVertices: null,
     name: 'box1',
-    isSelected: false
-  }};
-
+    //isSelected: false
+  };
+  this.showIntersection = false;
+  this.IntersectionBoxPositionBuffer = null;
+  this.IntersectionBoxIndexBuffer = null;
 
   //Setup two-triangle rendering
   this.webgl.init2dBuffers(this.gl.TEXTURE1); //Use 2nd texture unit
@@ -10046,15 +10048,15 @@ Volume.prototype.computeIntersectionBox = function( min, max ) {
         0, 4, 3, 7, 1, 5, 2, 6
       ]
    );
-  this.currentIntersectBox.box.boxPositionBuffer = this.gl.createBuffer();
-  this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.currentIntersectBox.box.boxPositionBuffer);
+  this.IntersectionBoxPositionBuffer = this.gl.createBuffer();
+  this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.IntersectionBoxPositionBuffer);
   this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
-  this.currentIntersectBox.box.boxPositionBuffer.itemSize = 3;
+  this.IntersectionBoxPositionBuffer.itemSize = 3;
 
-  this.currentIntersectBox.box.boxIndexBuffer = this.gl.createBuffer();
-  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.currentIntersectBox.box.boxIndexBuffer); 
+  this.IntersectionBoxIndexBuffer = this.gl.createBuffer();
+  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.IntersectionBoxIndexBuffer); 
   this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, indices, this.gl.STATIC_DRAW);
-  this.currentIntersectBox.box.boxIndexBuffer.numItems = 24;
+  this.IntersectionBoxIndexBuffer.numItems = 24;
 
 }
 
@@ -10135,7 +10137,7 @@ Volume.prototype.addGUI = function(gui) {
   //new Intersections folder
   var f2 = this.gui.addFolder('Intersections');
 
-  //var currentItem = { selecTedBox: null };
+  var currentItem = { selecTedBox: null };
 
  // f2.add(currentItem, 'selecTedBox', this.interSectionBoxes );
 
@@ -10144,12 +10146,16 @@ Volume.prototype.addGUI = function(gui) {
   f2.add(newName, 'name');
 
   f2.add({"new intesection" : function() {
-    //console.log([that.properties.xmin, that.properties.ymin, that.properties.zmin], 
-    //  [that.properties.xmax, that.properties.ymax, that.properties.zmax]);
-    that.computeIntersectionBox([that.properties.xmin, that.properties.ymin, that.properties.zmin], 
-      [that.properties.xmax, that.properties.ymax, that.properties.zmax]);
-    that.currentIntersectBox.box.name = newName.name;
-    that.currentIntersectBox.box.isSelected = true;
+
+    that.properties.xmin = that.properties.ymin = that.properties.zmin = 0.0;
+    that.properties.xmax = that.properties.ymax = that.properties.zmax = 1.0;
+ 
+    that.computeIntersectionBox([0, 0, 0], 
+      [1, 1, 1]);
+    that.currentIntersectBox.name = newName.name;
+    that.showIntersection = true;
+
+    that.delayedRender(250);
 
   }}, 'new intesection');
   
@@ -10157,15 +10163,28 @@ Volume.prototype.addGUI = function(gui) {
     // change ref to copy
     that.interSectionBoxes[newName.name] = {
 
-      boxPositionBuffer : that.currentIntersectBox.box.boxPositionBuffer,
-      boxIndexBuffer: that.currentIntersectBox.box.boxIndexBuffer,
-      name: that.currentIntersectBox.box.name,
-      isSelected: true
+      minVertices:[that.properties.xmin, that.properties.ymin, that.properties.zmin].slice(),
+      maxVertices: [that.properties.xmax, that.properties.ymax, that.properties.zmax].slice(),
+      name: newName.name,
+      //isSelected: true
 
     }
     
+    
     f2.__controllers[f2.__controllers.length-1].remove();
-    f2.add( that.currentIntersectBox, 'box', that.interSectionBoxes ).onChange(function(){
+    f2.add(  currentItem, 'selecTedBox', Object.keys(that.interSectionBoxes) ).onChange(function(){
+      that.showIntersection = true;
+      that.currentIntersectBox = that.interSectionBoxes[currentItem.selecTedBox];
+
+      that.properties.xmin =  that.currentIntersectBox.minVertices[0];
+      that.properties.ymin =  that.currentIntersectBox.minVertices[1];
+      that.properties.zmin =  that.currentIntersectBox.minVertices[2];
+      that.properties.xmax =  that.currentIntersectBox.maxVertices[0];
+      that.properties.ymax =  that.currentIntersectBox.maxVertices[1];
+      that.properties.zmax =  that.currentIntersectBox.maxVertices[2];
+
+
+      that.computeIntersectionBox( that.currentIntersectBox.minVertices, that.currentIntersectBox.maxVertices);
       that.delayedRender(250);
     });
 
@@ -10175,8 +10194,9 @@ Volume.prototype.addGUI = function(gui) {
 
   f2.add({"cancel" : function() {
     
-    //that.currentIntersectBox.isSelected = false;
-    console.log( JSON.stringify(currentItem ));
+    that.showIntersection = false;
+    that.properties.xmin = that.properties.ymin = that.properties.zmin = 0.0;
+    that.properties.xmax = that.properties.ymax = that.properties.zmax = 1.0;
     
   }}, 'cancel');
 
@@ -10196,9 +10216,18 @@ Volume.prototype.addGUI = function(gui) {
   f2.add(this.properties, 'zmin', 0.0, 1.0, 0.01).onChange(changeIntesection);
   f2.add(this.properties, 'zmax', 0.0, 1.0, 0.01).onChange(changeIntesection);
 
-  f2.add( this.currentIntersectBox, 'box', this.interSectionBoxes ).onChange(function(){
+  f2.add( currentItem, 'selecTedBox', Object.keys(this.interSectionBoxes) ).onChange(function() {
+    that.showIntersection = true;
+    that.currentIntersectBox = that.interSectionBoxes[currentItem.selecTedBox];
+    that.properties.xmin =  that.currentIntersectBox.minVertices[0];
+    that.properties.ymin =  that.currentIntersectBox.minVertices[1];
+    that.properties.zmin =  that.currentIntersectBox.minVertices[2];
+    that.properties.xmax =  that.currentIntersectBox.maxVertices[0];
+    that.properties.ymax =  that.currentIntersectBox.maxVertices[1];
+    that.properties.zmax =  that.currentIntersectBox.maxVertices[2];
+    that.computeIntersectionBox( that.currentIntersectBox.minVertices, that.currentIntersectBox.maxVertices);
     that.delayedRender(250);
-    console.log();
+    
   });
 
   f2.open();
@@ -10286,8 +10315,11 @@ Volume.prototype.draw = function(lowquality, testmode) {
   //box/axes draw fully opaque behind volume
   if (this.properties.border) this.drawBox(1.0);
   if (this.properties.axes) this.drawAxis(1.0);
-  if (this.currentIntersectBox.box.isSelected === true )this.drawCurrentIntersection();
-
+  if (this.showIntersection === true ) { 
+    //console.log('draw');
+    this.drawCurrentIntersection();
+  }
+  //this.drawCurrentIntersection();
   //Volume render (skip while interacting if lowpower device flag is set)
   if (!(lowquality && !this.properties.interactive)) {
     //Setup volume camera
@@ -10483,15 +10515,15 @@ Volume.prototype.drawCurrentIntersection = function(alpha) {
   this.gl.uniform1f(this.lineprogram.uniforms["uAlpha"], alpha);
   this.gl.uniform4fv(this.lineprogram.uniforms["uColour"], this.borderColour.rgbaGL());
 
-  this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.currentIntersectBox.box.boxPositionBuffer);
-  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.currentIntersectBox.box.boxIndexBuffer);
+  this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.IntersectionBoxPositionBuffer);
+  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.IntersectionBoxIndexBuffer);
   this.gl.enableVertexAttribArray(this.lineprogram.attributes["aVertexPosition"]);
-  this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexPosition"], this.currentIntersectBox.box.boxPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
+  this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexPosition"], this.IntersectionBoxPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
   this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexColour"], 4, this.gl.UNSIGNED_BYTE, true, 0, 0);
 
   this.webgl.modelView.scale(this.scaling);  //Apply scaling
   this.webgl.setMatrices();
-  this.gl.drawElements(this.gl.LINES, this.currentIntersectBox.box.boxIndexBuffer.numItems, this.gl.UNSIGNED_SHORT, 0);
+  this.gl.drawElements(this.gl.LINES, this.IntersectionBoxIndexBuffer.numItems, this.gl.UNSIGNED_SHORT, 0);
 }
 
 Volume.prototype.timeAction = function(action, start) {
