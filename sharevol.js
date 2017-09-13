@@ -9028,6 +9028,16 @@ var reset;
 var filename;
 var mobile;
 
+window.Test1 = function( x,y,z) {
+  
+  volume.properties.xmax = x || 0.9;
+  volume.properties.ymax = y || 0.9;
+  volume.properties.zmax = z || 0.9;
+ // volume.box(0.4, 2);
+
+  volume.delayedRender(250);
+}
+
 function initPage() {
   window.onresize = autoResize;
 
@@ -9786,10 +9796,10 @@ Popup.prototype.hide = function() {
   SliceView.prototype.click = function(event, mouse) {
     if (this.slicer.flipY) mouse.y = mouse.element.clientHeight - mouse.y;
 
-    var coord;  
+    var coord;
 
     //Rotated?
-    if (this.rotate == 90)  
+    if (this.rotate == 90)
       coord = [mouse.y / mouse.element.clientHeight, 1.0 - mouse.x / mouse.element.clientWidth];
     else 
       coord = [mouse.x / mouse.element.clientWidth, mouse.y / mouse.element.clientHeight];
@@ -9805,7 +9815,8 @@ Popup.prototype.hide = function() {
       slicer.properties.Z = B;
     } else {
       slicer.properties.X = A;
-      slicer.properties.Y = B;          
+      slicer.properties.Y = B;
+    }
 
     this.slicer.draw();
   }
@@ -9844,6 +9855,8 @@ Popup.prototype.hide = function() {
 //Superimposed volumes
 
 function Volume(props, image, interactive, parentEl) {
+  //for dev
+  //interactive = false;
   this.image = image;
   this.canvas = document.createElement("canvas");
   this.canvas.style.cssText = "width: 100%; height: 100%; z-index: 0; margin: 0px; padding: 0px; background: black; border: none; display:block;";
@@ -9928,6 +9941,16 @@ function Volume(props, image, interactive, parentEl) {
   //Bounding box
   this.box([0.0, 0.0, 0.0], [1.0, 1.0, 1.0]);
 
+  //Bounding boxes for intersections 
+  this.interSectionBoxes = {  };
+  this.currentIntersectBox = { box: {
+    boxPositionBuffer : null,
+    boxIndexBuffer: null,
+    name: 'box1',
+    isSelected: false
+  }};
+
+
   //Setup two-triangle rendering
   this.webgl.init2dBuffers(this.gl.TEXTURE1); //Use 2nd texture unit
 
@@ -9993,9 +10016,46 @@ function Volume(props, image, interactive, parentEl) {
   this.properties.interactive = interactive;
   this.properties.axes = true;
   this.properties.border = true;
+  // for dev
+  this.computeIntersectionBox([this.properties.xmin, this.properties.ymin, this.properties.zmin], 
+    [this.properties.xmax, this.properties.ymax, this.properties.zmax]);
 
   //Load from local storage or previously loaded file
   this.load(props);
+
+}
+
+Volume.prototype.computeIntersectionBox = function( min, max ) {
+
+  var vertices = new Float32Array(
+      [
+        min[0], min[1], max[2],
+        min[0], max[1], max[2],
+        max[0], max[1], max[2],
+        max[0], min[1], max[2],
+        min[0], min[1], min[2],
+        min[0], max[1], min[2],
+        max[0], max[1], min[2],
+        max[0], min[1], min[2]
+      ]);
+
+  var indices = new Uint16Array(
+      [
+        0, 1, 1, 2, 2, 3, 3, 0,
+        4, 5, 5, 6, 6, 7, 7, 4,
+        0, 4, 3, 7, 1, 5, 2, 6
+      ]
+   );
+  this.currentIntersectBox.box.boxPositionBuffer = this.gl.createBuffer();
+  this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.currentIntersectBox.box.boxPositionBuffer);
+  this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
+  this.currentIntersectBox.box.boxPositionBuffer.itemSize = 3;
+
+  this.currentIntersectBox.box.boxIndexBuffer = this.gl.createBuffer();
+  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.currentIntersectBox.box.boxIndexBuffer); 
+  this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, indices, this.gl.STATIC_DRAW);
+  this.currentIntersectBox.box.boxIndexBuffer.numItems = 24;
+
 }
 
 Volume.prototype.box = function(min, max) {
@@ -10050,7 +10110,7 @@ Volume.prototype.addGUI = function(gui) {
   f.add(this.properties, 'axes');
   f.add(this.properties, 'border');
   f.add(this.properties, 'tricubicFilter');
-  f.open();
+  //f.open();
   //this.gui.__folders.f.controllers[1].updateDisplay();  //Update samples display
 
   //Clip planes folder
@@ -10072,6 +10132,80 @@ Volume.prototype.addGUI = function(gui) {
   f1.addColor(this.properties, 'colour');
   //f1.open();
 
+  //new Intersections folder
+  var f2 = this.gui.addFolder('Intersections');
+
+  //var currentItem = { selecTedBox: null };
+
+ // f2.add(currentItem, 'selecTedBox', this.interSectionBoxes );
+
+  var newName = { name: 'new name' };
+
+  f2.add(newName, 'name');
+
+  f2.add({"new intesection" : function() {
+    //console.log([that.properties.xmin, that.properties.ymin, that.properties.zmin], 
+    //  [that.properties.xmax, that.properties.ymax, that.properties.zmax]);
+    that.computeIntersectionBox([that.properties.xmin, that.properties.ymin, that.properties.zmin], 
+      [that.properties.xmax, that.properties.ymax, that.properties.zmax]);
+    that.currentIntersectBox.box.name = newName.name;
+    that.currentIntersectBox.box.isSelected = true;
+
+  }}, 'new intesection');
+  
+  f2.add({"save" : function() {
+    // change ref to copy
+    that.interSectionBoxes[newName.name] = {
+
+      boxPositionBuffer : that.currentIntersectBox.box.boxPositionBuffer,
+      boxIndexBuffer: that.currentIntersectBox.box.boxIndexBuffer,
+      name: that.currentIntersectBox.box.name,
+      isSelected: true
+
+    }
+    
+    f2.__controllers[f2.__controllers.length-1].remove();
+    f2.add( that.currentIntersectBox, 'box', that.interSectionBoxes ).onChange(function(){
+      that.delayedRender(250);
+    });
+
+    console.log(that.interSectionBoxes);
+
+  }}, 'save');
+
+  f2.add({"cancel" : function() {
+    
+    //that.currentIntersectBox.isSelected = false;
+    console.log( JSON.stringify(currentItem ));
+    
+  }}, 'cancel');
+
+  var changeIntesection = function(value) {
+    that.computeIntersectionBox([that.properties.xmin, that.properties.ymin, that.properties.zmin], 
+      [that.properties.xmax, that.properties.ymax, that.properties.zmax]);
+    for (var i in f2.__controllers) {
+      f2.__controllers[i].updateDisplay();
+    }
+    that.delayedRender(250);
+  };
+
+  f2.add(this.properties, 'xmin', 0.0, 1.0, 0.01).onChange(changeIntesection);
+  f2.add(this.properties, 'xmax', 0.0, 1.0, 0.01).onChange(changeIntesection);
+  f2.add(this.properties, 'ymin', 0.0, 1.0, 0.01).onChange(changeIntesection);
+  f2.add(this.properties, 'ymax', 0.0, 1.0, 0.01).onChange(changeIntesection);
+  f2.add(this.properties, 'zmin', 0.0, 1.0, 0.01).onChange(changeIntesection);
+  f2.add(this.properties, 'zmax', 0.0, 1.0, 0.01).onChange(changeIntesection);
+
+  f2.add( this.currentIntersectBox, 'box', this.interSectionBoxes ).onChange(function(){
+    that.delayedRender(250);
+    console.log();
+  });
+
+  f2.open();
+
+  // for (var i in f2.__controllers)
+  //   f2.__controllers[i].onChange(changeIntesection);
+  //--------------------------------------------
   // Iterate over all controllers and set change function
   var that = this;
   var changefn = function(value) {that.delayedRender(250);};  //Use delayed high quality render for faster interaction
@@ -10152,6 +10286,7 @@ Volume.prototype.draw = function(lowquality, testmode) {
   //box/axes draw fully opaque behind volume
   if (this.properties.border) this.drawBox(1.0);
   if (this.properties.axes) this.drawAxis(1.0);
+  if (this.currentIntersectBox.box.isSelected === true )this.drawCurrentIntersection();
 
   //Volume render (skip while interacting if lowpower device flag is set)
   if (!(lowquality && !this.properties.interactive)) {
@@ -10212,13 +10347,14 @@ Volume.prototype.draw = function(lowquality, testmode) {
     //this.webgl.setMatrices();
 
     this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.webgl.vertexPositionBuffer.numItems);
-
+    //this.drawCurrentIntersection();
     this.webgl.modelView.pop();
   } else {
     //Always draw axis even if turned off to show interaction
     if (!this.properties.axes) this.drawAxis(1.0);
     //Bounding box
     this.drawBox(1.0);
+    //this.drawCurrentIntersection();
   }
 
   //this.timeAction("Render", this.time);
@@ -10334,11 +10470,28 @@ Volume.prototype.drawBox = function(alpha) {
   this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.boxIndexBuffer);
   this.gl.enableVertexAttribArray(this.lineprogram.attributes["aVertexPosition"]);
   this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexPosition"], this.boxPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
-    this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexColour"], 4, this.gl.UNSIGNED_BYTE, true, 0, 0);
+  this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexColour"], 4, this.gl.UNSIGNED_BYTE, true, 0, 0);
 
   this.webgl.modelView.scale(this.scaling);  //Apply scaling
   this.webgl.setMatrices();
   this.gl.drawElements(this.gl.LINES, this.boxIndexBuffer.numItems, this.gl.UNSIGNED_SHORT, 0);
+}
+
+Volume.prototype.drawCurrentIntersection = function(alpha) {
+  this.camera();
+  this.webgl.use(this.lineprogram);
+  this.gl.uniform1f(this.lineprogram.uniforms["uAlpha"], alpha);
+  this.gl.uniform4fv(this.lineprogram.uniforms["uColour"], this.borderColour.rgbaGL());
+
+  this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.currentIntersectBox.box.boxPositionBuffer);
+  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.currentIntersectBox.box.boxIndexBuffer);
+  this.gl.enableVertexAttribArray(this.lineprogram.attributes["aVertexPosition"]);
+  this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexPosition"], this.currentIntersectBox.box.boxPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
+  this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexColour"], 4, this.gl.UNSIGNED_BYTE, true, 0, 0);
+
+  this.webgl.modelView.scale(this.scaling);  //Apply scaling
+  this.webgl.setMatrices();
+  this.gl.drawElements(this.gl.LINES, this.currentIntersectBox.box.boxIndexBuffer.numItems, this.gl.UNSIGNED_SHORT, 0);
 }
 
 Volume.prototype.timeAction = function(action, start) {

@@ -20,6 +20,16 @@ var reset;
 var filename;
 var mobile;
 
+window.Test1 = function( x,y,z) {
+  
+  volume.properties.xmax = x || 0.9;
+  volume.properties.ymax = y || 0.9;
+  volume.properties.zmax = z || 0.9;
+ // volume.box(0.4, 2);
+
+  volume.delayedRender(250);
+}
+
 function initPage() {
   window.onresize = autoResize;
 
