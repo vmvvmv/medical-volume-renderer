@@ -3555,7 +3555,7 @@ dat.utils.requestAnimationFrame = (function () {
    * http://paulirish.com/2011/requestanimationframe-for-smart-animating/
    */
 
-  return window.webkitRequestAnimationFrame ||
+  return window.requestAnimationFrame ||
       window.mozRequestAnimationFrame ||
       window.oRequestAnimationFrame ||
       window.msRequestAnimationFrame ||
@@ -7223,7 +7223,7 @@ function removeChildren(element) {
 //Browser specific animation frame request
 if ( !window.requestAnimationFrame ) {
   window.requestAnimationFrame = ( function() {
-    return window.webkitRequestAnimationFrame ||
+    return window.requestAnimationFrame ||
            window.mozRequestAnimationFrame ||
            window.oRequestAnimationFrame ||
            window.msRequestAnimationFrame;
@@ -9885,8 +9885,6 @@ SliceView.prototype.move = function(event, mouse) {
 //Superimposed volumes
 
 function Volume(props, image, interactive, parentEl) {
-  //for dev
-  //interactive = false;
   this.image = image;
   this.canvas = document.createElement("canvas");
   this.canvas.style.cssText = "width: 100%; height: 100%; z-index: 0; margin: 0px; padding: 0px; background: black; border: none; display:block;";
@@ -9897,8 +9895,8 @@ function Volume(props, image, interactive, parentEl) {
   this.canvas.mouse = new Mouse(this.canvas, this);
   this.canvas.mouse.moveUpdate = true; //Continual update of deltaX/Y
 
-  this.background = new Colour(0xff404040);
-  this.borderColour = new Colour(0xffbbbbbb);
+  this.background = new Colour(0xff414952);
+  this.borderColour = new Colour(0xffD9D5D0);
 
   this.width = this.height = 0; //Auto-size
 
@@ -9970,7 +9968,6 @@ function Volume(props, image, interactive, parentEl) {
 
   //Bounding box
   this.box([0.0, 0.0, 0.0], [1.0, 1.0, 1.0]);
-
   //Bounding boxes for intersections 
   this.interSectionBoxes = {  };
   this.currentIntersectBox = {
@@ -9985,7 +9982,6 @@ function Volume(props, image, interactive, parentEl) {
   // this.IntersectionBoxPositionBuffer = null;
   // this.IntersectionBoxIndexBuffer = null;
   //this.IntesectionColor = new Colour(0xff000000);
-
   //Setup two-triangle rendering
   this.webgl.init2dBuffers(this.gl.TEXTURE1); //Use 2nd texture unit
 
@@ -10038,12 +10034,9 @@ function Volume(props, image, interactive, parentEl) {
 
   this.properties.xmin = this.properties.ymin = this.properties.zmin = 0.0;
   this.properties.xmax = this.properties.ymax = this.properties.zmax = 1.0;
-
   this.drawCub = {};
   this.drawCub.xmin = this.drawCub.ymin = this.drawCub.zmin = 0.0;
   this.drawCub.xmax = this.drawCub.ymax = this.drawCub.zmax = 1.0;
-
-
   this.properties.density = 10.0;
   this.properties.saturation = 1.0;
   this.properties.brightness = 0.0;
@@ -10056,51 +10049,45 @@ function Volume(props, image, interactive, parentEl) {
   this.properties.interactive = interactive;
   this.properties.axes = true;
   this.properties.border = true;
-  // for dev
-  // this.computeIntersectionBox([this.properties.xmin, this.properties.ymin, this.properties.zmin], 
-  //   [this.properties.xmax, this.properties.ymax, this.properties.zmax]);
 
   //Load from local storage or previously loaded file
   this.load(props);
-
 }
-
 Volume.prototype.computeIntersectionBox = function( box ) {
-
-  var min = box.minVertices;
-  var max = box.maxVertices;
-
-  var vertices = new Float32Array(
-      [
-        min[0], min[1], max[2],
-        min[0], max[1], max[2],
-        max[0], max[1], max[2],
-        max[0], min[1], max[2],
-        min[0], min[1], min[2],
-        min[0], max[1], min[2],
-        max[0], max[1], min[2],
-        max[0], min[1], min[2]
-      ]);
-
-  var indices = new Uint16Array(
-      [
-        0, 1, 1, 2, 2, 3, 3, 0,
-        4, 5, 5, 6, 6, 7, 7, 4,
-        0, 4, 3, 7, 1, 5, 2, 6
-      ]
-   );
-  box.IntersectionBoxPositionBuffer = this.gl.createBuffer();
-  this.gl.bindBuffer(this.gl.ARRAY_BUFFER, box.IntersectionBoxPositionBuffer);
-  this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
-  box.IntersectionBoxPositionBuffer.itemSize = 3;
-
-  box.IntersectionBoxIndexBuffer = this.gl.createBuffer();
-  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, box.IntersectionBoxIndexBuffer); 
-  this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, indices, this.gl.STATIC_DRAW);
-  box.IntersectionBoxIndexBuffer.numItems = 24;
-
-}
-
+  
+    var min = box.minVertices;
+    var max = box.maxVertices;
+  
+    var vertices = new Float32Array(
+        [
+          min[0], min[1], max[2],
+          min[0], max[1], max[2],
+          max[0], max[1], max[2],
+          max[0], min[1], max[2],
+          min[0], min[1], min[2],
+          min[0], max[1], min[2],
+          max[0], max[1], min[2],
+          max[0], min[1], min[2]
+        ]);
+  
+    var indices = new Uint16Array(
+        [
+          0, 1, 1, 2, 2, 3, 3, 0,
+          4, 5, 5, 6, 6, 7, 7, 4,
+          0, 4, 3, 7, 1, 5, 2, 6
+        ]
+     );
+    box.IntersectionBoxPositionBuffer = this.gl.createBuffer();
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, box.IntersectionBoxPositionBuffer);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
+    box.IntersectionBoxPositionBuffer.itemSize = 3;
+  
+    box.IntersectionBoxIndexBuffer = this.gl.createBuffer();
+    this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, box.IntersectionBoxIndexBuffer); 
+    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, indices, this.gl.STATIC_DRAW);
+    box.IntersectionBoxIndexBuffer.numItems = 24;
+  
+  }
 Volume.prototype.box = function(min, max) {
   var vertices = new Float32Array(
         [
@@ -10132,12 +10119,19 @@ Volume.prototype.box = function(min, max) {
   this.boxIndexBuffer.numItems = 24;
 }
 
+Volume.prototype.clipminX = function(val) {this.properties.xmin = val / this.res[0];}
+Volume.prototype.clipmaxX = function(val) {this.properties.xmax = val / this.res[0];}
+Volume.prototype.clipminY = function(val) {this.properties.ymin = val / this.res[1];}
+Volume.prototype.clipmaxY = function(val) {this.properties.ymax = val / this.res[1];}
+Volume.prototype.clipminZ = function(val) {this.properties.zmin = val / this.res[2];}
+Volume.prototype.clipmaxZ = function(val) {this.properties.zmax = val / this.res[2];}
+
 Volume.prototype.addGUI = function(gui) {
   if (this.gui) this.gui.destroy(); //Necessary/valid?
 
   this.gui = gui;
 
-  var f = this.gui.addFolder('Volume');
+  var f = this.gui.addFolder('Объём');
   f.add(this.properties, 'interactive');
   f.add(this.properties, 'usecolourmap');
   this.properties.samples = Math.floor(this.properties.samples);
@@ -10153,30 +10147,29 @@ Volume.prototype.addGUI = function(gui) {
   f.add(this.properties, 'axes');
   f.add(this.properties, 'border');
   f.add(this.properties, 'tricubicFilter');
-  //f.open();
+  // f.open();
   //this.gui.__folders.f.controllers[1].updateDisplay();  //Update samples display
 
   //Clip planes folder
-  var f0 = this.gui.addFolder('Clip planes');
-  f0.add(this.properties, 'xmin', 0.0, 1.0, 0.01);//.onFinishChange(function(l) {if (slicer) slicer.setX(l);});
-  f0.add(this.properties, 'xmax', 0.0, 1.0, 0.01);//.onFinishChange(function(l) {if (slicer) slicer.setX(l);});
-  f0.add(this.properties, 'ymin', 0.0, 1.0, 0.01);//.onFinishChange(function(l) {if (slicer) slicer.setY(l);});
-  f0.add(this.properties, 'ymax', 0.0, 1.0, 0.01);//.onFinishChange(function(l) {if (slicer) slicer.setY(l);});
-  f0.add(this.properties, 'zmin', 0.0, 1.0, 0.01);//.onFinishChange(function(l) {if (slicer) slicer.setZ(l);});
-  f0.add(this.properties, 'zmax', 0.0, 1.0, 0.01);//.onFinishChange(function(l) {if (slicer) slicer.setZ(l);});
+  var f0 = this.gui.addFolder('Область интереса (объём)');
+  f0.add(this.properties, 'xmin', 0.01, 1.00, 0.01).listen().onFinishChange(function(l) {if (slicer) slicer.clipminX(l);});
+  f0.add(this.properties, 'xmax', 0.01, 1.00, 0.01).listen().onFinishChange(function(l) {if (slicer) slicer.clipmaxX(l);});
+  f0.add(this.properties, 'ymin', 0.01, 1.00, 0.01).listen().onFinishChange(function(l) {if (slicer) slicer.clipminY(l);});
+  f0.add(this.properties, 'ymax', 0.01, 1.00, 0.01).listen().onFinishChange(function(l) {if (slicer) slicer.clipmaxY(l);});
+  f0.add(this.properties, 'zmin', 0.01, 1.00, 0.01).listen().onFinishChange(function(l) {if (slicer) slicer.clipminZ(l);});
+  f0.add(this.properties, 'zmax', 0.01, 1.00, 0.01).listen().onFinishChange(function(l) {if (slicer) slicer.clipmaxZ(l);});
   //f0.open();
 
   //Isosurfaces folder
-  var f1 = this.gui.addFolder('Isosurface');
+  var f1 = this.gui.addFolder('3D поверхность');
   f1.add(this.properties, 'isovalue', 0.0, 1.0, 0.01);
   f1.add(this.properties, 'isowalls');
   f1.add(this.properties, 'isoalpha', 0.0, 1.0, 0.01);
   f1.add(this.properties, 'isosmooth', 0.1, 3.0, 0.1);
   f1.addColor(this.properties, 'colour');
   //f1.open();
-
-  //new Intersections folder
-  var f2 = this.gui.addFolder('Intersections');
+//new Intersections folder
+var f2 = this.gui.addFolder('Intersections');
 
   var currentItem = { selecTedBox: null };
 
@@ -10300,10 +10293,6 @@ Volume.prototype.addGUI = function(gui) {
   });
 
   f2.open();
-
-  // for (var i in f2.__controllers)
-  //   f2.__controllers[i].onChange(changeIntesection);
-  //--------------------------------------------
   // Iterate over all controllers and set change function
   var that = this;
   var changefn = function(value) {that.delayedRender(250);};  //Use delayed high quality render for faster interaction
@@ -10392,7 +10381,6 @@ Volume.prototype.draw = function(lowquality, testmode) {
     //console.log('draw');
     this.drawCurrentIntersection(1.0, this.currentIntersectBox);
   }
-  //this.drawCurrentIntersection();
   //Volume render (skip while interacting if lowpower device flag is set)
   if (!(lowquality && !this.properties.interactive)) {
     //Setup volume camera
@@ -10452,14 +10440,13 @@ Volume.prototype.draw = function(lowquality, testmode) {
     //this.webgl.setMatrices();
 
     this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.webgl.vertexPositionBuffer.numItems);
-    //this.drawCurrentIntersection();
+
     this.webgl.modelView.pop();
   } else {
     //Always draw axis even if turned off to show interaction
     if (!this.properties.axes) this.drawAxis(1.0);
     //Bounding box
     this.drawBox(1.0);
-    //this.drawCurrentIntersection();
   }
 
   //this.timeAction("Render", this.time);
@@ -10575,13 +10562,12 @@ Volume.prototype.drawBox = function(alpha) {
   this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.boxIndexBuffer);
   this.gl.enableVertexAttribArray(this.lineprogram.attributes["aVertexPosition"]);
   this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexPosition"], this.boxPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
-  this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexColour"], 4, this.gl.UNSIGNED_BYTE, true, 0, 0);
+    this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexColour"], 4, this.gl.UNSIGNED_BYTE, true, 0, 0);
 
   this.webgl.modelView.scale(this.scaling);  //Apply scaling
   this.webgl.setMatrices();
   this.gl.drawElements(this.gl.LINES, this.boxIndexBuffer.numItems, this.gl.UNSIGNED_SHORT, 0);
 }
-
 Volume.prototype.drawCurrentIntersection = function( alpha, box ) {
   this.camera();
   this.webgl.use(this.lineprogram);
@@ -10735,7 +10721,7 @@ Volume.prototype.applyBackground = function(bg) {
   if (!bg) return;
   this.background = new Colour(bg);
   var hsv = this.background.HSV();
-  this.borderColour = hsv.V > 50 ? new Colour(0xff444444) : new Colour(0xffbbbbbb);
+  this.borderColour = hsv.V > 50 ? new Colour(0xff414952) : new Colour(0xffbbbbbb);
 
   //document.body.style.background = bg;
 

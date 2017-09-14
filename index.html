@@ -552,9 +552,9 @@ void main(void)
 
 <style>
 html {
-  font-family: "Lucida Grande",sans-serif;
+  font-family: "Open Sans",sans-serif;
   font-size: 11pt;
-  background: #ffe;
+  background: #ffffff;
 }
 html, body { 
   padding: 0; margin: 0;
@@ -578,11 +578,11 @@ html, body {
 
 .toolbox {
   visibility: hidden; z-index: 20;
-  background: #bba; 
+  background: #D9D5D0; 
   color: #000; 
   padding: 7px 10px 11px 10px; 
   position: absolute; 
-  border: 1px solid #444; 
+  border: 1px solid #00858A; 
   min-width: 300px;
   max-height: 400px;
 }
@@ -595,10 +595,76 @@ html, body {
   border: none; padding: 0px 4px; font-size: 14pt; line-height: 16px;}
 .toolbox h3 {
   font-size: 10pt;
-  font-weight: bold;
+  font-weight: normal;
   margin: 2px 0px; padding: 0;
   display: inline;
 }
+
+/*dat.gui lighter theme*/
+
+.dg.main.taller-than-window .close-button {
+    border-top: 1px solid #ddd;
+}
+
+.dg.main .close-button {
+    background-color: #ccc;
+}
+ 
+.dg.main .close-button:hover {
+    background-color: #ddd;
+}
+
+.dg {
+    color: #555;
+    text-shadow: none !important;
+}
+
+.dg.main::-webkit-scrollbar {
+    background: #fafafa;
+}
+
+.dg.main::-webkit-scrollbar-thumb {
+    background: #bbb;
+}
+ 
+.dg li:not(.folder) {
+    background: #fafafa;
+    border-bottom: 1px solid #ddd;
+}
+ 
+.dg li.save-row .button {
+    text-shadow: none !important;
+}
+
+.dg li.title {
+    background: #e8e8e8 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;
+}
+
+.dg .cr.function:hover,.dg .cr.boolean:hover {
+    background: #fff;
+}
+ 
+.dg .c input[type=text] {
+    background: #e9e9e9;
+}
+ 
+.dg .c input[type=text]:hover {
+    background: #eee;
+}
+ 
+.dg .c input[type=text]:focus {
+    background: #eee;
+    color: #555;
+}
+ 
+.dg .c .slider {
+    background: #e9e9e9;
+}
+
+.dg .c .slider:hover {
+    background: #eee;
+}
+
 </style>
 
 </head>
@@ -610,21 +676,21 @@ html, body {
 </div>
 
 <div class="toolbox" id="info"><div>
-  <h3 id="status">Loading...</h3>
+  <h3 id="status">Загрузка...</h3>
 </div></div>
 
 <div class="toolbox" id="colourmap"><div>
   <div class="toolclose" onclick="window.colourmaps.hide();">&times;</div>
-  <h3>Colourmaps:</h3>
+  <h3>Паллитра:</h3>
   <hr>
   <select id="colourmaps" onchange="colours.read(this.value); updateColourmap();">
-    <option value="" selected>None</option>
-    <option value="#000000;#ffffff">Black-White</option>
-    <option value="#ffffff;#000000">White-Black</option>
-    <option value="0.0=rgba(59,76,192,1.0);0.117647=rgba(95,127,232,1.0);0.235294=rgba(135,171,253,1.0);0.352941=rgba(176,203,252,1.0);0.5=rgba(220,220,220,1.0);0.529412=rgba(228,217,211,1.0);0.647059=rgba(246,191,165,1.0);0.764706=rgba(243,149,118,1.0);0.882353=rgba(221,94,75,1.0);1.0=rgba(181,11,39,1.0)">Cool-Warm</option>
-    <option value="0.0=rgba(0,0,0,1.0);0.5=rgba(255,0,0,1.0);0.75=rgba(255,127,0,1.0);1.000000=rgba(255,255,255,1.0)">Hot iron</option>
+    <option value="" selected>Отсутствует</option>
+    <option value="#000000;#ffffff">Черный-Белый</option>
+    <option value="#ffffff;#000000">Белый-Черный</option>
+    <option value="0.0=rgba(59,76,192,1.0);0.117647=rgba(95,127,232,1.0);0.235294=rgba(135,171,253,1.0);0.352941=rgba(176,203,252,1.0);0.5=rgba(220,220,220,1.0);0.529412=rgba(228,217,211,1.0);0.647059=rgba(246,191,165,1.0);0.764706=rgba(243,149,118,1.0);0.882353=rgba(221,94,75,1.0);1.0=rgba(181,11,39,1.0)">Холодный-Теплый</option>
+    <option value="0.0=rgba(0,0,0,1.0);0.5=rgba(255,0,0,1.0);0.75=rgba(255,127,0,1.0);1.000000=rgba(255,255,255,1.0)">Лава</option>
     <option value="rgba(0,0,0,1.0);rgba(85,0,170,1.0);rgba(5,0,90,1.0);rgba(0,0,159,1.0);rgba(0,0,239,1.0);rgba(0,63,255,1.0);rgba(0,143,196,1.0);rgba(0,223,170,1.0);rgba(0,255,74,1.0);rgba(42,255,42,1.0);rgba(159,255,47,1.0);rgba(255,223,0,1.0);rgba(255,143,0,1.0);rgba(255,71,0,1.0);rgba(255,22,0,1.0);rgba(237,0,0,1.0);rgba(203,0,0,1.0);rgba(0,0,0,1.0)">NIH</option>
-    <option value="#ff00ff;#0000ff;#00ffff;#00ff00;#ffff00;#ff0000">Spectrum</option>
+    <option value="#ff00ff;#0000ff;#00ffff;#00ff00;#ffff00;#ff0000">Спектр</option>
   </select>
   <br>
   <canvas id="palette" width="512" height="24" class="palette checkerboard"></canvas>
