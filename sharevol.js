@@ -9947,11 +9947,14 @@ function Volume(props, image, interactive, parentEl) {
     minVertices : null,
     maxVertices: null,
     name: 'box1',
-    //isSelected: false
+    color: new Colour('#'+Math.floor(Math.random()*16777215).toString(16)),
+    IntersectionBoxPositionBuffer : null,
+    IntersectionBoxIndexBuffer : null
   };
   this.showIntersection = false;
-  this.IntersectionBoxPositionBuffer = null;
-  this.IntersectionBoxIndexBuffer = null;
+  // this.IntersectionBoxPositionBuffer = null;
+  // this.IntersectionBoxIndexBuffer = null;
+  //this.IntesectionColor = new Colour(0xff000000);
 
   //Setup two-triangle rendering
   this.webgl.init2dBuffers(this.gl.TEXTURE1); //Use 2nd texture unit
@@ -10006,6 +10009,11 @@ function Volume(props, image, interactive, parentEl) {
   this.properties.xmin = this.properties.ymin = this.properties.zmin = 0.0;
   this.properties.xmax = this.properties.ymax = this.properties.zmax = 1.0;
 
+  this.drawCub = {};
+  this.drawCub.xmin = this.drawCub.ymin = this.drawCub.zmin = 0.0;
+  this.drawCub.xmax = this.drawCub.ymax = this.drawCub.zmax = 1.0;
+
+
   this.properties.density = 10.0;
   this.properties.saturation = 1.0;
   this.properties.brightness = 0.0;
@@ -10019,15 +10027,18 @@ function Volume(props, image, interactive, parentEl) {
   this.properties.axes = true;
   this.properties.border = true;
   // for dev
-  this.computeIntersectionBox([this.properties.xmin, this.properties.ymin, this.properties.zmin], 
-    [this.properties.xmax, this.properties.ymax, this.properties.zmax]);
+  // this.computeIntersectionBox([this.properties.xmin, this.properties.ymin, this.properties.zmin], 
+  //   [this.properties.xmax, this.properties.ymax, this.properties.zmax]);
 
   //Load from local storage or previously loaded file
   this.load(props);
 
 }
 
-Volume.prototype.computeIntersectionBox = function( min, max ) {
+Volume.prototype.computeIntersectionBox = function( box ) {
+
+  var min = box.minVertices;
+  var max = box.maxVertices;
 
   var vertices = new Float32Array(
       [
@@ -10048,15 +10059,15 @@ Volume.prototype.computeIntersectionBox = function( min, max ) {
         0, 4, 3, 7, 1, 5, 2, 6
       ]
    );
-  this.IntersectionBoxPositionBuffer = this.gl.createBuffer();
-  this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.IntersectionBoxPositionBuffer);
+  box.IntersectionBoxPositionBuffer = this.gl.createBuffer();
+  this.gl.bindBuffer(this.gl.ARRAY_BUFFER, box.IntersectionBoxPositionBuffer);
   this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
-  this.IntersectionBoxPositionBuffer.itemSize = 3;
+  box.IntersectionBoxPositionBuffer.itemSize = 3;
 
-  this.IntersectionBoxIndexBuffer = this.gl.createBuffer();
-  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.IntersectionBoxIndexBuffer); 
+  box.IntersectionBoxIndexBuffer = this.gl.createBuffer();
+  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, box.IntersectionBoxIndexBuffer); 
   this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, indices, this.gl.STATIC_DRAW);
-  this.IntersectionBoxIndexBuffer.numItems = 24;
+  box.IntersectionBoxIndexBuffer.numItems = 24;
 
 }
 
@@ -10143,17 +10154,32 @@ Volume.prototype.addGUI = function(gui) {
 
   var newName = { name: 'new name' };
 
-  f2.add(newName, 'name');
+  f2.add(newName, 'name').onChange( function(){
+      that.currentIntersectBox.name = newName.name;
+  });
 
   f2.add({"new intesection" : function() {
 
-    that.properties.xmin = that.properties.ymin = that.properties.zmin = 0.0;
-    that.properties.xmax = that.properties.ymax = that.properties.zmax = 1.0;
- 
-    that.computeIntersectionBox([0, 0, 0], 
-      [1, 1, 1]);
-    that.currentIntersectBox.name = newName.name;
+    that.drawCub.xmin = that.drawCub.ymin = that.drawCub.zmin = 0.0;
+    that.drawCub.xmax = that.drawCub.ymax = that.drawCub.zmax = 1.0;
+
+    that.currentIntersectBox = {
+      minVertices : [0, 0, 0],
+      maxVertices: [1, 1, 1],
+      name: newName.name,
+      color: new Colour('#'+Math.floor(Math.random()*16777215).toString(16)),
+      IntersectionBoxPositionBuffer : null,
+      IntersectionBoxIndexBuffer : null
+    };
+
+
+    that.computeIntersectionBox( that.currentIntersectBox );
+    //that.currentIntersectBox.name = newName.name;
     that.showIntersection = true;
+
+    for (var i in f2.__controllers) {
+      f2.__controllers[i].updateDisplay();
+    }
 
     that.delayedRender(250);
 
@@ -10161,71 +10187,84 @@ Volume.prototype.addGUI = function(gui) {
   
   f2.add({"save" : function() {
     // change ref to copy
-    that.interSectionBoxes[newName.name] = {
-
-      minVertices:[that.properties.xmin, that.properties.ymin, that.properties.zmin].slice(),
-      maxVertices: [that.properties.xmax, that.properties.ymax, that.properties.zmax].slice(),
-      name: newName.name,
-      //isSelected: true
-
-    }
+    that.interSectionBoxes[that.currentIntersectBox.name] = that.currentIntersectBox;
     
     
     f2.__controllers[f2.__controllers.length-1].remove();
     f2.add(  currentItem, 'selecTedBox', Object.keys(that.interSectionBoxes) ).onChange(function(){
+    
       that.showIntersection = true;
       that.currentIntersectBox = that.interSectionBoxes[currentItem.selecTedBox];
-
-      that.properties.xmin =  that.currentIntersectBox.minVertices[0];
-      that.properties.ymin =  that.currentIntersectBox.minVertices[1];
-      that.properties.zmin =  that.currentIntersectBox.minVertices[2];
-      that.properties.xmax =  that.currentIntersectBox.maxVertices[0];
-      that.properties.ymax =  that.currentIntersectBox.maxVertices[1];
-      that.properties.zmax =  that.currentIntersectBox.maxVertices[2];
-
-
-      that.computeIntersectionBox( that.currentIntersectBox.minVertices, that.currentIntersectBox.maxVertices);
+      that.drawCub.xmin =  that.currentIntersectBox.minVertices[0];
+      that.drawCub.ymin =  that.currentIntersectBox.minVertices[1];
+      that.drawCub.zmin =  that.currentIntersectBox.minVertices[2];
+      that.drawCub.xmax =  that.currentIntersectBox.maxVertices[0];
+      that.drawCub.ymax =  that.currentIntersectBox.maxVertices[1];
+      that.drawCub.zmax =  that.currentIntersectBox.maxVertices[2];
+  
+      for (var i in f2.__controllers) {
+        f2.__controllers[i].updateDisplay();
+      }
+  
+      that.computeIntersectionBox( that.currentIntersectBox );
+  
       that.delayedRender(250);
     });
 
-    console.log(that.interSectionBoxes);
+    //console.log(that.interSectionBoxes);
 
   }}, 'save');
 
   f2.add({"cancel" : function() {
     
     that.showIntersection = false;
-    that.properties.xmin = that.properties.ymin = that.properties.zmin = 0.0;
-    that.properties.xmax = that.properties.ymax = that.properties.zmax = 1.0;
+    that.drawCub.xmin = that.drawCub.ymin = that.drawCub.zmin = 0.0;
+    that.drawCub.xmax = that.drawCub.ymax = that.drawCub.zmax = 1.0;
     
   }}, 'cancel');
 
   var changeIntesection = function(value) {
-    that.computeIntersectionBox([that.properties.xmin, that.properties.ymin, that.properties.zmin], 
-      [that.properties.xmax, that.properties.ymax, that.properties.zmax]);
+
+    that.currentIntersectBox.minVertices = [that.drawCub.xmin, that.drawCub.ymin, that.drawCub.zmin];
+    that.currentIntersectBox.maxVertices = [that.drawCub.xmax, that.drawCub.ymax, that.drawCub.zmax];
+
+    that.computeIntersectionBox( that.currentIntersectBox );
+
     for (var i in f2.__controllers) {
       f2.__controllers[i].updateDisplay();
     }
+
     that.delayedRender(250);
+
   };
 
-  f2.add(this.properties, 'xmin', 0.0, 1.0, 0.01).onChange(changeIntesection);
-  f2.add(this.properties, 'xmax', 0.0, 1.0, 0.01).onChange(changeIntesection);
-  f2.add(this.properties, 'ymin', 0.0, 1.0, 0.01).onChange(changeIntesection);
-  f2.add(this.properties, 'ymax', 0.0, 1.0, 0.01).onChange(changeIntesection);
-  f2.add(this.properties, 'zmin', 0.0, 1.0, 0.01).onChange(changeIntesection);
-  f2.add(this.properties, 'zmax', 0.0, 1.0, 0.01).onChange(changeIntesection);
+  f2.add(this.drawCub, 'xmin', 0.0, 1.0, 0.01).onChange(changeIntesection);
+  f2.add(this.drawCub, 'xmax', 0.0, 1.0, 0.01).onChange(changeIntesection);
+  f2.add(this.drawCub, 'ymin', 0.0, 1.0, 0.01).onChange(changeIntesection);
+  f2.add(this.drawCub, 'ymax', 0.0, 1.0, 0.01).onChange(changeIntesection);
+  f2.add(this.drawCub, 'zmin', 0.0, 1.0, 0.01).onChange(changeIntesection);
+  f2.add(this.drawCub, 'zmax', 0.0, 1.0, 0.01).onChange(changeIntesection);
 
   f2.add( currentItem, 'selecTedBox', Object.keys(this.interSectionBoxes) ).onChange(function() {
+
     that.showIntersection = true;
     that.currentIntersectBox = that.interSectionBoxes[currentItem.selecTedBox];
-    that.properties.xmin =  that.currentIntersectBox.minVertices[0];
-    that.properties.ymin =  that.currentIntersectBox.minVertices[1];
-    that.properties.zmin =  that.currentIntersectBox.minVertices[2];
-    that.properties.xmax =  that.currentIntersectBox.maxVertices[0];
-    that.properties.ymax =  that.currentIntersectBox.maxVertices[1];
-    that.properties.zmax =  that.currentIntersectBox.maxVertices[2];
-    that.computeIntersectionBox( that.currentIntersectBox.minVertices, that.currentIntersectBox.maxVertices);
+
+    //console.log(that.currentIntersectBox);
+
+    that.drawCub.xmin =  that.currentIntersectBox.minVertices[0];
+    that.drawCub.ymin =  that.currentIntersectBox.minVertices[1];
+    that.drawCub.zmin =  that.currentIntersectBox.minVertices[2];
+    that.drawCub.xmax =  that.currentIntersectBox.maxVertices[0];
+    that.drawCub.ymax =  that.currentIntersectBox.maxVertices[1];
+    that.drawCub.zmax =  that.currentIntersectBox.maxVertices[2];
+
+    for (var i in f2.__controllers) {
+      f2.__controllers[i].updateDisplay();
+    }
+
+    that.computeIntersectionBox( that.currentIntersectBox );
+
     that.delayedRender(250);
     
   });
@@ -10313,11 +10352,15 @@ Volume.prototype.draw = function(lowquality, testmode) {
   this.gl.viewport(this.webgl.viewport.x, this.webgl.viewport.y, this.webgl.viewport.width, this.webgl.viewport.height);
 
   //box/axes draw fully opaque behind volume
-  if (this.properties.border) this.drawBox(1.0);
+  if (this.properties.border) { 
+    this.drawBox(1.0);
+    this.showIntersection = false;
+    this.drawIntersectionBoxes();
+  }
   if (this.properties.axes) this.drawAxis(1.0);
   if (this.showIntersection === true ) { 
     //console.log('draw');
-    this.drawCurrentIntersection();
+    this.drawCurrentIntersection(1.0, this.currentIntersectBox);
   }
   //this.drawCurrentIntersection();
   //Volume render (skip while interacting if lowpower device flag is set)
@@ -10509,21 +10552,34 @@ Volume.prototype.drawBox = function(alpha) {
   this.gl.drawElements(this.gl.LINES, this.boxIndexBuffer.numItems, this.gl.UNSIGNED_SHORT, 0);
 }
 
-Volume.prototype.drawCurrentIntersection = function(alpha) {
+Volume.prototype.drawCurrentIntersection = function( alpha, box ) {
   this.camera();
   this.webgl.use(this.lineprogram);
   this.gl.uniform1f(this.lineprogram.uniforms["uAlpha"], alpha);
-  this.gl.uniform4fv(this.lineprogram.uniforms["uColour"], this.borderColour.rgbaGL());
+  
+  // precomputed to each box
+  //var randomColor = new Colour('#'+Math.floor(Math.random()*16777215).toString(16));
+  this.gl.uniform4fv(this.lineprogram.uniforms["uColour"], box.color.rgbaGL());
 
-  this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.IntersectionBoxPositionBuffer);
-  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.IntersectionBoxIndexBuffer);
+  this.gl.bindBuffer(this.gl.ARRAY_BUFFER, box.IntersectionBoxPositionBuffer);
+  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, box.IntersectionBoxIndexBuffer);
   this.gl.enableVertexAttribArray(this.lineprogram.attributes["aVertexPosition"]);
-  this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexPosition"], this.IntersectionBoxPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
+  this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexPosition"], box.IntersectionBoxPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
   this.gl.vertexAttribPointer(this.lineprogram.attributes["aVertexColour"], 4, this.gl.UNSIGNED_BYTE, true, 0, 0);
 
   this.webgl.modelView.scale(this.scaling);  //Apply scaling
   this.webgl.setMatrices();
-  this.gl.drawElements(this.gl.LINES, this.IntersectionBoxIndexBuffer.numItems, this.gl.UNSIGNED_SHORT, 0);
+  this.gl.drawElements(this.gl.LINES, box.IntersectionBoxIndexBuffer.numItems, this.gl.UNSIGNED_SHORT, 0);
+}
+
+Volume.prototype.drawIntersectionBoxes = function () {
+
+  for ( boxname of Object.keys(this.interSectionBoxes) ) {
+
+    this.drawCurrentIntersection( 1.0, this.interSectionBoxes[boxname] );
+
+  }
+
 }
 
 Volume.prototype.timeAction = function(action, start) {
