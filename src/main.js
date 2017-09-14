@@ -20,16 +20,6 @@ var reset;
 var filename;
 var mobile;
 
-window.Test1 = function( x,y,z) {
-  
-  volume.properties.xmax = x || 0.9;
-  volume.properties.ymax = y || 0.9;
-  volume.properties.zmax = z || 0.9;
- // volume.box(0.4, 2);
-
-  volume.delayedRender(250);
-}
-
 function initPage() {
   window.onresize = autoResize;
 
@@ -62,7 +52,7 @@ function initPage() {
   //Attempt to load default.json
   if (!json) json = "default.json";
 
-  $('status').innerHTML = "Loading params...";
+  $('status').innerHTML = "Загрузка параметров...";
   ajaxReadFile(decodeURI(json), loadData, true);
 }
 
@@ -235,7 +225,7 @@ function resetFromData(src) {
 }
 
 function loadTexture() {
-  $('status').innerHTML = "Loading image data... ";
+  $('status').innerHTML = "Загрузка... ";
   var image;
 
   loadImage(state.objects[0].volume.url, function () {
@@ -300,14 +290,15 @@ function imageLoaded(image) {
     //gui.add({"loadFile" : function() {document.getElementById('fileupload').click();}}, 'loadFile'). name('Load Image file');
     gui.add({"ColourMaps" : function() {window.colourmaps.toggle();}}, 'ColourMaps');
 
-    var f = gui.addFolder('Views');
+    var f = gui.addFolder('Ракурсы');
     var ir2 = 1.0 / Math.sqrt(2.0);
-    f.add({"XY" : function() {volume.rotate = quat4.create([0, 0, 0, 1]);}}, 'XY');
-    f.add({"YX" : function() {volume.rotate = quat4.create([0, 1, 0, 0]);}}, 'YX');
-    f.add({"XZ" : function() {volume.rotate = quat4.create([ir2, 0, 0, -ir2]);}}, 'XZ');
-    f.add({"ZX" : function() {volume.rotate = quat4.create([ir2, 0, 0, ir2]);}}, 'ZX');
-    f.add({"YZ" : function() {volume.rotate = quat4.create([0, -ir2, 0, -ir2]);}}, 'YZ');
-    f.add({"ZY" : function() {volume.rotate = quat4.create([0, -ir2, 0, ir2]);}}, 'ZY');
+    var ir4 = 1.0 / Math.sqrt(4.0);
+    f.add({"Сверху" : function() {volume.rotate = quat4.create([0, 0, 1, 0]);}}, 'Сверху');
+    f.add({"Снизу" : function() {volume.rotate = quat4.create([1, 0, 0, 0]);}}, 'Снизу');
+    f.add({"Спереди" : function() {volume.rotate = quat4.create([ir2, 0, 0, -ir2]);}}, 'Спереди');
+    f.add({"Сзади" : function() {volume.rotate = quat4.create([ir2, 0, 0, ir2]);}}, 'Сзади');
+    f.add({"Справа" : function() {volume.rotate = quat4.create([ir4,ir4,ir4,-ir4]);}}, 'Справа');
+    f.add({"Слева" : function() {volume.rotate = quat4.create([ir4,-ir4,-ir4,-ir4]);}}, 'Слева');
 
     if (volume) volume.addGUI(gui);
     if (slicer) slicer.addGUI(gui);
