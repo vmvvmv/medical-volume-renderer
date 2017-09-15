@@ -117,7 +117,7 @@ Slicer.prototype.addGUI = function(gui) {
   // if (state.properties.server)
     f2.add({"Обновить" : function() {ajaxPost(state.properties.server + "/update", "data=" + encodeURIComponent(getData(true, true)));}}, 'Обновить');
   
-  f2.open();
+  //f2.open();
 
   var changefn = function(value) {that.draw();};
   for (var i in f1.__controllers)

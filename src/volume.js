@@ -457,7 +457,7 @@ var f2 = this.gui.addFolder('Intersections');
     
   });
 
-  f2.open();
+  //f2.open();
   // Iterate over all controllers and set change function
   var that = this;
   var changefn = function(value) {that.delayedRender(250);};  //Use delayed high quality render for faster interaction

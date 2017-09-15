@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/OKaluza/sharevol#readme",
   "dependencies": {
+    "express": "^4.15.4",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-develop-server": "^0.5.2"
