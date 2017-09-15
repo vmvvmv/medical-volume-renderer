@@ -19,6 +19,7 @@
 //Superimposed volumes
 
 function Volume(props, image, interactive, parentEl) {
+  interactive = false;
   this.image = image;
   this.canvas = document.createElement("canvas");
   this.canvas.style.cssText = "width: 100%; height: 100%; z-index: 0; margin: 0px; padding: 0px; background: black; border: none; display:block;";
@@ -108,7 +109,7 @@ function Volume(props, image, interactive, parentEl) {
     minVertices : null,
     maxVertices: null,
     name: 'box1',
-    color: new Colour('#'+Math.floor(Math.random()*16777215).toString(16)),
+    color: [214, 188, 86],
     IntersectionBoxPositionBuffer : null,
     IntersectionBoxIndexBuffer : null
   };
@@ -309,14 +310,24 @@ var f2 = this.gui.addFolder('Intersections');
 
  // f2.add(currentItem, 'selecTedBox', this.interSectionBoxes );
 
-  var newName = { name: 'new name' };
+  var newName = { name: 'new name', color: [214, 188, 86] };
 
   f2.add(newName, 'name').onChange( function(){
       that.currentIntersectBox.name = newName.name;
   });
 
+  f2.addColor(newName, 'color').onChange( function() {
+
+    that.currentIntersectBox.color = newName.color;
+    that.delayedRender(250);
+
+  });; 
+  
+
   f2.add({"new intesection" : function() {
 
+    that.properties.xmin = that.properties.ymin = that.properties.zmin = 0.0;
+    that.properties.xmax = that.properties.ymax = that.properties.zmax = 1.0;
     that.drawCub.xmin = that.drawCub.ymin = that.drawCub.zmin = 0.0;
     that.drawCub.xmax = that.drawCub.ymax = that.drawCub.zmax = 1.0;
 
@@ -377,8 +388,28 @@ var f2 = this.gui.addFolder('Intersections');
     that.showIntersection = false;
     that.drawCub.xmin = that.drawCub.ymin = that.drawCub.zmin = 0.0;
     that.drawCub.xmax = that.drawCub.ymax = that.drawCub.zmax = 1.0;
+
+    that.properties.xmin = that.properties.ymin = that.properties.zmin = 0.0;
+    that.properties.xmax = that.properties.ymax = that.properties.zmax = 1.0;
+
+    for (var i in f2.__controllers) {
+      f2.__controllers[i].updateDisplay();
+    }
     
   }}, 'cancel');
+
+  f2.add({"Обрезать" : function() {
+
+    that.properties.xmin =  that.drawCub.xmin;
+    that.properties.ymin =  that.drawCub.ymin;
+    that.properties.zmin =  that.drawCub.zmin;
+    that.properties.xmax =  that.drawCub.xmax;
+    that.properties.ymax =  that.drawCub.ymax;
+    that.properties.zmax =  that.drawCub.zmax;
+
+    that.delayedRender(250);
+    
+  }}, 'Обрезать');
 
   var changeIntesection = function(value) {
 
@@ -709,7 +740,8 @@ Volume.prototype.drawCurrentIntersection = function( alpha, box ) {
   
   // precomputed to each box
   //var randomColor = new Colour('#'+Math.floor(Math.random()*16777215).toString(16));
-  this.gl.uniform4fv(this.lineprogram.uniforms["uColour"], box.color.rgbaGL());
+  var color = new Colour(box.color);
+  this.gl.uniform4fv(this.lineprogram.uniforms["uColour"], color.rgbaGL());
 
   this.gl.bindBuffer(this.gl.ARRAY_BUFFER, box.IntersectionBoxPositionBuffer);
   this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, box.IntersectionBoxIndexBuffer);
