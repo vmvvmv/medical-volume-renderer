@@ -70,10 +70,10 @@ function Slicer(props, image, filter, parentEl) {
   this.program.setup(["aVertexPosition"], ["palette", "texture", "colourmap", "cont", "bright", "power", "slice", "dim", "res", "axis", "select"]);
 
   // brush program
-  this.brushprogram = new WebGLProgram(this.gl, 'brush-vs', 'brush-fs');
-  this.brushprogram.setup(["a_Position"], ["u_FragColor"]);
-  if (this.brushprogram.errors) OK.debug(this.brushprogram.errors);
-  this.g_points = [];
+  // this.brushprogram = new WebGLProgram(this.gl, 'brush-vs', 'brush-fs');
+  // //this.brushprogram.setup(["a_Position"], ["u_FragColor"]);
+  // if (this.brushprogram.errors) OK.debug(this.brushprogram.errors);
+  // this.g_points = [];
 
   //-----------------------------------------------------------------
 
@@ -339,11 +339,11 @@ Slicer.prototype.draw = function() {
   this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
   //Draw each slice viewport
-  // for (var i=0; i<this.viewers.length; i++)
-  //   this.drawSlice(i);
+  for (var i=0; i<this.viewers.length; i++)
+    this.drawSlice(i);
 
   
-  this.drawBrush(0);
+  // this.drawBrush(0);
 }
 
 Slicer.prototype.drawSlice = function(idx) {
@@ -396,26 +396,42 @@ Slicer.prototype.drawSlice = function(idx) {
   this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.webgl.vertexPositionBuffer.numItems);
 }
 
-Slicer.prototype.drawBrush = function(idx) {
+// Slicer.prototype.drawBrush = function(idx) {
 
-  this.webgl.use(this.brushprogram);
+//   this.webgl.use(this.brushprogram);
 
-  var len = this.g_points.length;
-  var a_Position = this.gl.getAttribLocation(this.brushprogram.program, "a_Position");
-
-  this.gl.uniform4fv(this.brushprogram.uniforms["u_FragColor"], new Float32Array([1.0, 1.0, 1.0, 0.0]));
-  //console.log(this.brushprogram.program);
   
+//   //console.log(this.gl.getProgramInfoLog(this.brushprogram.program))
 
-  for (var i = 0; i < len; i += 2) {
-    // Передать координаты щелчка в переменную a_Position
-    this.gl.vertexAttrib3f(a_Position, this.g_points[i], this.g_points[i + 1], 0.0);
+//   var len = this.g_points.length;
+//   //var a_Position = this.gl.getAttribLocation(this.brushprogram.program, "a_Position");
 
-    // Нарисовать точку
-    this.gl.drawArrays(this.gl.POINTS, 0, 1);
-  }
 
-}
+
+//   //this.gl.uniform4fv(this.brushprogram.uniforms["u_FragColor"], new Float32Array([1.0, 1.0, 1.0, 0.0]));
+//   //console.log(this.brushprogram.program);
+    
+//   for (var i = 0; i < len; i += 2) {
+
+//     var positionBuffer = this.gl.createBuffer();
+    
+//     this.gl.bindBuffer( this.gl.ARRAY_BUFFER, positionBuffer);
+  
+//     this.gl.bufferData( this.gl.ARRAY_BUFFER, new Float32Array( [this.g_points[i],this.g_points[i+1]] ),  this.gl.STATIC_DRAW);
+  
+//     //this.gl.enableVertexAttribArray(a_Position);
+    
+//       // Bind the position buffer.
+//     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
+
+//     // Передать координаты щелчка в переменную a_Position
+//     //this.gl.vertexAttrib3f(a_Position, this.g_points[i], this.g_points[i + 1], 0.0);
+
+//     // Нарисовать точку
+//     this.gl.drawArrays(this.gl.POINTS, 0, 1);
+//   }
+
+// }
 
 function SliceView(slicer, x, y, axis, rotate, magnify) {
   this.axis = axis;
@@ -501,8 +517,8 @@ SliceView.prototype.click = function(event, mouse) {
   }
 
   //console.log(this);
-  this.slicer.g_points.push(coord[0]);
-  this.slicer.g_points.push(coord[1]);
+  // this.slicer.g_points.push(coord[0]);
+  // this.slicer.g_points.push(coord[1]);
 
   this.slicer.draw();
 }
