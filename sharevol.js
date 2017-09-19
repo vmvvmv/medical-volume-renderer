@@ -9452,6 +9452,25 @@ function Slicer(props, image, filter, parentEl) {
   this.flipY = false;
   this.properties.zoom = 1.0;
 
+  //brush
+  this.properties.brushSize = 1;
+  this.properties.enableBrush = false;
+  this.properties.brushColour =  [214, 188, 86];
+  this.properties.brushName = 'new brush';
+  this.properties.eraser = false;
+
+  this.currentBrush = {
+
+    color: [214, 188, 86],
+    name: 'brush1',
+    brushSize:1,
+    lineCoords:[],
+    axis: null
+
+  }
+  this.properties.brushCoords = [];
+  
+
   this.container = document.createElement("div");
   this.container.style.cssText = "position: absolute; bottom: 10px; left: 10px; margin: 0px; padding: 0px; pointer-events: none;";
   if (!parentEl) parentEl = document.body;
@@ -9461,7 +9480,13 @@ function Slicer(props, image, filter, parentEl) {
   if (props.slices) this.load(props.slices);
 
   this.canvas = document.createElement("canvas");
-  this.canvas.style.cssText = "position: absolute; bottom: 0px; margin: 0px; padding: 0px; border: none; background: rgba(0,0,0,0); pointer-events: none;";
+  this.canvas.style.cssText = "position: absolute; bottom: 0px;   z-index: 0; margin: 0px; padding: 0px; border: none; background: rgba(0,0,0,0); pointer-events: none;";
+
+  this.overlayCanvas = document.createElement("canvas");
+  this.overlayCanvas.style.cssText = 'position: absolute; bottom: 0px;   z-index: 1; margin: 0px; padding: 0px; border: none; background: rgba(0,0,0,0); pointer-events: none;';
+  this.overlayCanvasContext =  this.overlayCanvas.getContext('2d');
+
+  this.container.appendChild(this.overlayCanvas);
 
   this.doLayout();
 
@@ -9480,15 +9505,6 @@ function Slicer(props, image, filter, parentEl) {
   this.program = new WebGLProgram(this.gl, 'texture-vs', 'texture-fs');
   if (this.program.errors) OK.debug(this.program.errors);
   this.program.setup(["aVertexPosition"], ["palette", "texture", "colourmap", "cont", "bright", "power", "slice", "dim", "res", "axis", "select"]);
-
-  // brush program
-  // this.brushprogram = new WebGLProgram(this.gl, 'brush-vs', 'brush-fs');
-  // //this.brushprogram.setup(["a_Position"], ["u_FragColor"]);
-  // if (this.brushprogram.errors) OK.debug(this.brushprogram.errors);
-  // this.g_points = [];
-
-  //-----------------------------------------------------------------
-
 
 
   this.gl.clearColor(0, 0, 0, 0);
@@ -9548,15 +9564,66 @@ Slicer.prototype.addGUI = function(gui) {
     f2.__controllers[i].onChange(changefn);
 
   //--------------Brush
-  this.properties.brushSize = 1;
-  this.properties.enableBrush = false;
-  this.properties.brushColour =  [214, 188, 86];
+  // this.properties.brushSize = 1;
+  // this.properties.enableBrush = false;
+  // this.properties.brushColour =  [214, 188, 86];
 
   var f3 = this.gui.addFolder('Кисточка');
+  //this.properties.brushName
 
+  f3.add(this.properties, 'brushName').onChange( function(){
+
+    //that.currentIntersectBox.name = newName.name;
+
+  });
+
+  f3.add( {"new brush": function(){
+
+    that.currentBrush = {
+      
+          color: [214, 188, 86],
+          name: 'brush1',
+          brushSize:1,
+          lineCoords:[],
+          axis: null
+      
+      }
+    
+    that.overlayCanvasContext.clearRect(0, 0, that.overlayCanvas.width, that.overlayCanvas.height);
+
+    //that.draw();
+
+  }}, 'new brush');
+
+  f3.add( {"save brush": function(){
+    
+        //todo
+    
+      }}, 'save brush');
   f3.add(this.properties, 'enableBrush');
-  f3.add(this.properties, 'brushSize', 1, 10, 1);
-  f3.addColor(this.properties, 'brushColour');
+  f3.add(this.properties, 'eraser');
+  f3.add(this.properties, 'brushSize', 1, 10, 1).onChange(function(){
+
+    that.currentBrush.brushSize = that.properties.brushSize;
+    that.draw();
+    
+  });
+  f3.addColor(this.properties, 'brushColour').onChange(function(){
+
+    that.currentBrush.color = that.properties.brushColour;
+    that.draw();
+
+  });
+
+
+
+  // f3.add( currentItem, 'selecTedBox', Object.keys(this.interSectionBoxes) ).onChange(function() {
+    
+  //       //todo   
+
+  // });
+
+
 
 
   f3.open();
@@ -9620,6 +9687,7 @@ Slicer.prototype.doLayout = function() {
     if (w > rowWidth) rowWidth = w;
     if (y > ymax) ymax = y;
   }
+  
 
   //Process based on layout
   this.flipY = false;
@@ -9672,8 +9740,11 @@ Slicer.prototype.doLayout = function() {
   this.width = x + rowWidth;
   this.height = ymax;
 
+  console.log(this.width, this.height);
+
   //Restore the main canvas
   this.container.appendChild(this.canvas);
+  this.container.appendChild(this.overlayCanvas);
 
   //Align to top or bottom?
   //console.log(this.height);
@@ -9715,14 +9786,18 @@ Slicer.prototype.draw = function() {
     this.canvas.height = this.height;
     this.canvas.setAttribute("width", this.width);
     this.canvas.setAttribute("height", this.height);
+
+    this.overlayCanvas.width = this.width;
+    this.overlayCanvas.height = this.height;
+    this.overlayCanvas.setAttribute("width", this.width);
+    this.overlayCanvas.setAttribute("height", this.height);
+
     if (this.webgl) {
       this.gl.viewportWidth = this.width;
       this.gl.viewportHeight = this.height;
       this.webgl.viewport = new Viewport(0, 0, this.width, this.height);
     }
   }
-  //console.log(this.gl.viewportWidth + " x " + this.gl.viewportHeight);
-  //console.log(this.width + " x " + this.height);
 
   this.webgl.use(this.program);
 
@@ -9754,8 +9829,7 @@ Slicer.prototype.draw = function() {
   for (var i=0; i<this.viewers.length; i++)
     this.drawSlice(i);
 
-  
-  // this.drawBrush(0);
+    this.drawBrush();
 }
 
 Slicer.prototype.drawSlice = function(idx) {
@@ -9808,42 +9882,45 @@ Slicer.prototype.drawSlice = function(idx) {
   this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.webgl.vertexPositionBuffer.numItems);
 }
 
-// Slicer.prototype.drawBrush = function(idx) {
+Slicer.prototype.drawBrush = function() {
 
-//   this.webgl.use(this.brushprogram);
+  // need convert draw coord to new size and etc
 
+  this.overlayCanvasContext.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
+
+  function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+
+  var color = /*this.properties.brushColour instanceof Array?*/  rgbToHex( 
+    Math.floor(this.currentBrush.color[0]),
+    Math.floor(this.currentBrush.color[1]),
+    Math.floor(this.currentBrush.color[2]))/*: this.properties.brushColour*/;
+
+  this.overlayCanvasContext.strokeStyle = color;
+  this.overlayCanvasContext.fillStyle = color;
   
-//   //console.log(this.gl.getProgramInfoLog(this.brushprogram.program))
 
-//   var len = this.g_points.length;
-//   //var a_Position = this.gl.getAttribLocation(this.brushprogram.program, "a_Position");
+  for ( var i = 0; i < this.currentBrush.lineCoords.length; i+=2 ) {
+
+    this.overlayCanvasContext.beginPath();
+    this.overlayCanvasContext.arc(this.currentBrush.lineCoords[i], this.currentBrush.lineCoords[i+1], Math.floor ( this.currentBrush.brushSize ), 0, 2 * Math.PI);
+    this.overlayCanvasContext.fill();
+
+  }
 
 
+}
 
-//   //this.gl.uniform4fv(this.brushprogram.uniforms["u_FragColor"], new Float32Array([1.0, 1.0, 1.0, 0.0]));
-//   //console.log(this.brushprogram.program);
-    
-//   for (var i = 0; i < len; i += 2) {
+Slicer.prototype.erase = function( x,y ) {
+  console.log('clear');
+  var size =  Math.floor ( this.currentBrush.brushSize );
+  this.overlayCanvasContext.clearRect(x, y, size, size);
 
-//     var positionBuffer = this.gl.createBuffer();
-    
-//     this.gl.bindBuffer( this.gl.ARRAY_BUFFER, positionBuffer);
-  
-//     this.gl.bufferData( this.gl.ARRAY_BUFFER, new Float32Array( [this.g_points[i],this.g_points[i+1]] ),  this.gl.STATIC_DRAW);
-  
-//     //this.gl.enableVertexAttribArray(a_Position);
-    
-//       // Bind the position buffer.
-//     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
+}
 
-//     // Передать координаты щелчка в переменную a_Position
-//     //this.gl.vertexAttrib3f(a_Position, this.g_points[i], this.g_points[i + 1], 0.0);
 
-//     // Нарисовать точку
-//     this.gl.drawArrays(this.gl.POINTS, 0, 1);
-//   }
-
-// }
 
 function SliceView(slicer, x, y, axis, rotate, magnify) {
   this.axis = axis;
@@ -9876,6 +9953,9 @@ function SliceView(slicer, x, y, axis, rotate, magnify) {
 
   this.div.style.left = x + "px";
   this.div.style.bottom = y + "px";
+
+  //console.log(w,h,x,y);
+
   this.div.style.width = this.viewport.width + "px";
   this.div.style.height = this.viewport.height + "px";
 
@@ -9884,20 +9964,34 @@ function SliceView(slicer, x, y, axis, rotate, magnify) {
 
 SliceView.prototype.click = function(event, mouse) {
 
-  //------------------------------------------------------------------
+  //console.log(this.axis);
+  if(this.slicer.currentBrush.axis === null) {
 
-  // var x = ev.clientX; // координата X указателя мыши
-  // var y = ev.clientY; // координата Y указателя мыши
-  // var rect = ev.target.getBoundingClientRect();
+    this.slicer.currentBrush.axis = this.axis;
 
-  // x = ((x - rect.left) - canvas.width / 2) / (canvas.width / 2);
-  // y = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2);
-  // // Сохранить координаты в массиве g_points
-  // g_points.push(x);
-  // g_points.push(y);
+  }
+  //console.log(mouse.x,mouse.y);
 
+  if( this.axis === this.slicer.currentBrush.axis
+    &&( mouse.x  + this.viewport.x ) < ( this.viewport.x + this.viewport.width ) 
+    && ( mouse.x  + this.viewport.x ) > this.viewport.x
+    && ( mouse.y  + this.viewport.y ) < ( this.viewport.y + this.viewport.height )
+    /*&& ( mouse.y  + this.viewport.y ) < this.viewport.y*/) {
 
-  //--------------------------------------------------------
+      //console.log(this.slicer.properties.eraser);
+      if( !this.slicer.properties.eraser ) {
+        this.slicer.currentBrush.lineCoords.push(mouse.x  + this.viewport.x);
+        this.slicer.currentBrush.lineCoords.push(mouse.y + this.viewport.y);
+      } else {
+
+       // console.log(this.slicer.eraser);
+
+        this.slicer.erase( mouse.x  + this.viewport.x, mouse.y + this.viewport.y);
+
+      }
+
+  }  
+
   if (this.slicer.flipY) mouse.y = mouse.element.clientHeight - mouse.y;
 
   var coord;
@@ -9928,10 +10022,6 @@ SliceView.prototype.click = function(event, mouse) {
     slicer.properties.Y = B;
   }
 
-  //console.log(this);
-  // this.slicer.g_points.push(coord[0]);
-  // this.slicer.g_points.push(coord[1]);
-
   this.slicer.draw();
 }
 
@@ -9939,6 +10029,9 @@ SliceView.prototype.wheel = function(event, mouse) {
   if (this.axis == 0) slicer.properties.X += event.spin;
   if (this.axis == 1) slicer.properties.Y += event.spin;
   if (this.axis == 2) slicer.properties.Z += event.spin;
+
+  console.log(slicer.properties.X,slicer.properties.X,slicer.properties.X);
+
   this.slicer.draw();
 }
 
