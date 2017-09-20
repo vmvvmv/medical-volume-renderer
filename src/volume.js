@@ -19,6 +19,7 @@
 //Superimposed volumes
 
 function Volume(props, image, interactive, parentEl) {
+  //console.log(props);
   interactive = false;
   this.image = image;
   this.canvas = document.createElement("canvas");
@@ -113,6 +114,25 @@ function Volume(props, image, interactive, parentEl) {
     IntersectionBoxPositionBuffer : null,
     IntersectionBoxIndexBuffer : null
   };
+
+  //console.log(this.res);
+  if(props.intersections && props.intersections.length)
+    for ( var i=0; i < props.intersections.length;i++ ) {
+
+      this.interSectionBoxes[ props.intersections[i].name ] = {
+
+        minVertices : [ props.intersections[i].minVertices[0] / this.res[0],props.intersections[i].minVertices[1]/ this.res[1],props.intersections[i].minVertices[2]/ this.res[2]],
+        maxVertices:  [ props.intersections[i].maxVertices[0]/ this.res[0],props.intersections[i].maxVertices[1]/ this.res[1],props.intersections[i].maxVertices[2] / this.res[2]],
+        name:  props.intersections[i].name,
+        color:  props.intersections[i].color,
+        IntersectionBoxPositionBuffer : null,
+        IntersectionBoxIndexBuffer : null
+
+      }
+
+    }
+
+
   this.showIntersection = false;
   // this.IntersectionBoxPositionBuffer = null;
   // this.IntersectionBoxIndexBuffer = null;

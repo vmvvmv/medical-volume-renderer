@@ -143,6 +143,8 @@ function loadData(src, fn) {
   if (!state.objects[0].volume.res) state.objects[0].volume.res = [256, 256, 256];
   if (!state.objects[0].volume.scale) state.objects[0].volume.scale = [1.0, 1.0, 1.0];
 
+  //console.log(parsed);
+
   //Load the image
   loadTexture();
 }
@@ -184,6 +186,30 @@ function getData(compact, matrix) {
       object.colourmap = 0;
     else
       delete object.colourmap;
+
+    object.intersections = [];
+
+  
+
+    for ( boxKey of Object.keys(volume.interSectionBoxes) ) {
+
+      //console.log(boxKey);
+      var boxToSave = volume.interSectionBoxes[boxKey];
+
+      object.intersections.push(
+        {
+
+          name: boxToSave.name,
+          color: boxToSave.color,
+          minVertices:[boxToSave.minVertices[0] * slicer.dims[0],boxToSave.minVertices[1]* slicer.dims[1],boxToSave.minVertices[2] * slicer.dims[2]],
+          maxVertices:[boxToSave.maxVertices[0] * slicer.dims[0],boxToSave.maxVertices[1]* slicer.dims[1],boxToSave.maxVertices[2] * slicer.dims[2]]
+        
+        }
+      );
+
+    }
+
+
 
     //Views - single only in old data
     state.views[0].axes = vdat.properties.axes;

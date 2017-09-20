@@ -9151,6 +9151,8 @@ function loadData(src, fn) {
   if (!state.objects[0].volume.res) state.objects[0].volume.res = [256, 256, 256];
   if (!state.objects[0].volume.scale) state.objects[0].volume.scale = [1.0, 1.0, 1.0];
 
+  //console.log(parsed);
+
   //Load the image
   loadTexture();
 }
@@ -9192,6 +9194,30 @@ function getData(compact, matrix) {
       object.colourmap = 0;
     else
       delete object.colourmap;
+
+    object.intersections = [];
+
+  
+
+    for ( boxKey of Object.keys(volume.interSectionBoxes) ) {
+
+      //console.log(boxKey);
+      var boxToSave = volume.interSectionBoxes[boxKey];
+
+      object.intersections.push(
+        {
+
+          name: boxToSave.name,
+          color: boxToSave.color,
+          minVertices:[boxToSave.minVertices[0] * slicer.dims[0],boxToSave.minVertices[1]* slicer.dims[1],boxToSave.minVertices[2] * slicer.dims[2]],
+          maxVertices:[boxToSave.maxVertices[0] * slicer.dims[0],boxToSave.maxVertices[1]* slicer.dims[1],boxToSave.maxVertices[2] * slicer.dims[2]]
+        
+        }
+      );
+
+    }
+
+
 
     //Views - single only in old data
     state.views[0].axes = vdat.properties.axes;
@@ -9601,7 +9627,7 @@ Slicer.prototype.addGUI = function(gui) {
     
       }}, 'save brush');
   f3.add(this.properties, 'enableBrush');
-  f3.add(this.properties, 'eraser');
+  // f3.add(this.properties, 'eraser');
   f3.add(this.properties, 'brushSize', 1, 10, 1).onChange(function(){
 
     that.currentBrush.brushSize = that.properties.brushSize;
@@ -9728,7 +9754,7 @@ Slicer.prototype.doLayout = function() {
   this.width = x + rowWidth;
   this.height = ymax;
 
-  console.log(this.width, this.height);
+ // console.log(this.width, this.height);
 
   //Restore the main canvas
   this.container.appendChild(this.canvas);
@@ -9884,15 +9910,87 @@ Slicer.prototype.drawBrush = function() {
     Math.floor(this.currentBrush.color[1]),
     Math.floor(this.currentBrush.color[2]))/*: this.properties.brushColour*/;
 
-  this.overlayCanvasContext.strokeStyle = color;
+  //this.overlayCanvasContext.strokeStyle = color;
   this.overlayCanvasContext.fillStyle = color;
   
+  for( viewport of this.viewers ) {
 
-  for ( var i = 0; i < this.currentBrush.lineCoords.length; i+=2 ) {
+    for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
 
-    this.overlayCanvasContext.beginPath();
-    this.overlayCanvasContext.arc(this.currentBrush.lineCoords[i], this.currentBrush.lineCoords[i+1], Math.floor ( this.currentBrush.brushSize ), 0, 2 * Math.PI);
-    this.overlayCanvasContext.fill();
+
+       
+
+        var coords = this.currentBrush.lineCoords[i];
+
+        if ( viewport.axis === 2 ) {
+
+          var z = this.properties.Z/this.dims[2];
+          
+
+          if ( ( coords.z - 1/this.dims[2]) < z && ( coords.z + 1/this.dims[2]) > z ) {
+
+              var v = viewport.viewport;
+
+              var x = coords.x * v.width + v.x;
+              var width = coords.x * v.width;
+
+              var y = coords.y * v.height + v.y;
+              var height = coords.y * v.height;
+
+              this.overlayCanvasContext.beginPath();
+              this.overlayCanvasContext.arc(x, y, Math.floor ( this.currentBrush.brushSize ), 0, 2 * Math.PI);
+              this.overlayCanvasContext.fill();
+
+          }
+
+
+        } else if ( viewport.axis === 1 ) {
+
+          var Y = this.properties.Y/this.dims[2];
+          
+
+          if ( ( coords.y - 1/this.dims[2]) < Y && ( coords.y + 1/this.dims[2]) > Y ) {
+
+              var v = viewport.viewport;
+
+              var x = coords.x * v.width + v.x;
+              var width = coords.x * v.width;
+
+              var y = coords.z * v.height + v.y;
+              var height = coords.z * v.height;
+
+              this.overlayCanvasContext.beginPath();
+              this.overlayCanvasContext.arc(x, y, Math.floor ( this.currentBrush.brushSize ), 0, 2 * Math.PI);
+              this.overlayCanvasContext.fill();
+
+          }
+
+
+        } else if ( viewport.axis === 0 ) {
+
+          var X = this.properties.X/this.dims[2];
+          
+
+          if ( ( coords.x - 1/this.dims[2]) < X && ( coords.x + 1/this.dims[2]) > X ) {
+
+              var v = viewport.viewport;
+
+              var x = coords.z * v.width + v.x;
+              var width = coords.z * v.width;
+
+              var y = coords.y * v.height + v.y;
+              var height = coords.y * v.height;
+
+              this.overlayCanvasContext.beginPath();
+              this.overlayCanvasContext.arc(x, y, Math.floor ( this.currentBrush.brushSize ), 0, 2 * Math.PI);
+              this.overlayCanvasContext.fill();
+
+          }
+
+        }
+
+
+    }
 
   }
 
@@ -9938,7 +10036,7 @@ Slicer.prototype.drawIntersections = function() {
 
   }
 
-  console.log(this.viewers);
+  //console.log(this.viewers);
 
   for( viewport of this.viewers ) {
 
@@ -10024,14 +10122,6 @@ Slicer.prototype.drawIntersections = function() {
 
 
 
-Slicer.prototype.erase = function( x,y ) {
-  console.log('clear');
-  var size =  Math.floor ( this.currentBrush.brushSize );
-  this.overlayCanvasContext.clearRect(x, y, size, size);
-
-}
-
-
 
 function SliceView(slicer, x, y, axis, rotate, magnify) {
   this.axis = axis;
@@ -10082,15 +10172,35 @@ SliceView.prototype.click = function(event, mouse) {
   }
   //console.log(mouse.x,mouse.y);
 
-  if( this.axis === this.slicer.currentBrush.axis
-    &&( mouse.x  + this.viewport.x ) < ( this.viewport.x + this.viewport.width ) 
+   
+    if(( mouse.x  + this.viewport.x ) < ( this.viewport.x + this.viewport.width ) 
     && ( mouse.x  + this.viewport.x ) > this.viewport.x
     && ( mouse.y  + this.viewport.y ) < ( this.viewport.y + this.viewport.height )
     /*&& ( mouse.y  + this.viewport.y ) < this.viewport.y*/) {
 
       if( !this.slicer.properties.eraser ) {
-        this.slicer.currentBrush.lineCoords.push(mouse.x  + this.viewport.x);
-        this.slicer.currentBrush.lineCoords.push(mouse.y + this.viewport.y);
+
+        //console.log(this.slicer);
+        var newBrushCoords;
+
+
+
+        (this.axis===2) && (newBrushCoords = {x: mouse.x / this.viewport.width,
+                              y:  mouse.y / this.viewport.height, 
+                              z: this.slicer.properties.Z / this.slicer.dims[2]});
+        (this.axis===1) && (newBrushCoords = {x:  mouse.x / this.viewport.width,
+                              y:this.slicer.properties.Y / this.slicer.dims[1], 
+                              z:  mouse.y / this.viewport.height});
+        (this.axis===0) && (newBrushCoords = {x: this.slicer.properties.X / this.slicer.dims[0],
+                              y: mouse.y / this.viewport.height, 
+                              z:  mouse.x / this.viewport.width});
+        this.slicer.currentBrush.lineCoords.push( newBrushCoords );
+
+        //console.log(newBrushCoords);
+
+        //this.slicer.currentBrush.lineCoords.push(mouse.x  + this.viewport.x);
+        //this.slicer.currentBrush.lineCoords.push(mouse.y + this.viewport.y);
+
       } else {
 
         //TO DO
@@ -10171,6 +10281,7 @@ SliceView.prototype.move = function(event, mouse) {
 //Superimposed volumes
 
 function Volume(props, image, interactive, parentEl) {
+  //console.log(props);
   interactive = false;
   this.image = image;
   this.canvas = document.createElement("canvas");
@@ -10265,6 +10376,25 @@ function Volume(props, image, interactive, parentEl) {
     IntersectionBoxPositionBuffer : null,
     IntersectionBoxIndexBuffer : null
   };
+
+  //console.log(this.res);
+  if(props.intersections && props.intersections.length)
+    for ( var i=0; i < props.intersections.length;i++ ) {
+
+      this.interSectionBoxes[ props.intersections[i].name ] = {
+
+        minVertices : [ props.intersections[i].minVertices[0] / this.res[0],props.intersections[i].minVertices[1]/ this.res[1],props.intersections[i].minVertices[2]/ this.res[2]],
+        maxVertices:  [ props.intersections[i].maxVertices[0]/ this.res[0],props.intersections[i].maxVertices[1]/ this.res[1],props.intersections[i].maxVertices[2] / this.res[2]],
+        name:  props.intersections[i].name,
+        color:  props.intersections[i].color,
+        IntersectionBoxPositionBuffer : null,
+        IntersectionBoxIndexBuffer : null
+
+      }
+
+    }
+
+
   this.showIntersection = false;
   // this.IntersectionBoxPositionBuffer = null;
   // this.IntersectionBoxIndexBuffer = null;

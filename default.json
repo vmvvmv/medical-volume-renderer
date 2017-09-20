@@ -1,7 +1,8 @@
 {
   "properties": {
     "nogui": false,
-    "background": "rgba(81,77,74,1.00)"
+    "background": "rgba(81,77,74,1.00)",
+    "server": ""
   },
   "colourmaps": [
     {
@@ -64,13 +65,13 @@
       "translate": [
         -0.05715767664977255,
         -0.031176914536239782,
-        -1.6454482671904334
+        -2.0784609690826525
       ],
       "rotate": [
-        0.5536984801292419,
-        0.1137750968337059,
-        -0.7585440278053284,
-        0.32404208183288574
+        0.9656041860580444,
+        -0.16724076867103577,
+        -0.1183980256319046,
+        0.15980952978134155
       ]
     }
   ],
@@ -94,7 +95,7 @@
       "zmin": 0,
       "zmax": 1,
       "ymin": 0,
-      "ymax": 0.9723324001313833,
+      "ymax": 1,
       "xmin": 0,
       "xmax": 1,
       "brightness": -0.11780890196982163,
@@ -115,17 +116,74 @@
       "slices": {
         "properties": {
           "show": true,
-          "X": 93,
-          "Y": 111,
+          "X": 126,
+          "Y": 177,
           "Z": 144,
+          "minX": 0,
+          "maxX": 256,
+          "minY": 0,
+          "maxY": 256,
+          "minZ": 0,
+          "maxZ": 256,
           "brightness": 0,
           "contrast": 1,
           "power": 1,
           "usecolourmap": false,
           "layout": "x|y|z",
-          "zoom": 0.6683351069050206
+          "zoom": 0.6683351069050206,
+          "brushSize": 5.262156448202959,
+          "enableBrush": false,
+          "brushColour": [
+            214,
+            188,
+            86
+          ],
+          "brushName": "new brush",
+          "eraser": false,
+          "brushCoords": []
         }
-      }
+      },
+      "saturation": 1,
+      "intersections": [
+        {
+          "name": "new name",
+          "color": {
+            "alpha": 1,
+            "red": 100,
+            "green": 88,
+            "blue": 188
+          },
+          "minVertices": [
+            0,
+            0,
+            0
+          ],
+          "maxVertices": [
+            256,
+            256,
+            256
+          ]
+        },
+        {
+          "name": "new name2",
+          "color": {
+            "alpha": 1,
+            "red": 37,
+            "green": 240,
+            "blue": 180
+          },
+          "minVertices": [
+            0,
+            0,
+            0
+          ],
+          "maxVertices": [
+            106.80197322057788,
+            256,
+            256
+          ]
+        }
+      ]
     }
   ]
 }
