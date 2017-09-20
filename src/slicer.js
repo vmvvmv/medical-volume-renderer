@@ -418,6 +418,7 @@ Slicer.prototype.draw = function() {
     this.drawSlice(i);
 
     this.drawBrush();
+    this.drawIntersections();
 }
 
 Slicer.prototype.drawSlice = function(idx) {
@@ -500,6 +501,20 @@ Slicer.prototype.drawBrush = function() {
 
 
 }
+
+Slicer.prototype.drawIntersections = function() {
+
+  // test data [0,0,0] [1,1,1]
+  //
+  //console.log(volume);
+  console.log(this.properties.X,this.properties.Y,this.properties.Z);
+  // this.slices = [(this.properties.X-1)/(this.res[0]-1), 
+  // (this.properties.Y-1)/(this.res[1]-1),
+  // (this.properties.Z-1)/(this.res[2]-1)];
+
+}
+
+
 
 Slicer.prototype.erase = function( x,y ) {
   console.log('clear');
