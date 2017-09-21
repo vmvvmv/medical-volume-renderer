@@ -10629,7 +10629,8 @@ var f2 = this.gui.addFolder('Intersections');
   f2.add({"save" : function() {
     // change ref to copy
     that.interSectionBoxes[that.currentIntersectBox.name] = that.currentIntersectBox;
-    
+
+    slicer.draw();
     
     f2.__controllers[f2.__controllers.length-1].remove();
     f2.add(  currentItem, 'selecTedBox', Object.keys(that.interSectionBoxes) ).onChange(function(){
@@ -10651,7 +10652,6 @@ var f2 = this.gui.addFolder('Intersections');
   
       that.delayedRender(250);
 
-      //slicer.drawIntersections();
     });
 
     //console.log(that.interSectionBoxes);
