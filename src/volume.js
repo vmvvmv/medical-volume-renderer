@@ -130,6 +130,8 @@ function Volume(props, image, interactive, parentEl) {
 
       }
 
+      this.computeIntersectionBox(this.interSectionBoxes[ props.intersections[i].name ]);
+
     }
 
 
@@ -355,11 +357,11 @@ var f2 = this.gui.addFolder('Intersections');
       minVertices : [0, 0, 0],
       maxVertices: [1, 1, 1],
       name: newName.name,
-      color: new Colour('#'+Math.floor(Math.random()*16777215).toString(16)),
+      color: newName.color,
       IntersectionBoxPositionBuffer : null,
       IntersectionBoxIndexBuffer : null
     };
-
+    //new Colour('#'+Math.floor(Math.random()*16777215).toString(16))
 
     that.computeIntersectionBox( that.currentIntersectBox );
     //that.currentIntersectBox.name = newName.name;
@@ -397,6 +399,8 @@ var f2 = this.gui.addFolder('Intersections');
       that.computeIntersectionBox( that.currentIntersectBox );
   
       that.delayedRender(250);
+
+      //slicer.drawIntersections();
     });
 
     //console.log(that.interSectionBoxes);

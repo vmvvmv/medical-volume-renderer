@@ -46,6 +46,7 @@ function Slicer(props, image, filter, parentEl) {
   this.properties.brushColour =  [214, 188, 86];
   this.properties.brushName = 'new brush';
   this.properties.eraser = false;
+  this.properties.drawRectangles = true;
 
   this.currentBrush = {
 
@@ -126,6 +127,7 @@ Slicer.prototype.addGUI = function(gui) {
   f1.add(this.properties, 'contrast', 0.0, 3.0, 0.01).listen();
   f1.add(this.properties, 'power', 0.01, 5.0, 0.01).listen();
   f1.add(this.properties, 'usecolourmap');
+  f1.add(this.properties, 'drawRectangles').onChange( function(){ that.draw });
   f1.add(this.properties, 'layout').onFinishChange(function(l) {that.doLayout(); that.draw();});
 
   f1.add(this.properties, 'X', 0, this.res[0], 1).listen();
@@ -402,7 +404,12 @@ Slicer.prototype.draw = function() {
   for (var i=0; i<this.viewers.length; i++)
     this.drawSlice(i);
 
+    this.overlayCanvasContext.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);  
+  
+    if(this.properties.drawRectangles)
     this.drawIntersections();
+
+    //console.log(this.properties.drawRectangles);
 
     this.drawBrush();
     
@@ -466,11 +473,18 @@ Slicer.prototype.drawBrush = function() {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
 
+  //console.log(this.currentBrush.color);
 
-  var color = /*this.properties.brushColour instanceof Array?*/  rgbToHex( 
-    Math.floor(this.currentBrush.color[0]),
-    Math.floor(this.currentBrush.color[1]),
-    Math.floor(this.currentBrush.color[2]))/*: this.properties.brushColour*/;
+  if (this.currentBrush.color instanceof Array) {
+    var color =   rgbToHex( Math.floor(this.currentBrush.color[0]),
+                            Math.floor(this.currentBrush.color[1]),
+                            Math.floor(this.currentBrush.color[2]));
+  } else {
+
+    var color =   this.currentBrush.color;
+  }
+
+  //console.log(color);
 
   //this.overlayCanvasContext.strokeStyle = color;
   this.overlayCanvasContext.fillStyle = color;
@@ -562,7 +576,6 @@ Slicer.prototype.drawBrush = function() {
 Slicer.prototype.drawIntersections = function() {
 
   //console.log(volume);
-  this.overlayCanvasContext.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);  
 
   var testData = {
       'testBox1': {
@@ -584,11 +597,21 @@ Slicer.prototype.drawIntersections = function() {
     function rgbToHex(r, g, b) {
       return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
-  
-    var color =   rgbToHex( Math.floor(testData[boxkey].color[0]),
-                            Math.floor(testData[boxkey].color[1]),
-                            Math.floor(testData[boxkey].color[2]));
     
+    if (testData[boxkey].color['red']) {
+      var color =   rgbToHex( Math.floor(testData[boxkey].color['red']),
+                              Math.floor(testData[boxkey].color['green']),
+                              Math.floor(testData[boxkey].color['blue']));
+    } else {
+
+      var color =   rgbToHex( Math.floor(testData[boxkey].color[0]),
+                              Math.floor(testData[boxkey].color[1]),
+                              Math.floor(testData[boxkey].color[2]));
+
+    }
+    
+    //console.log(testData[boxkey].color);
+
     overlayCanvasContext.beginPath();                        
     overlayCanvasContext.strokeStyle = color;
     overlayCanvasContext.lineWidth=2;
