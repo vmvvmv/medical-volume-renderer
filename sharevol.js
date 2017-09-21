@@ -9480,7 +9480,7 @@ function Slicer(props, image, filter, parentEl) {
 
   //brush
   this.properties.brushSize = 1;
-  this.properties.enableBrush = false;
+  this.properties.enableBrush = true;
   this.properties.brushColour =  [214, 188, 86];
   this.properties.brushName = 'new brush';
   this.properties.eraser = false;
@@ -9490,9 +9490,7 @@ function Slicer(props, image, filter, parentEl) {
 
     color: [214, 188, 86],
     name: 'brush1',
-    brushSize:5,
     lineCoords:[],
-    axis: null
 
   }
   this.properties.brushCoords = [];
@@ -9630,12 +9628,12 @@ Slicer.prototype.addGUI = function(gui) {
       }}, 'save brush');
   f3.add(this.properties, 'enableBrush');
   // f3.add(this.properties, 'eraser');
-  f3.add(this.properties, 'brushSize', 1, 10, 1).onChange(function(){
+  // f3.add(this.properties, 'brushSize', 1, 10, 1).onChange(function(){
 
-    that.currentBrush.brushSize = that.properties.brushSize;
-    that.draw();
+  //   that.currentBrush.brushSize = that.properties.brushSize;
+  //   that.draw();
     
-  });
+  // });
   f3.addColor(this.properties, 'brushColour').onChange(function(){
 
     that.currentBrush.color = that.properties.brushColour;
@@ -9848,7 +9846,7 @@ Slicer.prototype.draw = function() {
     this.drawIntersections();
 
     //console.log(this.properties.drawRectangles);
-
+    if(this.properties.enableBrush)
     this.drawBrush();
     
 }
@@ -9929,10 +9927,10 @@ Slicer.prototype.drawBrush = function() {
   
   for( viewport of this.viewers ) {
 
+    var brushSize = viewport.viewport.width / this.dims[0];
+
     for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
 
-
-       
 
         var coords = this.currentBrush.lineCoords[i];
 
@@ -9952,7 +9950,7 @@ Slicer.prototype.drawBrush = function() {
               var height = coords.y * v.height;
 
               this.overlayCanvasContext.beginPath();
-              this.overlayCanvasContext.arc(x, y, Math.floor ( this.currentBrush.brushSize ), 0, 2 * Math.PI);
+              this.overlayCanvasContext.arc(x, y, brushSize, 0, 2 * Math.PI);
               this.overlayCanvasContext.fill();
 
           }
@@ -9974,7 +9972,7 @@ Slicer.prototype.drawBrush = function() {
               var height = coords.z * v.height;
 
               this.overlayCanvasContext.beginPath();
-              this.overlayCanvasContext.arc(x, y, Math.floor ( this.currentBrush.brushSize ), 0, 2 * Math.PI);
+              this.overlayCanvasContext.arc(x, y, brushSize, 0, 2 * Math.PI);
               this.overlayCanvasContext.fill();
 
           }
@@ -9996,7 +9994,7 @@ Slicer.prototype.drawBrush = function() {
               var height = coords.y * v.height;
 
               this.overlayCanvasContext.beginPath();
-              this.overlayCanvasContext.arc(x, y, Math.floor ( this.currentBrush.brushSize ), 0, 2 * Math.PI);
+              this.overlayCanvasContext.arc(x, y, brushSize, 0, 2 * Math.PI);
               this.overlayCanvasContext.fill();
 
           }
@@ -10013,48 +10011,31 @@ Slicer.prototype.drawBrush = function() {
 
 Slicer.prototype.drawIntersections = function() {
 
-  //console.log(volume);
-
-  var testData = {
-      'testBox1': {
-        minVertices : [0,0,0],
-        maxVertices: [0.9,0.8,0.7],
-        color: [218, 40, 40]
-      },
-      'testBox2': {
-        minVertices : [0.5,0.5,0.5],
-        maxVertices: [0.7,1,0.6],
-        color: [24, 172, 44]
-      }
-  };
-
-  testData = volume.interSectionBoxes;
-
-  function drawRect ( x,y,width,height, testData, overlayCanvasContext ) {
+  function drawRect ( x,y,width,height, overlayCanvasContext ) {
 
     function rgbToHex(r, g, b) {
       return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
     
-    if (testData[boxkey].color['red']) {
-      var color =   rgbToHex( Math.floor(testData[boxkey].color['red']),
-                              Math.floor(testData[boxkey].color['green']),
-                              Math.floor(testData[boxkey].color['blue']));
+    if (volume.interSectionBoxes[boxkey].color['red']) {
+      var color =   rgbToHex( Math.floor(volume.interSectionBoxes[boxkey].color['red']),
+                              Math.floor(volume.interSectionBoxes[boxkey].color['green']),
+                              Math.floor(volume.interSectionBoxes[boxkey].color['blue']));
     } else {
 
-      var color =   rgbToHex( Math.floor(testData[boxkey].color[0]),
-                              Math.floor(testData[boxkey].color[1]),
-                              Math.floor(testData[boxkey].color[2]));
+      var color =   rgbToHex( Math.floor(volume.interSectionBoxes[boxkey].color[0]),
+                              Math.floor(volume.interSectionBoxes[boxkey].color[1]),
+                              Math.floor(volume.interSectionBoxes[boxkey].color[2]));
 
     }
     
-    //console.log(testData[boxkey].color);
+    //console.log(volume.interSectionBoxes[boxkey].color);
 
     overlayCanvasContext.beginPath();                        
     overlayCanvasContext.strokeStyle = color;
     overlayCanvasContext.lineWidth=2;
-    
-    overlayCanvasContext.rect(x,y,width,height);
+    //+5 offset
+    overlayCanvasContext.rect(x,y+5,width,height);
     overlayCanvasContext.stroke();
 
   }
@@ -10065,22 +10046,22 @@ Slicer.prototype.drawIntersections = function() {
 
     if( viewport.axis == 2 ) {
 
-      for ( boxkey of Object.keys(testData) ) {
+      for ( boxkey of Object.keys(volume.interSectionBoxes) ) {
 
-        var zMin = testData[boxkey].minVertices[2];
-        var zMax = testData[boxkey].maxVertices[2];
+        var zMin = volume.interSectionBoxes[boxkey].minVertices[2];
+        var zMax = volume.interSectionBoxes[boxkey].maxVertices[2];
 
         if( zMin < this.properties.Z/this.dims[2] && zMax >  this.properties.Z/this.dims[2]) {
 
           var v = viewport.viewport;
 
-          var x = testData[boxkey].minVertices[0] * v.width + v.x;
-          var width = testData[boxkey].maxVertices[0] * v.width;
+          var x = volume.interSectionBoxes[boxkey].minVertices[0] * v.width + v.x;
+          var width = volume.interSectionBoxes[boxkey].maxVertices[0] * v.width;
 
-          var y = testData[boxkey].minVertices[1] * v.height + v.y;
-          var height = testData[boxkey].maxVertices[1] * v.height;
+          var y = volume.interSectionBoxes[boxkey].minVertices[1] * v.height + v.y;
+          var height = volume.interSectionBoxes[boxkey].maxVertices[1] * v.height;
 
-          drawRect( x,y,width,height, testData, this.overlayCanvasContext);
+          drawRect( x,y,width,height, this.overlayCanvasContext);
 
         }
 
@@ -10088,22 +10069,22 @@ Slicer.prototype.drawIntersections = function() {
 
     } else if( viewport.axis == 1 ) {
 
-      for ( boxkey of Object.keys(testData) ) {
+      for ( boxkey of Object.keys(volume.interSectionBoxes) ) {
         
-                var yMin = testData[boxkey].minVertices[1];
-                var yMax = testData[boxkey].maxVertices[1];
+                var yMin = volume.interSectionBoxes[boxkey].minVertices[1];
+                var yMax = volume.interSectionBoxes[boxkey].maxVertices[1];
         
         if( yMin < this.properties.Y/this.dims[1] && yMax >  this.properties.Y/this.dims[1]) {
 
           var v = viewport.viewport;
 
-          var x = testData[boxkey].minVertices[0] * v.width + v.x;
-          var width = testData[boxkey].maxVertices[0] * v.width;
+          var x = volume.interSectionBoxes[boxkey].minVertices[0] * v.width + v.x;
+          var width = volume.interSectionBoxes[boxkey].maxVertices[0] * v.width;
 
-          var y = testData[boxkey].minVertices[2] * v.height + v.y;
-          var height = testData[boxkey].maxVertices[2] * v.height;
+          var y = volume.interSectionBoxes[boxkey].minVertices[2] * v.height + v.y;
+          var height = volume.interSectionBoxes[boxkey].maxVertices[2] * v.height;
 
-          drawRect( x,y,width,height, testData, this.overlayCanvasContext);
+          drawRect( x,y,width,height, this.overlayCanvasContext);
 
         }
         
@@ -10112,22 +10093,22 @@ Slicer.prototype.drawIntersections = function() {
     }
     else if( viewport.axis == 0 ) {
     
-          for ( boxkey of Object.keys(testData) ) {
+          for ( boxkey of Object.keys(volume.interSectionBoxes) ) {
             
-                    var xMin = testData[boxkey].minVertices[0];
-                    var xMax = testData[boxkey].maxVertices[0];
+                    var xMin = volume.interSectionBoxes[boxkey].minVertices[0];
+                    var xMax = volume.interSectionBoxes[boxkey].maxVertices[0];
             
             if( xMin < this.properties.X/this.dims[0] && xMax >  this.properties.X/this.dims[0]) {
     
               var v = viewport.viewport;
     
-              var x = testData[boxkey].minVertices[2] * v.width + v.x;
-              var width = testData[boxkey].maxVertices[2] * v.width;
+              var x = volume.interSectionBoxes[boxkey].minVertices[2] * v.width + v.x;
+              var width = volume.interSectionBoxes[boxkey].maxVertices[2] * v.width;
     
-              var y = testData[boxkey].minVertices[1] * v.height + v.y;
-              var height = testData[boxkey].maxVertices[1] * v.height;
+              var y = volume.interSectionBoxes[boxkey].minVertices[1] * v.height + v.y;
+              var height = volume.interSectionBoxes[boxkey].maxVertices[1] * v.height;
     
-              drawRect( x,y,width,height, testData, this.overlayCanvasContext);
+              drawRect( x,y,width,height, this.overlayCanvasContext);
     
             }
             
@@ -10142,9 +10123,6 @@ Slicer.prototype.drawIntersections = function() {
 
 
 }
-
-
-
 
 function SliceView(slicer, x, y, axis, rotate, magnify) {
   this.axis = axis;
@@ -10193,43 +10171,31 @@ SliceView.prototype.click = function(event, mouse) {
     this.slicer.currentBrush.axis = this.axis;
 
   }
-  //console.log(mouse.x,mouse.y);
+  //console.log(this);
 
-   
-    if(( mouse.x  + this.viewport.x ) < ( this.viewport.x + this.viewport.width ) 
-    && ( mouse.x  + this.viewport.x ) > this.viewport.x
-    && ( mouse.y  + this.viewport.y ) < ( this.viewport.y + this.viewport.height )
-    /*&& ( mouse.y  + this.viewport.y ) < this.viewport.y*/) {
+  if(this.slicer.properties.enableBrush)
+  if(( mouse.x  + this.viewport.x ) < ( this.viewport.x + this.viewport.width ) 
+  && ( mouse.x  + this.viewport.x ) > this.viewport.x
+  && ( mouse.y  + this.viewport.y ) < ( this.viewport.y + this.viewport.height )
+  /*&& ( mouse.y  + this.viewport.y ) < this.viewport.y*/) {
 
-      if( !this.slicer.properties.eraser ) {
+    var newBrushCoords;
 
-        //console.log(this.slicer);
-        var newBrushCoords;
-
-
-
-        (this.axis===2) && (newBrushCoords = {x: mouse.x / this.viewport.width,
-                              y:  mouse.y / this.viewport.height, 
-                              z: this.slicer.properties.Z / this.slicer.dims[2]});
-        (this.axis===1) && (newBrushCoords = {x:  mouse.x / this.viewport.width,
-                              y:this.slicer.properties.Y / this.slicer.dims[1], 
-                              z:  mouse.y / this.viewport.height});
-        (this.axis===0) && (newBrushCoords = {x: this.slicer.properties.X / this.slicer.dims[0],
-                              y: mouse.y / this.viewport.height, 
-                              z:  mouse.x / this.viewport.width});
-        this.slicer.currentBrush.lineCoords.push( newBrushCoords );
-
-        //console.log(newBrushCoords);
-
-        //this.slicer.currentBrush.lineCoords.push(mouse.x  + this.viewport.x);
-        //this.slicer.currentBrush.lineCoords.push(mouse.y + this.viewport.y);
-
-      } else {
-
-        //TO DO
-        //this.slicer.erase( mouse.x  + this.viewport.x, mouse.y + this.viewport.y);
-
-      }
+    (this.axis===2) && (newBrushCoords = {x: mouse.x / this.viewport.width,
+                          y:  mouse.y / this.viewport.height, 
+                          z: this.slicer.properties.Z / this.slicer.dims[2]});
+    (this.axis===1) && (newBrushCoords = {x:  mouse.x / this.viewport.width,
+                          y:this.slicer.properties.Y / this.slicer.dims[1], 
+                          z:  mouse.y / this.viewport.height});
+    (this.axis===0) && (newBrushCoords = {x: this.slicer.properties.X / this.slicer.dims[0],
+                          y: mouse.y / this.viewport.height, 
+                          z:  mouse.x / this.viewport.width});
+                          
+    this.slicer.currentBrush.lineCoords.push( newBrushCoords );
+    //console.log(newBrushCoords);
+    //console.log(this.axis, mouse.x, mouse.y);
+    //this.slicer.currentBrush.lineCoords.push(mouse.x  + this.viewport.x);
+    //this.slicer.currentBrush.lineCoords.push(mouse.y + this.viewport.y);
 
   }  
   //----------------------------------------------------------------------------
