@@ -11,6 +11,8 @@
  */
 
 function Slicer(props, image, filter, parentEl) {
+  //console.log(props.slices.properties.importAtlasUrl);
+  
   this.image = image;
   this.res = props.volume.res;
   this.dims = [props.volume.res[0] * props.volume.scale[0], 
@@ -56,7 +58,7 @@ function Slicer(props, image, filter, parentEl) {
 
   }
   this.properties.brushCoords = [];
-  
+  this.properties.importAtlasUrl = props.slices.properties.importAtlasUrl||undefined;
 
   this.container = document.createElement("div");
   this.container.style.cssText = "position: absolute; bottom: 10px; left: 10px; margin: 0px; padding: 0px; pointer-events: none;";
@@ -197,6 +199,13 @@ Slicer.prototype.addGUI = function(gui) {
       that.exportBrush();
         
   }}, 'export brush atlas');
+
+  f3.add( {"import brush atlas": function(){
+    
+      that.importBrush();
+    
+  }}, 'import brush atlas');
+
   f3.add(this.properties, 'enableBrush');
 
   f3.addColor(this.properties, 'brushColour').onChange(function(){
@@ -609,7 +618,66 @@ Slicer.prototype.exportBrush = function() {
   window.location = this.exportCanvas.toDataURL("image/png");
 }
 
-Slicer.prototype.importBrush = function(){
+Slicer.prototype.importBrush = function() {
+
+var image;
+  
+ loadImage(this.properties.importAtlasUrl, function () {
+   image = new Image();
+   var headers = request.getAllResponseHeaders();
+   var match = headers.match( /^Content-Type\:\s*(.*?)$/mi );
+   var mimeType = match[1] || 'image/png';
+   var blob = new Blob([request.response], {type: mimeType} );
+   image.src =  window.URL.createObjectURL(blob);
+   var imageElement = document.createElement("img");
+   image.onload = function () {
+     console.log("Loaded image: " + image.width + " x " + image.height);
+
+     var canvas = document.createElement('canvas');
+     canvas.width = image.width;
+     canvas.height = image.height;
+     canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
+     var ctx = canvas.getContext('2d');
+
+     var pix = ctx.getImageData(0, 0, image.width, image.height).data;
+     //console.log(pix);
+
+     console.log('brush import begin');
+     for( var i = 0; i<pix.length; i++ ) {
+
+      var r = pix[i];
+      var g = pix[i+1];
+      var b = pix[i+2];
+
+      if(r!==0 || g!==0|| b!==0) {
+
+        //console.log(r,g,b);
+        var pixely = Math.floor( i / 4 / image.height );
+        var pixelx = (i / 4) % image.width;
+
+        var z =  Math.ceil (pixelx / slicer.res[0]) - 1 + Math.ceil( pixely / slicer.res[1]) * slicer.dimx - slicer.dimx;
+        var x =  Math.floor (  pixelx % slicer.res[0]);
+        var y =  Math.floor (  pixely % slicer.res[1]);
+
+
+        x = x /  slicer.res[0] * 1;
+        y = y /  slicer.res[1] * 1;
+        z = z /  slicer.res[2] * 1;
+
+        
+
+        slicer.currentBrush.lineCoords.push({x:x,y:y,z:z});
+
+
+      }
+
+     }
+    
+     console.log('brush import finish');
+
+   }
+ }
+ );
 
 }
 
