@@ -136,7 +136,8 @@
           "brushColour": "#d6bc56",
           "brushName": "new brush",
           "eraser": false,
-          "brushCoords": []
+          "brushCoords": [],
+          "importAtlasUrl": "brushAtlas.png"
         }
       },
       "saturation": 1,

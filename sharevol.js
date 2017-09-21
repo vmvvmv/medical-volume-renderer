@@ -9921,7 +9921,7 @@ Slicer.prototype.drawBrush = function() {
   
   for( viewport of this.viewers ) {
 
-    var brushSize = viewport.viewport.width / this.dims[0];
+    var brushSize = viewport.viewport.width / this.dims[0] * 3;
 
     for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
 
@@ -10045,6 +10045,10 @@ Slicer.prototype.exportBrush = function() {
   }
   
   window.location = this.exportCanvas.toDataURL("image/png");
+}
+
+Slicer.prototype.importBrush = function(){
+
 }
 
 Slicer.prototype.drawIntersections = function() {
