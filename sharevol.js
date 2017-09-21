@@ -9542,6 +9542,12 @@ function Slicer(props, image, filter, parentEl) {
 
   //Hidden?
   if (!this.properties.show) this.toggle();
+
+  //console.log(this);
+  //exportBrush canvas
+  this.exportCanvas = document.createElement("canvas");
+  this.exportCanvas.width = this.image.width;
+  this.exportCanvas.height = this.image.height;
 }
 
 Slicer.prototype.toggle = function() {
@@ -9590,9 +9596,6 @@ Slicer.prototype.addGUI = function(gui) {
     f2.__controllers[i].onChange(changefn);
 
   //--------------Brush
-  // this.properties.brushSize = 1;
-  // this.properties.enableBrush = false;
-  // this.properties.brushColour =  [214, 188, 86];
 
   var f3 = this.gui.addFolder('Кисточка');
   //this.properties.brushName
@@ -9603,53 +9606,43 @@ Slicer.prototype.addGUI = function(gui) {
 
   });
 
-  f3.add( {"new brush": function(){
+  // f3.add( {"new brush": function(){
 
-    that.currentBrush = {
+  //   that.currentBrush = {
       
-          color: [214, 188, 86],
-          name: 'brush1',
-          brushSize:1,
-          lineCoords:[],
-          axis: null
+  //         color: [214, 188, 86],
+  //         name: 'brush1',
+  //         brushSize:1,
+  //         lineCoords:[],
+  //         axis: null
       
-      }
+  //     }
     
-    that.overlayCanvasContext.clearRect(0, 0, that.overlayCanvas.width, that.overlayCanvas.height);
+  //   that.overlayCanvasContext.clearRect(0, 0, that.overlayCanvas.width, that.overlayCanvas.height);
 
-    //that.draw();
+  //   //that.draw();
 
-  }}, 'new brush');
+  // }}, 'new brush');
 
   f3.add( {"save brush": function(){
     
         //todo
     
       }}, 'save brush');
+  
+  f3.add( {"export brush atlas": function(){
+        
+      that.exportBrush();
+        
+  }}, 'export brush atlas');
   f3.add(this.properties, 'enableBrush');
-  // f3.add(this.properties, 'eraser');
-  // f3.add(this.properties, 'brushSize', 1, 10, 1).onChange(function(){
 
-  //   that.currentBrush.brushSize = that.properties.brushSize;
-  //   that.draw();
-    
-  // });
   f3.addColor(this.properties, 'brushColour').onChange(function(){
 
     that.currentBrush.color = that.properties.brushColour;
     that.draw();
 
   });
-
-
-
-  // f3.add( currentItem, 'selecTedBox', Object.keys(this.interSectionBoxes) ).onChange(function() {
-    
-  //       //todo   
-
-  // });
-
-
 
 
   f3.open();
@@ -9918,6 +9911,7 @@ Slicer.prototype.drawBrush = function() {
   } else {
 
     var color =   this.currentBrush.color;
+
   }
 
   //console.log(color);
@@ -10007,6 +10001,50 @@ Slicer.prototype.drawBrush = function() {
   }
 
 
+}
+
+Slicer.prototype.exportBrush = function() {
+
+  console.log('export');
+
+  var ctx = this.exportCanvas.getContext('2d');
+  ctx.clearRect(0, 0, this.exportCanvas.width, this.exportCanvas.height); 
+  //--------------------------------------
+
+  function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  //console.log(this.currentBrush.color);
+
+  if (this.currentBrush.color instanceof Array) {
+    var color =   rgbToHex( Math.floor(this.currentBrush.color[0]),
+                            Math.floor(this.currentBrush.color[1]),
+                            Math.floor(this.currentBrush.color[2]));
+  } else {
+
+    var color =   this.currentBrush.color;
+    
+  }
+
+  ctx.fillStyle = color;
+
+  for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
+
+    var row = Math.floor(this.currentBrush.lineCoords[i].z*this.res[2] /  this.dimy);
+    var col = this.currentBrush.lineCoords[i].z*this.res[2] % this.dimx;
+
+    var x = this.currentBrush.lineCoords[i].x*this.res[0] + col * this.res[0];
+    var y = this.currentBrush.lineCoords[i].y*this.res[1] + row * this.res[1];
+
+
+    ctx.beginPath();
+    ctx.arc(Math.floor(x), Math.floor(y), 3, 0, 2 * Math.PI);
+    ctx.fill();
+
+  }
+  
+  window.location = this.exportCanvas.toDataURL("image/png");
 }
 
 Slicer.prototype.drawIntersections = function() {
