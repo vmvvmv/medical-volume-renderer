@@ -137,7 +137,7 @@
           "brushName": "new brush",
           "eraser": false,
           "brushCoords": [],
-          "importAtlasUrl": "index.png"
+          "importAtlasUrl": "brushAtlas.png"
         }
       },
       "saturation": 1,

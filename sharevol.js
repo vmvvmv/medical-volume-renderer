@@ -10052,8 +10052,10 @@ Slicer.prototype.exportBrush = function() {
     ctx.fill();
 
   }
+  var exportImage =  this.exportCanvas.toDataURL("image/png");
   
-  window.location = this.exportCanvas.toDataURL("image/png");
+  window.location = exportImage;
+
 }
 
 Slicer.prototype.importBrush = function() {
