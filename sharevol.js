@@ -10018,7 +10018,7 @@ Slicer.prototype.exportBrush = function() {
 
 
     ctx.beginPath();
-    ctx.arc(Math.floor(x), Math.floor(y), 3, 0, 2 * Math.PI);
+    ctx.arc(Math.floor(x), Math.floor(y), 1, 0, 2 * Math.PI);
     ctx.fill();
 
   }
