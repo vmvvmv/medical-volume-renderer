@@ -53,7 +53,6 @@ function Slicer(props, image, filter, parentEl) {
   this.currentBrush = {
 
     color: [214, 188, 86],
-    name: 'brush1',
     lineCoords:[],
 
   }
@@ -164,35 +163,6 @@ Slicer.prototype.addGUI = function(gui) {
   var f3 = this.gui.addFolder('Кисточка');
   //this.properties.brushName
 
-  f3.add(this.properties, 'brushName').onChange( function(){
-
-    //that.currentIntersectBox.name = newName.name;
-
-  });
-
-  // f3.add( {"new brush": function(){
-
-  //   that.currentBrush = {
-      
-  //         color: [214, 188, 86],
-  //         name: 'brush1',
-  //         brushSize:1,
-  //         lineCoords:[],
-  //         axis: null
-      
-  //     }
-    
-  //   that.overlayCanvasContext.clearRect(0, 0, that.overlayCanvas.width, that.overlayCanvas.height);
-
-  //   //that.draw();
-
-  // }}, 'new brush');
-
-  f3.add( {"save brush": function(){
-    
-        //todo
-    
-      }}, 'save brush');
   
   f3.add( {"export brush atlas": function(){
         
@@ -616,7 +586,7 @@ Slicer.prototype.exportBrush = function() {
   }
   var exportImage =  this.exportCanvas.toDataURL("image/png");
   
-  window.location = exportImage;
+  window.open(exportImage, '_blank');
 
 }
 
