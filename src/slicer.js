@@ -176,7 +176,9 @@ Slicer.prototype.addGUI = function(gui) {
     
   }}, 'import brush atlas');
 
-  f3.add(this.properties, 'enableBrush');
+  f3.add(this.properties, 'enableBrush').onChange( function(){
+    that.draw();
+  });
 
   f3.addColor(this.properties, 'brushColour').onChange(function(){
 
@@ -646,6 +648,8 @@ var image;
      }
     
      console.log('brush import finish');
+     if(slicer.properties.enableBrush)
+      slicer.draw();
 
    }
  }
