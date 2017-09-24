@@ -502,9 +502,8 @@ Slicer.prototype.drawBrush = function() {
             switch(rotate){
           
                 case -90:
-                  var x = ( coords[ykey] ) * v.height + v.y;
-                  var y = ( 1 - coords[xkey] ) * v.width + v.x;
-                  //console.log('-90',x,y);
+                  var x = ( coords[ykey] ) * v.height + v.x;
+                  var y = ( 1 - coords[xkey] ) * v.width + v.y;
                   break;
                 case 90:
                   var x = ( coords[ykey] ) * v.height + v.y;
@@ -520,6 +519,8 @@ Slicer.prototype.drawBrush = function() {
                   break;
           
               }
+            
+            //console.log('axis' + axis + ' ',rotate,x,y);
 
             this.overlayCanvasContext.beginPath();
             this.overlayCanvasContext.arc(x, y, brushSize, 0, 2 * Math.PI);
@@ -719,13 +720,14 @@ Slicer.prototype.drawIntersections = function() {
         }
         else if (rotate === -90) {
 
-          var x = ( 1 - volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + v.y;
+          var x = ( 1 - volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + v.x;
           var width = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height;
           
-          var y = volume.interSectionBoxes[boxkey].minVertices[i] * v.width + v.x;
-          var height = volume.interSectionBoxes[boxkey].maxVertices[i] * v.width * -1;
+          var y = volume.interSectionBoxes[boxkey].minVertices[i] * v.width + v.y;
+          var height = volume.interSectionBoxes[boxkey].maxVertices[i] * v.width;
 
-          //console.log('-90 ',x, width, y,height);
+          // console.log('-90 ',x, y, width,height);
+          // console.log(v);
 
         }
         else if (rotate === 180) {
@@ -866,7 +868,7 @@ SliceView.prototype.click = function(event, mouse) {
     newBrushCoords.z = slicer.properties.Z / this.slicer.res[2];
   }
 
-  console.log(this.viewport);
+  //console.log(this.viewport);
 
   if( this.slicer.properties.enableBrush && isCursorInView() )
   this.slicer.currentBrush.lineCoords.push( newBrushCoords );
