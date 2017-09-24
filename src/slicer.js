@@ -263,7 +263,7 @@ Slicer.prototype.doLayout = function() {
         addViewer(1);
         break;
       case 'Z':
-        rotate = 360;
+        //rotate = 360;
       case 'z':
         addViewer(2);
         break;
@@ -683,91 +683,100 @@ Slicer.prototype.drawIntersections = function() {
     overlayCanvasContext.strokeStyle = color;
     overlayCanvasContext.lineWidth=2;
     //+5 offset
-    overlayCanvasContext.rect(x,y+5,width,height);
+    overlayCanvasContext.rect(x,y,width,height);
     overlayCanvasContext.stroke();
 
   }
 
-  //console.log(this.viewers);
 
   for( viewport of this.viewers ) {
+    var i = viewport.i;
+    var j = viewport.j;
+    var axis = viewport.axis;
+    var rotate = viewport.rotate;
+    var v = viewport.viewport;
+    var deepDimension;
 
-    if( viewport.axis == 2 ) {
+    switch(axis){
 
-      for ( boxkey of Object.keys(volume.interSectionBoxes) ) {
+      case 0:
+        deepDimension = this.properties.X;
+        break;
+      case 1:
+        deepDimension = this.properties.Y;
+        break;
+      case 2:
+        deepDimension = this.properties.Z;
+        break;
 
-        var zMin = volume.interSectionBoxes[boxkey].minVertices[2];
-        var zMax = volume.interSectionBoxes[boxkey].maxVertices[2];
+    }
 
-        if( zMin < this.properties.Z/this.dims[2] && zMax >  this.properties.Z/this.dims[2]) {
+    for ( boxkey of Object.keys(volume.interSectionBoxes) ) {
 
-          var v = viewport.viewport;
+      var minD = volume.interSectionBoxes[boxkey].minVertices[axis];
+      var maxD = volume.interSectionBoxes[boxkey].maxVertices[axis];
 
-          var x = volume.interSectionBoxes[boxkey].minVertices[0] * v.width + v.x;
-          var width = volume.interSectionBoxes[boxkey].maxVertices[0] * v.width;
+      if( minD < deepDimension/this.dims[axis] && maxD > deepDimension/this.dims[axis]) {
 
-          var y = volume.interSectionBoxes[boxkey].minVertices[1] * v.height + v.y;
-          var height = volume.interSectionBoxes[boxkey].maxVertices[1] * v.height;
+        
+        // if (this.rotate == 90)
+        // coord = [mouse.y / mouse.element.clientHeight, 1.0 - mouse.x / mouse.element.clientWidth];
+        // else if (this.rotate == -90)
+        // coord = [1 - mouse.y / mouse.element.clientHeight, mouse.x / mouse.element.clientWidth];
 
-          drawRect( x,y,width,height, this.overlayCanvasContext);
+        if (rotate ===90){
+
+          var x =  volume.interSectionBoxes[boxkey].minVertices[j] * v.height + v.y;
+          var width = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height;
+          
+          var y = ( 1 - volume.interSectionBoxes[boxkey].minVertices[i]) * v.width + v.x;
+          var height = ( 1 - volume.interSectionBoxes[boxkey].maxVertices[i]) * v.width;
+
+          console.log('90 ',x, width, y,height);
+        }
+        else if (rotate === -90) {
+
+          var x = ( 1 - volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + v.y;
+          var width = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height;
+          
+          var y = volume.interSectionBoxes[boxkey].minVertices[i] * v.width + v.x;
+          var height = volume.interSectionBoxes[boxkey].maxVertices[i] * v.width * -1;
+
+          console.log('-90 ',x, width, y,height);
+
+        }
+        else if (rotate === 180) {
+
+          var x = ( 1 - volume.interSectionBoxes[boxkey].minVertices[i] ) * v.width + v.x;
+          var width = volume.interSectionBoxes[boxkey].maxVertices[i]  * v.width * -1;
+
+          var y = ( 1 - volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + v.y;
+          var height = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height * -1;
+
+          console.log('180 ',x, width, y,height);
+        }
+        else {
+
+          var x = volume.interSectionBoxes[boxkey].minVertices[i] * v.width + v.x;
+          var width = volume.interSectionBoxes[boxkey].maxVertices[i] * v.width;
+
+          var y = volume.interSectionBoxes[boxkey].minVertices[j] * v.height + v.y;
+          var height = volume.interSectionBoxes[boxkey].maxVertices[j] * v.height;
+
+          if(axis===0)
+          console.log('0 ',x, width, y,height);
 
         }
 
+
+        drawRect( x,y,width,height, this.overlayCanvasContext);
+
       }
 
-    } else if( viewport.axis == 1 ) {
 
-      for ( boxkey of Object.keys(volume.interSectionBoxes) ) {
-        
-                var yMin = volume.interSectionBoxes[boxkey].minVertices[1];
-                var yMax = volume.interSectionBoxes[boxkey].maxVertices[1];
-        
-        if( yMin < this.properties.Y/this.dims[1] && yMax >  this.properties.Y/this.dims[1]) {
-
-          var v = viewport.viewport;
-
-          var x = volume.interSectionBoxes[boxkey].minVertices[0] * v.width + v.x;
-          var width = volume.interSectionBoxes[boxkey].maxVertices[0] * v.width;
-
-          var y = volume.interSectionBoxes[boxkey].minVertices[2] * v.height + v.y;
-          var height = volume.interSectionBoxes[boxkey].maxVertices[2] * v.height;
-
-          drawRect( x,y,width,height, this.overlayCanvasContext);
-
-        }
-        
-      }
-
-    }
-    else if( viewport.axis == 0 ) {
-    
-          for ( boxkey of Object.keys(volume.interSectionBoxes) ) {
-            
-                    var xMin = volume.interSectionBoxes[boxkey].minVertices[0];
-                    var xMax = volume.interSectionBoxes[boxkey].maxVertices[0];
-            
-            if( xMin < this.properties.X/this.dims[0] && xMax >  this.properties.X/this.dims[0]) {
-    
-              var v = viewport.viewport;
-    
-              var x = volume.interSectionBoxes[boxkey].minVertices[2] * v.width + v.x;
-              var width = volume.interSectionBoxes[boxkey].maxVertices[2] * v.width;
-    
-              var y = volume.interSectionBoxes[boxkey].minVertices[1] * v.height + v.y;
-              var height = volume.interSectionBoxes[boxkey].maxVertices[1] * v.height;
-    
-              drawRect( x,y,width,height, this.overlayCanvasContext);
-    
-            }
-            
-      }
-    
-    }
+    } 
 
   }
-  
-  //console.log(this.viewers);
-  //console.log(this.properties.X,this.properties.Y,this.properties.Z);
 
 
 }
@@ -814,38 +823,33 @@ function SliceView(slicer, x, y, axis, rotate, magnify) {
 
 SliceView.prototype.click = function(event, mouse) {
 
-  if(this.slicer.currentBrush.axis === null) {
+  // if(this.slicer.properties.enableBrush)
+  // if(( mouse.x  + this.viewport.x ) < ( this.viewport.x + this.viewport.width ) 
+  // && ( mouse.x  + this.viewport.x ) > this.viewport.x
+  // && ( mouse.y  + this.viewport.y ) < ( this.viewport.y + this.viewport.height )
+  // /*&& ( mouse.y  + this.viewport.y ) < this.viewport.y*/) {
 
-    this.slicer.currentBrush.axis = this.axis;
+  //   var newBrushCoords;
 
-  }
-  //console.log(this);
+  //   console.log(this);
 
-  if(this.slicer.properties.enableBrush)
-  if(( mouse.x  + this.viewport.x ) < ( this.viewport.x + this.viewport.width ) 
-  && ( mouse.x  + this.viewport.x ) > this.viewport.x
-  && ( mouse.y  + this.viewport.y ) < ( this.viewport.y + this.viewport.height )
-  /*&& ( mouse.y  + this.viewport.y ) < this.viewport.y*/) {
-
-    var newBrushCoords;
-
-    (this.axis===2) && (newBrushCoords = {x: mouse.x / this.viewport.width,
-                          y:  mouse.y / this.viewport.height, 
-                          z: this.slicer.properties.Z / this.slicer.dims[2]});
-    (this.axis===1) && (newBrushCoords = {x:  mouse.x / this.viewport.width,
-                          y:this.slicer.properties.Y / this.slicer.dims[1], 
-                          z:  mouse.y / this.viewport.height});
-    (this.axis===0) && (newBrushCoords = {x: this.slicer.properties.X / this.slicer.dims[0],
-                          y: mouse.y / this.viewport.height, 
-                          z:  mouse.x / this.viewport.width});
+  //   (this.axis===2) && (newBrushCoords = {x: mouse.x / this.viewport.width,
+  //                         y:  mouse.y / this.viewport.height, 
+  //                         z: this.slicer.properties.Z / this.slicer.dims[2]});
+  //   (this.axis===1) && (newBrushCoords = {x:  mouse.x / this.viewport.width,
+  //                         y:this.slicer.properties.Y / this.slicer.dims[1], 
+  //                         z:  mouse.y / this.viewport.height});
+  //   (this.axis===0) && (newBrushCoords = {x: this.slicer.properties.X / this.slicer.dims[0],
+  //                         y: mouse.y / this.viewport.height, 
+  //                         z:  mouse.x / this.viewport.width});
                           
-    this.slicer.currentBrush.lineCoords.push( newBrushCoords );
-    //console.log(newBrushCoords);
-    //console.log(this.axis, mouse.x, mouse.y);
-    //this.slicer.currentBrush.lineCoords.push(mouse.x  + this.viewport.x);
-    //this.slicer.currentBrush.lineCoords.push(mouse.y + this.viewport.y);
+  //   this.slicer.currentBrush.lineCoords.push( newBrushCoords );
+  //   console.log(newBrushCoords);
+  //   //console.log(this.axis, mouse.x, mouse.y);
+  //   //this.slicer.currentBrush.lineCoords.push(mouse.x  + this.viewport.x);
+  //   //this.slicer.currentBrush.lineCoords.push(mouse.y + this.viewport.y);
 
-  }  
+  // }  
   //----------------------------------------------------------------------------
 
   if (this.slicer.flipY) mouse.y = mouse.element.clientHeight - mouse.y;
@@ -867,16 +871,39 @@ SliceView.prototype.click = function(event, mouse) {
   var A = Math.round(this.slicer.res[this.i] * coord[0]);
   var B = Math.round(this.slicer.res[this.j] * coord[1]);
 
+  //console.log(coord);
+
+  var newBrushCoords ={};
+
   if (this.axis == 0) {
     slicer.properties.Z = A;
     slicer.properties.Y = B;
+
+    newBrushCoords.z = coord[0];
+    newBrushCoords.y = coord[1];
+    newBrushCoords.x = slicer.properties.X / this.slicer.res[0];
+
   } else if (this.axis == 1) {
     slicer.properties.X = A;
     slicer.properties.Z = B;
+
+    newBrushCoords.x = coord[0];
+    newBrushCoords.z = coord[1];
+    newBrushCoords.y = slicer.properties.Y / this.slicer.res[1];
+    
   } else {
     slicer.properties.X = A;
     slicer.properties.Y = B;
+
+    newBrushCoords.x = coord[0];
+    newBrushCoords.y = coord[1];
+    newBrushCoords.z = slicer.properties.Z / this.slicer.res[2];
   }
+
+  console.log(this);
+
+  if( this.slicer.properties.enableBrush )
+  this.slicer.currentBrush.lineCoords.push( newBrushCoords );
 
   this.slicer.draw();
 }
