@@ -61,7 +61,7 @@
         "power": 1,
         "slices": {
             "properties": {
-                "layout": "X|Y|Z",
+                "layout": "x|X|y|Y|z",
                 "power": 1,
                 "brightness": 0,
                 "show": true,

@@ -10251,7 +10251,8 @@ SliceView.prototype.click = function(event, mouse) {
 
     return ( mouse.x  + view.viewport.x ) < ( view.viewport.x + view.viewport.width ) 
             && ( mouse.x  + view.viewport.x ) > view.viewport.x
-            &&( mouse.y  + view.viewport.y ) < ( view.viewport.y + view.viewport.height )
+            &&( mouse.y  + view.viewport.y ) < ( view.viewport.y + view.viewport.height)
+            && ( mouse.y > 0 )
 
   }
 
@@ -10303,7 +10304,7 @@ SliceView.prototype.click = function(event, mouse) {
     newBrushCoords.z = slicer.properties.Z / this.slicer.res[2];
   }
 
-  //console.log(this);
+  console.log(this.viewport);
 
   if( this.slicer.properties.enableBrush && isCursorInView() )
   this.slicer.currentBrush.lineCoords.push( newBrushCoords );
