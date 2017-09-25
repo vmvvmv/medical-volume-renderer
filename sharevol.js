@@ -9671,6 +9671,7 @@ Slicer.prototype.doLayout = function() {
   var buffer = "";
   var rowHeight = 0, rowWidth = 0;
   var addViewer = function(idx) {
+    //console.log( that.viewers);
     var mag = 1.0;
     if (buffer) mag = parseFloat(buffer);
     var v = new SliceView(that, x, y, idx, rotate, mag);
@@ -9688,6 +9689,7 @@ Slicer.prototype.doLayout = function() {
   this.flipY = false;
   for (var i=0; i<this.properties.layout.length; i++) {
     var c = this.properties.layout.charAt(i);
+    //console.log(c);
     rotate = 0;
     switch (c) {
       case 'X':
@@ -9729,6 +9731,8 @@ Slicer.prototype.doLayout = function() {
   this.height = ymax;
 
  // console.log(this.width, this.height);
+  // that.viewers[2].viewport.y = that.viewers[0].viewport.y;
+  // that.viewers[0].viewport.y = 0;
 
   //Restore the main canvas
   this.container.appendChild(this.canvas);
@@ -9937,23 +9941,26 @@ Slicer.prototype.drawBrush = function() {
         
         if ( ( coords[zkey] - 1/this.dims[axis]) < z && ( coords[zkey] + 1/this.dims[axis]) > z ) {
 
+            //console.log(this.height - v.y - v.height);
             switch(rotate){
           
                 case -90:
                   var x = ( coords[ykey] ) * v.height + v.x;
-                  var y = ( 1 - coords[xkey] ) * v.width + v.y;
+                  var y = ( 1 - coords[xkey] ) * v.width + (this.height - v.y - v.height);
                   break;
-                case 90:
-                  var x = ( coords[ykey] ) * v.height + v.y;
-                  var y = ( 1- coords[xkey] ) * v.width + v.x;
-                  break;
+                // case 90:
+                //   var x = ( coords[ykey] ) * v.height + v.y;
+                //   var y = ( 1- coords[xkey] ) * v.width + v.x;
+                //   break;
                 case 180:
                   var x = ( 1 - coords[xkey] ) * v.width + v.x;
-                  var y = ( 1 - coords[ykey] ) * v.height + v.y;
+                  var y = ( 1 - coords[ykey] ) * v.height + (this.height - v.y - v.height);
                   break;
                 default:
                   var x = ( coords[xkey] ) * v.width + v.x;
-                  var y = ( coords[ykey] ) * v.height + v.y;
+                  var y = ( coords[ykey] ) * v.height + (this.height - v.y - v.height);
+                  //console.log(y);
+                  
                   break;
           
               }
@@ -10148,11 +10155,11 @@ Slicer.prototype.drawIntersections = function() {
 
         if (rotate ===90){
 
-          var x =  volume.interSectionBoxes[boxkey].minVertices[j] * v.height + v.y;
-          var width = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height;
+          // var x =  volume.interSectionBoxes[boxkey].minVertices[j] * v.height + v.y;
+          // var width = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height;
           
-          var y = ( 1 - volume.interSectionBoxes[boxkey].minVertices[i]) * v.width + v.x;
-          var height = ( 1 - volume.interSectionBoxes[boxkey].maxVertices[i]) * v.width;
+          // var y = ( 1 - volume.interSectionBoxes[boxkey].minVertices[i]) * v.width + v.x;
+          // var height = ( 1 - volume.interSectionBoxes[boxkey].maxVertices[i]) * v.width;
 
           //console.log('90 ',x, width, y,height);
         }
@@ -10161,10 +10168,10 @@ Slicer.prototype.drawIntersections = function() {
           var x = ( volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + v.x;
           var width = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height ;
           
-          var y = ( 1- volume.interSectionBoxes[boxkey].minVertices[i] ) * v.width + v.y;
+          var y = ( 1- volume.interSectionBoxes[boxkey].minVertices[i] ) * v.width + (this.height - v.y - v.height);
           var height = volume.interSectionBoxes[boxkey].maxVertices[i] * v.width * -1;
 
-          console.log('-90 ',x, y, width,height);
+          //console.log('-90 ',x, y, width,height);
           // console.log(v);
 
         }
@@ -10173,7 +10180,7 @@ Slicer.prototype.drawIntersections = function() {
           var x = ( 1 - volume.interSectionBoxes[boxkey].minVertices[i] ) * v.width + v.x;
           var width = volume.interSectionBoxes[boxkey].maxVertices[i]  * v.width * -1;
 
-          var y = ( 1 - volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + v.y;
+          var y = ( 1 - volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + (this.height - v.y - v.height);
           var height = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height * -1;
 
           //console.log('180 ',x, width, y,height);
@@ -10183,7 +10190,7 @@ Slicer.prototype.drawIntersections = function() {
           var x = volume.interSectionBoxes[boxkey].minVertices[i] * v.width + v.x;
           var width = volume.interSectionBoxes[boxkey].maxVertices[i] * v.width;
 
-          var y = volume.interSectionBoxes[boxkey].minVertices[j] * v.height + v.y;
+          var y = volume.interSectionBoxes[boxkey].minVertices[j] * v.height + (this.height - v.y - v.height);
           var height = volume.interSectionBoxes[boxkey].maxVertices[j] * v.height;
 
           //if(axis===0)
@@ -10192,7 +10199,7 @@ Slicer.prototype.drawIntersections = function() {
         }
 
 
-        drawRect( x,y + 5,width,height, this.overlayCanvasContext);
+        drawRect( x,y,width,height, this.overlayCanvasContext);
 
       }
 
@@ -10246,6 +10253,7 @@ function SliceView(slicer, x, y, axis, rotate, magnify) {
 
 SliceView.prototype.click = function(event, mouse) {
 
+  console.log(this);
 
   var view = this;
 

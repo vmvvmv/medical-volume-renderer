@@ -61,7 +61,7 @@
   "views": [
     {
       "axes": false,
-      "border": false,
+      "border": true,
       "translate": [
         -0.05715767664977255,
         -0.031176914536239782,
@@ -129,7 +129,7 @@
           "contrast": 1,
           "power": 1,
           "usecolourmap": false,
-          "layout": "x|X|y|Y|z|Z",
+          "layout": "XYZ",
           "zoom": 0.6683351069050206,
           "brushSize": 1,
           "enableBrush": false,
