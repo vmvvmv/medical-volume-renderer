@@ -10110,10 +10110,10 @@ Slicer.prototype.drawIntersections = function() {
                               Math.floor(volume.interSectionBoxes[boxkey].color[2]));
 
     }
-    if ( volume.interSectionBoxes[boxkey].color instanceof String )
+    if ( typeof volume.interSectionBoxes[boxkey].color ===  'string' )
       color = volume.interSectionBoxes[boxkey].color;
     
-    console.log(color);
+    //console.log(color);
 
     overlayCanvasContext.beginPath();                        
     overlayCanvasContext.strokeStyle = color;
