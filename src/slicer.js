@@ -672,8 +672,10 @@ Slicer.prototype.drawIntersections = function() {
                               Math.floor(volume.interSectionBoxes[boxkey].color[2]));
 
     }
+    if ( volume.interSectionBoxes[boxkey].color instanceof String )
+      color = volume.interSectionBoxes[boxkey].color;
     
-    //console.log(volume.interSectionBoxes[boxkey].color);
+    console.log(color);
 
     overlayCanvasContext.beginPath();                        
     overlayCanvasContext.strokeStyle = color;
@@ -692,17 +694,20 @@ Slicer.prototype.drawIntersections = function() {
     var rotate = viewport.rotate;
     var v = viewport.viewport;
     var deepDimension;
-
+    //console.log(i,j);
     switch(axis){
 
       case 0:
         deepDimension = this.properties.X;
+
         break;
       case 1:
         deepDimension = this.properties.Y;
+
         break;
       case 2:
         deepDimension = this.properties.Z;
+
         break;
 
     }
@@ -717,22 +722,17 @@ Slicer.prototype.drawIntersections = function() {
 
         if (rotate ===90){
 
-          // var x =  volume.interSectionBoxes[boxkey].minVertices[j] * v.height + v.y;
-          // var width = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height;
-          
-          // var y = ( 1 - volume.interSectionBoxes[boxkey].minVertices[i]) * v.width + v.x;
-          // var height = ( 1 - volume.interSectionBoxes[boxkey].maxVertices[i]) * v.width;
+          console.log(90);
 
-          //console.log('90 ',x, width, y,height);
         }
         else if (rotate === -90) {
 
           var x = ( volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + v.x;
-          var width = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height ;
-          
-          var y = ( 1- volume.interSectionBoxes[boxkey].minVertices[i] ) * v.width + (this.height - v.y - v.height);
-          var height = volume.interSectionBoxes[boxkey].maxVertices[i] * v.width * -1;
+          var width =  ( volume.interSectionBoxes[boxkey].maxVertices[j] - volume.interSectionBoxes[boxkey].minVertices[j] )  * v.height ;
 
+          var y = ( 1- volume.interSectionBoxes[boxkey].minVertices[i] ) * v.width + (this.height - v.y - v.height);
+          var height =  ( volume.interSectionBoxes[boxkey].maxVertices[i] - volume.interSectionBoxes[boxkey].minVertices[i]) * v.width * -1;
+          
           //console.log('-90 ',x, y, width,height);
           // console.log(v);
 
@@ -740,26 +740,29 @@ Slicer.prototype.drawIntersections = function() {
         else if (rotate === 180) {
 
           var x = ( 1 - volume.interSectionBoxes[boxkey].minVertices[i] ) * v.width + v.x;
-          var width = volume.interSectionBoxes[boxkey].maxVertices[i]  * v.width * -1;
+          var width = ( volume.interSectionBoxes[boxkey].maxVertices[i] - volume.interSectionBoxes[boxkey].minVertices[i] )  * v.width * -1;
 
           var y = ( 1 - volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + (this.height - v.y - v.height);
-          var height = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height * -1;
+          var height =  ( volume.interSectionBoxes[boxkey].maxVertices[j] - volume.interSectionBoxes[boxkey].minVertices[j]) * v.height * -1;
 
           //console.log('180 ',x, width, y,height);
         }
         else {
 
           var x = volume.interSectionBoxes[boxkey].minVertices[i] * v.width + v.x;
-          var width = volume.interSectionBoxes[boxkey].maxVertices[i] * v.width;
+          var width = ( volume.interSectionBoxes[boxkey].maxVertices[i] - volume.interSectionBoxes[boxkey].minVertices[i] ) * v.width;
 
           var y = volume.interSectionBoxes[boxkey].minVertices[j] * v.height + (this.height - v.y - v.height);
-          var height = volume.interSectionBoxes[boxkey].maxVertices[j] * v.height;
+          var height = ( volume.interSectionBoxes[boxkey].maxVertices[j] - volume.interSectionBoxes[boxkey].minVertices[j]) * v.height;
 
           //if(axis===0)
           //console.log('0 ',x, width, y,height);
 
+          //console.log(x,y,width,height);
+
         }
 
+        //console.log( volume.interSectionBoxes[boxkey].minVertices , volume.interSectionBoxes[boxkey].maxVertices);
 
         drawRect( x,y,width,height, this.overlayCanvasContext);
 
@@ -815,7 +818,7 @@ function SliceView(slicer, x, y, axis, rotate, magnify) {
 
 SliceView.prototype.click = function(event, mouse) {
 
-  console.log(this);
+  //console.log(this);
 
   var view = this;
 
