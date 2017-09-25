@@ -720,13 +720,13 @@ Slicer.prototype.drawIntersections = function() {
         }
         else if (rotate === -90) {
 
-          var x = ( 1 - volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + v.x;
-          var width = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height;
+          var x = ( volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + v.x;
+          var width = volume.interSectionBoxes[boxkey].maxVertices[j]  * v.height ;
           
-          var y = volume.interSectionBoxes[boxkey].minVertices[i] * v.width + v.y;
-          var height = volume.interSectionBoxes[boxkey].maxVertices[i] * v.width;
+          var y = ( 1- volume.interSectionBoxes[boxkey].minVertices[i] ) * v.width + v.y;
+          var height = volume.interSectionBoxes[boxkey].maxVertices[i] * v.width * -1;
 
-          // console.log('-90 ',x, y, width,height);
+          console.log('-90 ',x, y, width,height);
           // console.log(v);
 
         }
@@ -754,7 +754,7 @@ Slicer.prototype.drawIntersections = function() {
         }
 
 
-        drawRect( x,y,width,height, this.overlayCanvasContext);
+        drawRect( x,y + 5,width,height, this.overlayCanvasContext);
 
       }
 

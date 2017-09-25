@@ -61,7 +61,7 @@
   "views": [
     {
       "axes": false,
-      "border": true,
+      "border": false,
       "translate": [
         -0.05715767664977255,
         -0.031176914536239782,
@@ -116,9 +116,9 @@
       "slices": {
         "properties": {
           "show": true,
-          "X": 138,
-          "Y": 159,
-          "Z": 144,
+          "X": 52,
+          "Y": 144,
+          "Z": 142,
           "minX": 0,
           "maxX": 256,
           "minY": 0,
@@ -131,8 +131,12 @@
           "usecolourmap": false,
           "layout": "x|X|y|Y|z|Z",
           "zoom": 0.6683351069050206,
+          "brushSize": 1,
           "enableBrush": false,
           "brushColour": "#d6bc56",
+          "brushName": "new brush",
+          "eraser": false,
+          "drawRectangles": true,
           "brushCoords": [],
           "importAtlasUrl": "index.png"
         }
@@ -155,6 +159,24 @@
           "maxVertices": [
             106.80197322057788,
             256,
+            256
+          ]
+        },
+        {
+          "name": "new name",
+          "color": [
+            214,
+            188,
+            86
+          ],
+          "minVertices": [
+            0,
+            0,
+            0
+          ],
+          "maxVertices": [
+            152.98661028893588,
+            98.14235377026074,
             256
           ]
         }
