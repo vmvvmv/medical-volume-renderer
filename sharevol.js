@@ -9486,6 +9486,7 @@ function Slicer(props, image, filter, parentEl) {
   this.properties.brushColour =  [214, 188, 86];
   this.properties.drawRectangles = true;
   this.properties.showBrush = true;
+  this.properties.brushTransperency = 255;
 
 
   this.currentBrush = {
@@ -9620,6 +9621,12 @@ Slicer.prototype.addGUI = function(gui) {
   });
   f3.add(this.properties, 'showBrush').onChange( function(){
     that.draw();
+  });
+
+  f3.add(this.properties, 'brushTransperency', 0, 255, 1).listen().onChange(function() {
+    
+        that.draw();
+    
   });
 
   f3.addColor(this.properties, 'brushColour').onChange(function(){
@@ -9889,6 +9896,15 @@ Slicer.prototype.drawBrush = function() {
   function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
+  function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+  }
+
 
   if (this.currentBrush.color instanceof Array) {
     var color =   rgbToHex( Math.floor(this.currentBrush.color[0]),
@@ -9900,8 +9916,10 @@ Slicer.prototype.drawBrush = function() {
 
   }
 
-  this.overlayCanvasContext.fillStyle = color;
-  
+  var rgb = hexToRgb(color);
+
+  this.overlayCanvasContext.fillStyle = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + "," +  this.properties.brushTransperency / 255 +")";
+
   for( viewport of this.viewers ) {
 
     var brushSize = viewport.viewport.width / this.dims[0] * 3;
