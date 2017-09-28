@@ -10557,7 +10557,7 @@ function Volume(props, image, interactive, parentEl) {
   this.properties.xmin = this.properties.ymin = this.properties.zmin = 0.0;
   this.properties.xmax = this.properties.ymax = this.properties.zmax = 1.0;
   this.drawCub = {};
-  this.drawCub.xmin = this.drawCub.ymin = this.drawCub.zmin = 0.0;
+  this.drawCub.xmin = this.drawCub.ymin = this.drawCub.zmin = 0.1;
   this.drawCub.xmax = this.drawCub.ymax = this.drawCub.zmax = 1.0;
   this.properties.density = 10.0;
   this.properties.saturation = 1.0;
@@ -10815,12 +10815,12 @@ var f2 = this.gui.addFolder('Intersections');
 
   };
 
-  f2.add(this.drawCub, 'xmin', 0.0, 1.0, 0.01).onChange(changeIntesection);
-  f2.add(this.drawCub, 'xmax', 0.0, 1.0, 0.01).onChange(changeIntesection);
-  f2.add(this.drawCub, 'ymin', 0.0, 1.0, 0.01).onChange(changeIntesection);
-  f2.add(this.drawCub, 'ymax', 0.0, 1.0, 0.01).onChange(changeIntesection);
-  f2.add(this.drawCub, 'zmin', 0.0, 1.0, 0.01).onChange(changeIntesection);
-  f2.add(this.drawCub, 'zmax', 0.0, 1.0, 0.01).onChange(changeIntesection);
+  f2.add(this.drawCub, 'xmin', 0.0, 1.0, 0.01).step(0.1).onChange(changeIntesection);
+  f2.add(this.drawCub, 'xmax', 0.0, 1.0, 0.01).step(0.1).onChange(changeIntesection);
+  f2.add(this.drawCub, 'ymin', 0.0, 1.0, 0.01).step(0.1).onChange(changeIntesection);
+  f2.add(this.drawCub, 'ymax', 0.0, 1.0, 0.01).step(0.1).onChange(changeIntesection);
+  f2.add(this.drawCub, 'zmin', 0.0, 1.0, 0.01).step(0.1).onChange(changeIntesection);
+  f2.add(this.drawCub, 'zmax', 0.0, 1.0, 0.01).step(0.1).onChange(changeIntesection);
 
   f2.add( currentItem, 'selecTedBox', Object.keys(this.interSectionBoxes) ).onChange(function() {
 
