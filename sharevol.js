@@ -9484,9 +9484,9 @@ function Slicer(props, image, filter, parentEl) {
   this.properties.brushSize = 1;
   this.properties.enableBrush = true;
   this.properties.brushColour =  [214, 188, 86];
-  this.properties.brushName = 'new brush';
-  this.properties.eraser = false;
   this.properties.drawRectangles = true;
+  this.properties.showBrush = true;
+
 
   this.currentBrush = {
 
@@ -9494,6 +9494,7 @@ function Slicer(props, image, filter, parentEl) {
     lineCoords:[],
 
   }
+  
   this.properties.brushCoords = [];
   this.properties.importAtlasUrl = props.slices.properties.importAtlasUrl||undefined;
 
@@ -9615,6 +9616,9 @@ Slicer.prototype.addGUI = function(gui) {
   }}, 'import brush atlas');
 
   f3.add(this.properties, 'enableBrush').onChange( function(){
+    that.draw();
+  });
+  f3.add(this.properties, 'showBrush').onChange( function(){
     that.draw();
   });
 
@@ -9824,7 +9828,7 @@ Slicer.prototype.draw = function() {
     this.drawIntersections();
 
     //console.log(this.properties.drawRectangles);
-    if(this.properties.enableBrush)
+    if(this.properties.enableBrush || this.properties.showBrush)
     this.drawBrush();
     
 }
