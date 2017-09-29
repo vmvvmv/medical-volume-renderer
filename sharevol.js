@@ -9960,7 +9960,6 @@ Slicer.prototype.drawBrush = function() {
         var coords = this.currentBrush.lineCoords[i];
 
         var z = deepDimension/this.dims[axis];
-        
         if ( ( coords[zkey] - 1/this.dims[axis]) < z && ( coords[zkey] + 1/this.dims[axis]) > z ) {
 
             //console.log(this.height - v.y - v.height);
