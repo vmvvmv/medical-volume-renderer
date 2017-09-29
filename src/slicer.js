@@ -612,10 +612,8 @@ Slicer.prototype.exportBrush = function() {
 
 Slicer.prototype.importBrush = function() {
 
-var image;
-  
  loadImage(this.properties.importAtlasUrl, function () {
-   image = new Image();
+   var image = new Image();
    var headers = request.getAllResponseHeaders();
    var match = headers.match( /^Content-Type\:\s*(.*?)$/mi );
    var mimeType = match[1] || 'image/png';
@@ -666,7 +664,7 @@ var image;
      }
     
      console.log('brush import finish');
-     if(slicer.properties.enableBrush)
+     if(slicer.properties.enableBrush || slicer.properties.showBrush)
       slicer.draw();
 
    }
@@ -692,7 +690,6 @@ Slicer.prototype.drawIntersections = function() {
       var color =   rgbToHex( Math.floor(volume.interSectionBoxes[boxkey].color[0]),
                               Math.floor(volume.interSectionBoxes[boxkey].color[1]),
                               Math.floor(volume.interSectionBoxes[boxkey].color[2]));
-
     }
     if ( typeof volume.interSectionBoxes[boxkey].color ===  'string' )
       color = volume.interSectionBoxes[boxkey].color;
