@@ -46,11 +46,11 @@
         "zmax": 1,
         "slices": {
             "properties": {
-                "layout": "x|y|z",
+                "layout": "x|X",
                 "power": 1,
                 "brightness": 0,
                 "show": true,
-                "zoom": 0.45,
+                "zoom": 0.6,
                 "Y": 150,
                 "X": 150,
                 "Z": 130,
@@ -65,7 +65,24 @@
         "isovalue": 0.45,
         "density": 5,
         "samples": 256,
-        "intersections": [],
+        "intersections": [{
+            "name": "new name",
+            "color": [
+                214,
+                188,
+                86
+            ],
+            "minVertices": [
+                0,
+                0,
+                0
+            ],
+            "maxVertices": [
+                320,
+                320,
+                264
+            ]
+        }],
         "contrast": 1,
         "power": 1,
         "colourmap": 0,
@@ -87,7 +104,7 @@
     "views": [{
         "translate": [-0.031176914536239782, -0.05715767664977255, -1.6454482671904334],
         "axes": true,
-        "border": false,
+        "border": true,
         "rotate": [0.7071067690849304, 0, 0, -0.7071067690849304]
     }]
 }

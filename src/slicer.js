@@ -454,6 +454,7 @@ Slicer.prototype.drawSlice = function(idx) {
 
 Slicer.prototype.drawBrush = function() {
 
+  //XY BUG mouse coord not in view
 
   function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
@@ -528,16 +529,12 @@ Slicer.prototype.drawBrush = function() {
             switch(rotate){
           
                 case -90:
-                  var x = ( coords[ykey] ) * v.height + v.x;
-                  var y = ( 1 - coords[xkey] ) * v.width + (this.height - v.y - v.height);
+                  var x = ( coords[ykey] ) * v.width + v.x;
+                  var y = ( 1 - coords[xkey] ) * v.height + (this.height - v.y - v.height);
                   break;
-                // case 90:
-                //   var x = ( coords[ykey] ) * v.height + v.y;
-                //   var y = ( 1- coords[xkey] ) * v.width + v.x;
-                //   break;
                 case 180:
-                  var x = ( 1 - coords[xkey] ) * v.width + v.x;
-                  var y = ( 1 - coords[ykey] ) * v.height + (this.height - v.y - v.height);
+                  var x = ( 1 - coords[xkey] ) * v.height + v.x;
+                  var y = ( 1 - coords[ykey] ) * v.width + (this.height - v.y - v.height);
                   break;
                 default:
                   var x = ( coords[xkey] ) * v.width + v.x;
@@ -693,7 +690,7 @@ Slicer.prototype.drawIntersections = function() {
     if ( typeof volume.interSectionBoxes[boxkey].color ===  'string' )
       color = volume.interSectionBoxes[boxkey].color;
     
-    //console.log(color);
+    //console.log(x,y,width,height);
 
     overlayCanvasContext.beginPath();                        
     overlayCanvasContext.strokeStyle = color;
@@ -745,11 +742,11 @@ Slicer.prototype.drawIntersections = function() {
         }
         else if (rotate === -90) {
 
-          var x = ( volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + v.x;
-          var width =  ( volume.interSectionBoxes[boxkey].maxVertices[j] - volume.interSectionBoxes[boxkey].minVertices[j] )  * v.height ;
+          var x = ( volume.interSectionBoxes[boxkey].minVertices[j] )* v.width + v.x;
+          var height =  ( volume.interSectionBoxes[boxkey].maxVertices[j] - volume.interSectionBoxes[boxkey].minVertices[j] )  * v.height* -1 ;
 
-          var y = ( 1- volume.interSectionBoxes[boxkey].minVertices[i] ) * v.width + (this.height - v.y - v.height);
-          var height =  ( volume.interSectionBoxes[boxkey].maxVertices[i] - volume.interSectionBoxes[boxkey].minVertices[i]) * v.width * -1;
+          var y = ( 1- volume.interSectionBoxes[boxkey].minVertices[i] ) * v.height + (this.height - v.y - v.height);
+          var width =  ( volume.interSectionBoxes[boxkey].maxVertices[i] - volume.interSectionBoxes[boxkey].minVertices[i]) * v.width ;
           
           //console.log('-90 ',x, y, width,height);
           // console.log(v);
@@ -772,11 +769,6 @@ Slicer.prototype.drawIntersections = function() {
 
           var y = volume.interSectionBoxes[boxkey].minVertices[j] * v.height + (this.height - v.y - v.height);
           var height = ( volume.interSectionBoxes[boxkey].maxVertices[j] - volume.interSectionBoxes[boxkey].minVertices[j]) * v.height;
-
-          //if(axis===0)
-          //console.log('0 ',x, width, y,height);
-
-          //console.log(x,y,width,height);
 
         }
 
