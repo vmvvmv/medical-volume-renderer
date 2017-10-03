@@ -15,6 +15,7 @@ function Slicer(props, image, filter, parentEl) {
   
   this.image = image;
   this.res = props.volume.res;
+  //this.res = [320,320,320];
   this.dims = [props.volume.res[0] * props.volume.scale[0], 
                props.volume.res[1] * props.volume.scale[1], 
                props.volume.res[2] * props.volume.scale[2]];
@@ -431,6 +432,8 @@ Slicer.prototype.drawSlice = function(idx) {
 
   //Apply zoom and flip Y
   var scale = [1.0/2.0, -1.0/2.0, -1.0];
+  //scale = [this.res[2] / this.res[0],this.res[2] / this.res[1],-1.0];
+  //scale = [0.5,1.3,-1]
   if (this.flipY) scale[1] = -scale[1];
   this.webgl.modelView.scale(scale);
 
@@ -588,8 +591,11 @@ Slicer.prototype.exportBrush = function() {
 
   for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
 
-    var row = Math.floor(this.currentBrush.lineCoords[i].z*this.res[2] /  this.dimy);
+    var row = Math.floor(this.currentBrush.lineCoords[i].z*this.res[2] /  this.dimx);
+    console.log(row);
     var col = this.currentBrush.lineCoords[i].z*this.res[2] % this.dimx;
+    console.log(col);
+    
 
     var x = this.currentBrush.lineCoords[i].x*this.res[0] + col * this.res[0];
     var y = this.currentBrush.lineCoords[i].y*this.res[1] + row * this.res[1];
@@ -699,6 +705,8 @@ Slicer.prototype.drawIntersections = function() {
     overlayCanvasContext.rect(x,y,width,height);
     overlayCanvasContext.stroke();
 
+    //console.log(x,y,width,height, rotate);
+
   }
 
 
@@ -742,14 +750,12 @@ Slicer.prototype.drawIntersections = function() {
         }
         else if (rotate === -90) {
 
-          var x = ( volume.interSectionBoxes[boxkey].minVertices[j] )* v.width + v.x;
-          var height =  ( volume.interSectionBoxes[boxkey].maxVertices[j] - volume.interSectionBoxes[boxkey].minVertices[j] )  * v.height* -1 ;
-
-          var y = ( 1- volume.interSectionBoxes[boxkey].minVertices[i] ) * v.height + (this.height - v.y - v.height);
-          var width =  ( volume.interSectionBoxes[boxkey].maxVertices[i] - volume.interSectionBoxes[boxkey].minVertices[i]) * v.width ;
           
-          //console.log('-90 ',x, y, width,height);
-          // console.log(v);
+          var x = volume.interSectionBoxes[boxkey].minVertices[j] * v.width + v.x;
+          var width = ( volume.interSectionBoxes[boxkey].maxVertices[j] - volume.interSectionBoxes[boxkey].minVertices[j] ) * v.width;
+
+          var y = volume.interSectionBoxes[boxkey].minVertices[i] * v.height + (this.height - v.y - v.height);
+          var height = ( volume.interSectionBoxes[boxkey].maxVertices[i] - volume.interSectionBoxes[boxkey].minVertices[i]) * v.height;
 
         }
         else if (rotate === 180) {
@@ -757,10 +763,9 @@ Slicer.prototype.drawIntersections = function() {
           var x = ( 1 - volume.interSectionBoxes[boxkey].minVertices[i] ) * v.width + v.x;
           var width = ( volume.interSectionBoxes[boxkey].maxVertices[i] - volume.interSectionBoxes[boxkey].minVertices[i] )  * v.width * -1;
 
-          var y = ( 1 - volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + (this.height - v.y - v.height);
-          var height =  ( volume.interSectionBoxes[boxkey].maxVertices[j] - volume.interSectionBoxes[boxkey].minVertices[j]) * v.height * -1;
+          var y = (  volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + (this.height - v.y - v.height);
+          var height =  ( volume.interSectionBoxes[boxkey].maxVertices[j] - volume.interSectionBoxes[boxkey].minVertices[j]) * v.height;
 
-          //console.log('180 ',x, width, y,height);
         }
         else {
 
