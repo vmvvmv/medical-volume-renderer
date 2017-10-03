@@ -10201,8 +10201,8 @@ Slicer.prototype.drawIntersections = function() {
           var x = ( 1 - volume.interSectionBoxes[boxkey].minVertices[i] ) * v.width + v.x;
           var width = ( volume.interSectionBoxes[boxkey].maxVertices[i] - volume.interSectionBoxes[boxkey].minVertices[i] )  * v.width * -1;
 
-          var y = (  volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + (this.height - v.y - v.height);
-          var height =  ( volume.interSectionBoxes[boxkey].maxVertices[j] - volume.interSectionBoxes[boxkey].minVertices[j]) * v.height;
+          var y = ( 1 - volume.interSectionBoxes[boxkey].minVertices[j] )* v.height + (this.height - v.y - v.height); 
+          var height =  ( volume.interSectionBoxes[boxkey].maxVertices[j] - volume.interSectionBoxes[boxkey].minVertices[j]) * v.height * -1;
 
         }
         else {
