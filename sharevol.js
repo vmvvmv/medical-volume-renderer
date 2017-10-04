@@ -9964,7 +9964,9 @@ Slicer.prototype.drawBrush = function() {
         var coords = this.currentBrush.lineCoords[i];
 
         var z = deepDimension/this.dims[axis];
-        if ( ( coords[zkey] - 1/this.dims[axis]) < z && ( coords[zkey] + 1/this.dims[axis]) > z ) {
+        //console.log(coords[zkey] * this.res[axis],  z * this.res[axis]);
+        
+        if ( Math.floor( coords[zkey] * this.res[axis] ) ===  Math.floor ( z * this.res[axis] )) {
 
             //console.log(this.height - v.y - v.height);
             switch(rotate){
@@ -10030,9 +10032,9 @@ Slicer.prototype.exportBrush = function() {
   for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
 
     var row = Math.floor(this.currentBrush.lineCoords[i].z*this.res[2] /  this.dimx);
-    console.log(row);
+    //console.log(row);
     var col = this.currentBrush.lineCoords[i].z*this.res[2] % this.dimx;
-    console.log(col);
+    //console.log(col);
     
 
     var x = this.currentBrush.lineCoords[i].x*this.res[0] + col * this.res[0];
@@ -10078,16 +10080,19 @@ Slicer.prototype.importBrush = function() {
       var r = pix[i];
       var g = pix[i+1];
       var b = pix[i+2];
+      var a = pix[i+3]
 
-      if(r!==0 || g!==0|| b!==0) {
+      //console.log(a);
+
+      if( (r!==0 || g!==0|| b!==0) && a === 0) {
 
         //console.log(r,g,b);
-        var pixely = Math.floor( i / 4 / image.height );
-        var pixelx = (i / 4) % image.width;
+        var pixely = ( i / 4 / image.height );
+        var pixelx = ((i / 4) % image.width);
 
         var z =  Math.ceil (pixelx / slicer.res[0]) - 1 + Math.ceil( pixely / slicer.res[1]) * slicer.dimx - slicer.dimx;
-        var x =  Math.floor (  pixelx % slicer.res[0]);
-        var y =  Math.floor (  pixely % slicer.res[1]);
+        var x =   (  pixelx % slicer.res[0]);
+        var y =   (  pixely % slicer.res[1]);
 
 
         x = x /  slicer.res[0] * 1;

@@ -65,8 +65,8 @@
           "properties": {
             "show": true,
             "X": 67.65327695560254,
-            "Y": 66,
-            "Z": 54,
+            "Y": 64,
+            "Z": 49,
             "minX": 0,
             "maxX": 150,
             "minY": 0,
@@ -77,7 +77,7 @@
             "contrast": 1,
             "power": 1,
             "usecolourmap": false,
-            "layout": "xX",
+            "layout": "x|y|z",
             "zoom": 1,
             "brushSize": 1,
             "enableBrush": false,
@@ -89,7 +89,8 @@
             "drawRectangles": true,
             "showBrush": true,
             "brushTransperency": 255,
-            "brushCoords": []
+            "brushCoords": [],
+            "importAtlasUrl": "index.png"            
           }
         },
         "zmin": 0,
@@ -108,13 +109,13 @@
               86
             ],
             "minVertices": [
-              0,
-              0,
-              0
+              61,
+              1,
+              1
             ],
             "maxVertices": [
-              75,
-              75,
+              150,
+              150,
               112
             ]
           },
@@ -132,8 +133,8 @@
             ],
             "maxVertices": [
               105.00000000000001,
-              150,
-              112
+              75,
+              49
             ]
           }
         ],
@@ -174,15 +175,15 @@
         "translate": [
           -0.031176914536239782,
           -0.05715767664977255,
-          -3.37749907475931
+          -2.6846787517317594
         ],
         "axes": true,
-        "border": true,
+        "border": false,
         "rotate": [
-          0.5913951992988586,
-          0.04276777058839798,
-          0.1490889936685562,
-          -0.7913176417350769
+          0.4256744980812073,
+          0.12004993110895157,
+          0.4647546112537384,
+          -0.7670533061027527
         ]
       }
     ]
