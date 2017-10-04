@@ -861,7 +861,7 @@ SliceView.prototype.click = function(event, mouse) {
   else if (this.rotate == -90)
     coord = [1 - mouse.y / mouse.element.clientHeight, mouse.x / mouse.element.clientWidth];
   else if (this.rotate == 180)
-    coord = [1 - mouse.x / mouse.element.clientHeight,1 - mouse.y / mouse.element.clientWidth];
+    coord = [1 - mouse.x / mouse.element.clientWidth,1 - mouse.y / mouse.element.clientHeight];
   else if (this.rotate == 360)
     coord = [1 - mouse.x / mouse.element.clientHeight, mouse.y / mouse.element.clientWidth];
   else 

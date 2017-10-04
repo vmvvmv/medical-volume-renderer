@@ -77,11 +77,7 @@
             "contrast": 1,
             "power": 1,
             "usecolourmap": false,
-<<<<<<< HEAD
             "layout": "y|Y",
-=======
-            "layout": "x|y|z",
->>>>>>> main
             "zoom": 1,
             "brushSize": 1,
             "enableBrush": false,
