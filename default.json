@@ -117,9 +117,9 @@
       "slices": {
         "properties": {
           "show": true,
-          "X": 150,
-          "Y": 123,
-          "Z": 121,
+          "X": 128,
+          "Y": 128,
+          "Z": 128,
           "minX": 0,
           "maxX": 256,
           "minY": 0,

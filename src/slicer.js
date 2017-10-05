@@ -528,7 +528,7 @@ Slicer.prototype.drawBrush = function() {
         var z = deepDimension/this.dims[axis];
         //console.log(coords[zkey] * this.res[axis],  z * this.res[axis]);
         
-        if ( Math.floor( coords[zkey] * this.res[axis] ) ===  Math.floor ( z * this.res[axis] )) {
+        if ( Math.round( coords[zkey] * this.res[axis] ) ===  Math.round ( z * this.res[axis] )) {
 
             //console.log(this.height - v.y - v.height);
             switch(rotate){
@@ -589,11 +589,15 @@ Slicer.prototype.exportBrush = function() {
     
   }
 
-  ctx.fillStyle = color;
+  ctx.fillStyle = "rgba(255,255,255,1)";
+
+  this.currentBrush.lineCoords.push( {x:0.5, y:0.5, z:0.5});
+  //this.currentBrush.lineCoords.push( {x:0.1, y:0.1, z:0.5});
+  //this.currentBrush.lineCoords.push( {x:0.1, y:0.5, z:0.5});
 
   for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
 
-    var row = Math.floor(this.currentBrush.lineCoords[i].z*this.res[2] /  this.dimx);
+    var row = Math.round(this.currentBrush.lineCoords[i].z*this.res[2] /  this.dimx);
     //console.log(row);
     var col = this.currentBrush.lineCoords[i].z*this.res[2] % this.dimx;
     //console.log(col);
@@ -604,7 +608,8 @@ Slicer.prototype.exportBrush = function() {
 
 
     ctx.beginPath();
-    ctx.arc(Math.floor(x), Math.floor(y), 1, 0, 2 * Math.PI);
+    //ctx.arc(Math.round(x), Math.round(y), 1, 0, 2 * Math.PI);
+    ctx.fillRect( x, y, 1, 1 );
     ctx.fill();
 
   }
@@ -637,22 +642,21 @@ Slicer.prototype.importBrush = function() {
      //console.log(pix);
 
      console.log('brush import begin');
-     for( var i = 0; i<pix.length; i++ ) {
+     for( var i = 0; i<pix.length; i+=4 ) {
 
       var r = pix[i];
       var g = pix[i+1];
       var b = pix[i+2];
-      var a = pix[i+3]
+      var a = pix[i+3];
 
-      //console.log(a);
+      if( (r!==0 || g!==0|| b!==0) ) {
 
-      if( (r!==0 || g!==0|| b!==0) && a === 0) {
+        console.log(r,g,b,a);
 
-        //console.log(r,g,b);
-        var pixely = ( i / 4 / image.height );
-        var pixelx = ((i / 4) % image.width);
+        var pixely = Math.round( (i) / 4 / image.width );
+        var pixelx = (((i) / 4) % image.width);
 
-        var z =  Math.ceil (pixelx / slicer.res[0]) - 1 + Math.ceil( pixely / slicer.res[1]) * slicer.dimx - slicer.dimx;
+        var z =  Math.round (pixelx / slicer.res[0]) - 1 + Math.round( pixely / slicer.res[1]) * slicer.dimx - slicer.dimx;
         var x =   (  pixelx % slicer.res[0]);
         var y =   (  pixely % slicer.res[1]);
 
@@ -661,7 +665,7 @@ Slicer.prototype.importBrush = function() {
         y = y /  slicer.res[1] * 1;
         z = z /  slicer.res[2] * 1;
 
-        
+        console.log(x,y,z);
 
         slicer.currentBrush.lineCoords.push({x:x,y:y,z:z});
 
@@ -671,6 +675,7 @@ Slicer.prototype.importBrush = function() {
      }
     
      console.log('brush import finish');
+     //console.log( slicer.currentBrush.lineCoords);
      if(slicer.properties.enableBrush || slicer.properties.showBrush)
       slicer.draw();
 
