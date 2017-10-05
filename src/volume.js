@@ -232,10 +232,10 @@ Volume.prototype.computeIntersectionBox = function( box ) {
           min[0], max[1], max[2] - this.volumeRoiOffset,
           max[0], max[1], max[2] - this.volumeRoiOffset,
           max[0], min[1], max[2] - this.volumeRoiOffset,
-          min[0], min[1], min[2],
-          min[0], max[1], min[2] ,
-          max[0], max[1], min[2] ,
-          max[0], min[1], min[2] 
+          min[0], min[1], min[2] - this.volumeRoiOffset,
+          min[0], max[1], min[2] - this.volumeRoiOffset,
+          max[0], max[1], min[2] - this.volumeRoiOffset,
+          max[0], min[1], min[2] - this.volumeRoiOffset
         ]);
   
     var indices = new Uint16Array(
