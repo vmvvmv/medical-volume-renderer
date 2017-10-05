@@ -101,42 +101,7 @@
         "density": 5,
         "samples": 256,
         "intersections": [
-          {
-            "name": "new name",
-            "color": [
-              214,
-              188,
-              86
-            ],
-            "minVertices": [
-              61,
-              1,
-              1
-            ],
-            "maxVertices": [
-              150,
-              150,
-              112
-            ]
-          },
-          {
-            "name": "zzz",
-            "color": [
-              86,
-              214,
-              108.58823529411768
-            ],
-            "minVertices": [
-              60,
-              60,
-              0
-            ],
-            "maxVertices": [
-              105.00000000000001,
-              75,
-              49
-            ]
-          }
+       
         ],
         "contrast": 1,
         "power": 1,
@@ -146,7 +111,7 @@
           "res": [
             150,
             150,
-            112
+            448
           ],
           "scale": [
             1,

@@ -19,7 +19,7 @@
 //Superimposed volumes
 
 function Volume(props, image, interactive, parentEl) {
-  //console.log(props);
+
   interactive = false;
   this.image = image;
   this.canvas = document.createElement("canvas");
@@ -67,6 +67,15 @@ function Volume(props, image, interactive, parentEl) {
   this.tiles = [this.image.width / this.res[0],
                 this.image.height / this.res[1]];
   this.iscale = [1.0 / this.scaling[0], 1.0 / this.scaling[1], 1.0 / this.scaling[2]]
+  //----------------------------------------
+  var res  = props.volume.res;
+  
+  this.dimx = image.width / res[0];
+  this.dimy = image.height / res[1];
+
+  this.volumeRoiOffset = 1 - res[2] / this.dimx / this.dimy;
+
+  //console.log(volumeRoiOffset);
 
   //Set dims
   this.centre = [0.5*this.scaling[0], 0.5*this.scaling[1], 0.5*this.scaling[2]];
@@ -219,14 +228,14 @@ Volume.prototype.computeIntersectionBox = function( box ) {
   
     var vertices = new Float32Array(
         [
-          min[0], min[1], max[2],
-          min[0], max[1], max[2],
-          max[0], max[1], max[2],
-          max[0], min[1], max[2],
+          min[0], min[1], max[2] - this.volumeRoiOffset,
+          min[0], max[1], max[2] - this.volumeRoiOffset,
+          max[0], max[1], max[2] - this.volumeRoiOffset,
+          max[0], min[1], max[2] - this.volumeRoiOffset,
           min[0], min[1], min[2],
-          min[0], max[1], min[2],
-          max[0], max[1], min[2],
-          max[0], min[1], min[2]
+          min[0], max[1], min[2] ,
+          max[0], max[1], min[2] ,
+          max[0], min[1], min[2] 
         ]);
   
     var indices = new Uint16Array(
