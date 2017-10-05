@@ -73,7 +73,7 @@ function Volume(props, image, interactive, parentEl) {
   this.dimx = image.width / res[0];
   this.dimy = image.height / res[1];
 
-  this.volumeRoiOffset = 1 - res[2] / this.dimx / this.dimy;
+  this.volumeRoiOffset = res[2] / this.dimx / this.dimy;
 
   //console.log(volumeRoiOffset);
 
@@ -228,14 +228,14 @@ Volume.prototype.computeIntersectionBox = function( box ) {
   
     var vertices = new Float32Array(
         [
-          min[0], min[1], max[2] - this.volumeRoiOffset,
-          min[0], max[1], max[2] - this.volumeRoiOffset,
-          max[0], max[1], max[2] - this.volumeRoiOffset,
-          max[0], min[1], max[2] - this.volumeRoiOffset,
-          min[0], min[1], min[2] - this.volumeRoiOffset,
-          min[0], max[1], min[2] - this.volumeRoiOffset,
-          max[0], max[1], min[2] - this.volumeRoiOffset,
-          max[0], min[1], min[2] - this.volumeRoiOffset
+          min[0], min[1], max[2] * this.volumeRoiOffset,
+          min[0], max[1], max[2] * this.volumeRoiOffset,
+          max[0], max[1], max[2] * this.volumeRoiOffset,
+          max[0], min[1], max[2] * this.volumeRoiOffset,
+          min[0], min[1], min[2] * this.volumeRoiOffset,
+          min[0], max[1], min[2] * this.volumeRoiOffset,
+          max[0], max[1], min[2] * this.volumeRoiOffset,
+          max[0], min[1], min[2] * this.volumeRoiOffset
         ]);
   
     var indices = new Uint16Array(
