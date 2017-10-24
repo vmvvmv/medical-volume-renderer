@@ -591,9 +591,9 @@ Slicer.prototype.exportBrush = function() {
 
   ctx.fillStyle = "rgba(255,255,255,1)";
 
-  //this.currentBrush.lineCoords.push( {x:0.5, y:0.5, z:0.5});
-  //this.currentBrush.lineCoords.push( {x:0.1, y:0.1, z:0.5});
-  //this.currentBrush.lineCoords.push( {x:0.1, y:0.5, z:0.5});
+  this.currentBrush.lineCoords.push( {x:0.5, y:0.5, z:0.5});
+  this.currentBrush.lineCoords.push( {x:0.1, y:0.1, z:0.5});
+  this.currentBrush.lineCoords.push( {x:0.1, y:0.5, z:0.5});
 
   for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
 
@@ -612,7 +612,7 @@ Slicer.prototype.exportBrush = function() {
     // ctx.fillRect( x, y, 1, 1 );
     // ctx.fill();
     
-    var imgData = ctx.createImageData(2,2);
+    var imgData = ctx.createImageData(1,1);
 
     for (var j = 0; j < imgData.data.length; j+=4) {
 
