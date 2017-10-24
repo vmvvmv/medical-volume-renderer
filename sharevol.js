@@ -10029,8 +10029,8 @@ Slicer.prototype.exportBrush = function() {
 
   ctx.fillStyle = "rgba(255,255,255,1)";
 
-  this.currentBrush.lineCoords.push( {x:0.5, y:0.5, z:0.5});
-  this.currentBrush.lineCoords.push( {x:0.1, y:0.1, z:0.5});
+  this.currentBrush.lineCoords.push( {x:0.5, y:0.5, z:0.3});
+  this.currentBrush.lineCoords.push( {x:0.23, y:0.1, z:0.5});
   this.currentBrush.lineCoords.push( {x:0.1, y:0.5, z:0.5});
 
   for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
@@ -10044,11 +10044,7 @@ Slicer.prototype.exportBrush = function() {
     var x = this.currentBrush.lineCoords[i].x*this.res[0] + col * this.res[0];
     var y = this.currentBrush.lineCoords[i].y*this.res[1] + row * this.res[1];
 
-
-    // ctx.beginPath();
-    // //ctx.arc(Math.round(x), Math.round(y), 1, 0, 2 * Math.PI);
-    // ctx.fillRect( x, y, 1, 1 );
-    // ctx.fill();
+    console.log(x,y);
     
     var imgData = ctx.createImageData(1,1);
 
@@ -10075,28 +10071,31 @@ Slicer.prototype.exportBrush = function() {
 
 Slicer.prototype.importBrush = function() {
 
- loadImage(this.properties.importAtlasUrl, function () {
-   var image = new Image();
-   var headers = request.getAllResponseHeaders();
-   var match = headers.match( /^Content-Type\:\s*(.*?)$/mi );
-   var mimeType = match[1] || 'image/png';
-   var blob = new Blob([request.response], {type: mimeType} );
-   image.src =  window.URL.createObjectURL(blob);
-   var imageElement = document.createElement("img");
-   image.onload = function () {
-     console.log("Loaded image: " + image.width + " x " + image.height);
+  loadImage(this.properties.importAtlasUrl, function () {
+    var image = new Image();
+    var headers = request.getAllResponseHeaders();
+    var match = headers.match( /^Content-Type\:\s*(.*?)$/mi );
+    var mimeType = match[1] || 'image/png';
+    var blob = new Blob([request.response], {type: mimeType} );
+    image.src =  window.URL.createObjectURL(blob);
+    var imageElement = document.createElement("img");
 
-     var canvas = document.createElement('canvas');
-     canvas.width = image.width;
-     canvas.height = image.height;
-     canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
-     var ctx = canvas.getContext('2d');
+    image.onload = function () {
 
-     var pix = ctx.getImageData(0, 0, image.width, image.height).data;
-     //console.log(pix);
+      console.log("Loaded image: " + image.width + " x " + image.height);
 
-     console.log('brush import begin');
-     for( var i = 0; i<pix.length; i+=4 ) {
+      var canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      canvas.getContext('2d').drawImage(image, 0, 0, image.width, image.height);
+      var ctx = canvas.getContext('2d');
+
+      var pix = ctx.getImageData(0, 0, image.width, image.height).data;
+      //console.log(pix);
+
+      console.log('brush import begin');
+
+      for( var i = 0; i<pix.length; i+=4 ) {
 
       var r = pix[i];
       var g = pix[i+1];
@@ -10110,32 +10109,32 @@ Slicer.prototype.importBrush = function() {
         var pixely = Math.round( (i) / 4 / image.width );
         var pixelx = (((i) / 4) % image.width);
 
-        var z =  Math.round (pixelx / slicer.res[0]) - 1 + Math.round( pixely / slicer.res[1]) * slicer.dimx - slicer.dimx;
-        var x =   (  pixelx % slicer.res[0]);
-        var y =   (  pixely % slicer.res[1]);
+        var z =  Math.ceil (pixelx / slicer.res[0]) - 1 + Math.ceil( pixely / slicer.res[1]) * slicer.dimx - slicer.dimx;
+        var x =  Math.ceil (  pixelx % slicer.res[0]);
+        var y =  Math.ceil (  pixely % slicer.res[1]);
 
 
         x = x /  slicer.res[0] * 1;
         y = y /  slicer.res[1] * 1;
         z = z /  slicer.res[2] * 1;
 
-        console.log(z);
+        console.log(pixelx,pixely);
 
         slicer.currentBrush.lineCoords.push({x:x,y:y,z:z});
 
 
       }
 
-     }
+      }
     
-     console.log('brush import finish');
-     //console.log( slicer.currentBrush.lineCoords);
-     if(slicer.properties.enableBrush || slicer.properties.showBrush)
+      console.log('brush import finish');
+      //console.log( slicer.currentBrush.lineCoords);
+      if(slicer.properties.enableBrush || slicer.properties.showBrush)
       slicer.draw();
 
-   }
- }
- );
+    }
+  }
+  );
 
 }
 
