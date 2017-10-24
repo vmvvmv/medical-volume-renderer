@@ -1,0 +1,113 @@
+{
+    "colourmaps": [{
+        "colours": [{
+            "position": 0,
+            "colour": "rgba(0,0,0,0.00)"
+        }, {
+            "position": 0.023438,
+            "colour": "rgba(60,60,60,1.00)"
+        }, {
+            "position": 0.046875,
+            "colour": "rgba(18,15,0,1.00)"
+        }, {
+            "position": 0.066641,
+            "colour": "rgba(248,144,87,0.38)"
+        }, {
+            "position": 0.103047,
+            "colour": "rgba(252,224,166,1.00)"
+        }, {
+            "position": 0.146016,
+            "colour": "rgba(255,81,0,1.00)"
+        }, {
+            "position": 0.200703,
+            "colour": "rgba(72,0,20,1.00)"
+        }, {
+            "position": 0.236084,
+            "colour": "rgba(246,245,122,1.00)"
+        }, {
+            "position": 0.310078,
+            "colour": "rgba(255,0,0,1.00)"
+        }, {
+            "position": 0.355,
+            "colour": "rgba(255,255,255,0.00)"
+        }, {
+            "position": 0.894062,
+            "colour": "rgba(255,255,255,0.00)"
+        }, {
+            "position": 1,
+            "colour": "rgba(255,255,255,1.00)"
+        }]
+    }],
+    "properties": {
+        "nogui": false,
+        "background": "rgba(65,73,82,1.00)"
+    },
+    "objects": [{
+        "zmax": 1,
+        "slices": {
+            "properties": {
+                "layout": "YzX",
+                "power": 1,
+                "brightness": 0,
+                "show": true,
+                "zoom": 0.6742,
+                "Y": 200,
+                "X": 200,
+                "Z": 150,
+                "usecolourmap": false,
+                "contrast": 1
+            }
+        },
+        "zmin": 0,
+        "xmin": 0,
+        "ymin": 0,
+        "ymax": 1,
+        "isovalue": 0.45,
+        "density": 5,
+        "samples": 256,
+        "intersections": [{
+            "color": {
+                "blue": 188,
+                "alpha": 1,
+                "green": 88,
+                "red": 100
+            },
+            "minVertices": [42.424242, 42.424242, 42.424242],
+            "maxVertices": [142.424242, 142.424242, 142.424242],
+            "name": "ROI"
+        }, {
+            "color": {
+                "blue": 180,
+                "alpha": 1,
+                "green": 240,
+                "red": 37
+            },
+            "minVertices": [42.424242, 42.424242, 42.424242],
+            "maxVertices": [142.424242, 142.424242, 142.424242],
+            "name": "m_bbox"
+        }],
+        "contrast": 1,
+        "power": 1,
+        "colourmap": 0,
+        "volume": {
+            "url": "getatlas-orig-178",
+            "res": [400, 400, 300],
+            "scale": [1, 1, 1],
+            "autoscale": true
+        },
+        "isoalpha": 1,
+        "name": "volume",
+        "brightness": -0.11780890196982163,
+        "colour": [255, 245.46299999999997, 226.95000000000002],
+        "isosmooth": 0.5045783843331688,
+        "xmax": 1,
+        "tricubicfilter": false,
+        "isowalls": true
+    }],
+    "views": [{
+        "translate": [-0.031176914536239782, -0.05715767664977255, -1.6454482671904334],
+        "axes": true,
+        "border": true,
+        "rotate": [0.7071067690849304, 0, 0, -0.7071067690849304]
+    }]
+}

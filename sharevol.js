@@ -10029,7 +10029,7 @@ Slicer.prototype.exportBrush = function() {
 
   ctx.fillStyle = "rgba(255,255,255,1)";
 
-  this.currentBrush.lineCoords.push( {x:0.5, y:0.5, z:0.5});
+  //this.currentBrush.lineCoords.push( {x:0.5, y:0.5, z:0.5});
   //this.currentBrush.lineCoords.push( {x:0.1, y:0.1, z:0.5});
   //this.currentBrush.lineCoords.push( {x:0.1, y:0.5, z:0.5});
 
@@ -10045,12 +10045,28 @@ Slicer.prototype.exportBrush = function() {
     var y = this.currentBrush.lineCoords[i].y*this.res[1] + row * this.res[1];
 
 
-    ctx.beginPath();
-    //ctx.arc(Math.round(x), Math.round(y), 1, 0, 2 * Math.PI);
-    ctx.fillRect( x, y, 1, 1 );
-    ctx.fill();
+    // ctx.beginPath();
+    // //ctx.arc(Math.round(x), Math.round(y), 1, 0, 2 * Math.PI);
+    // ctx.fillRect( x, y, 1, 1 );
+    // ctx.fill();
+    
+    var imgData = ctx.createImageData(2,2);
 
+    for (var j = 0; j < imgData.data.length; j+=4) {
+
+      // R
+      imgData.data[j] = 255;
+      // G
+      imgData.data[j+1] = 0;
+      // B
+      imgData.data[j+2] = 0;
+      // Alpha
+      imgData.data[j+3] = 255;
+
+    }
+    ctx.putImageData(imgData, x, y);
   }
+
   var exportImage =  this.exportCanvas.toDataURL("image/png");
   
   window.open(exportImage, '_blank');
@@ -10103,7 +10119,7 @@ Slicer.prototype.importBrush = function() {
         y = y /  slicer.res[1] * 1;
         z = z /  slicer.res[2] * 1;
 
-        //onsole.log(x,y,z);
+        console.log(z);
 
         slicer.currentBrush.lineCoords.push({x:x,y:y,z:z});
 
