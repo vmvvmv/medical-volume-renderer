@@ -90,7 +90,7 @@
         "power": 1,
         "colourmap": 0,
         "volume": {
-            "url": "getatlas-orig-178",
+            "url": "178_orig",
             "res": [400, 400, 300],
             "scale": [1, 1, 1],
             "autoscale": true

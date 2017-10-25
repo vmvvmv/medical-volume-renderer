@@ -19,6 +19,9 @@ var state = {};
 var reset;
 var filename;
 var mobile;
+var MAX_TEXTURE_SIZE;
+// l - 1, m - 2, s - 4, xs - 8
+var res_size = 1;
 
 function initPage() {
   window.onresize = autoResize;
@@ -33,8 +36,12 @@ function initPage() {
       throw "No browser WebGL support";
     var canvas = document.createElement('canvas');
     var ctx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    //console.log(ctx.getParameter(ctx.MAX_TEXTURE_SIZE));
+    MAX_TEXTURE_SIZE = ctx.getParameter(ctx.MAX_TEXTURE_SIZE);
+
     if (!ctx)
       throw "No WebGL context available";
+
     canvas = ctx = null;
   } catch (e) {
     $('status').innerHTML = "Sorry, ShareVol requires a <a href='http://get.webgl.org'>WebGL</a> capable browser!";
@@ -254,7 +261,36 @@ function loadTexture() {
   $('status').innerHTML = "Загрузка... ";
   var image;
 
-  loadImage(state.objects[0].volume.url, function () {
+  //console.log(MAX_TEXTURE_SIZE);
+  //console.log( state.objects[0].volume.res);
+  var imageName;
+  var orginalTextSize = state.objects[0].volume.res[0] * state.objects[0].volume.res[1] / 2;
+
+  if ( MAX_TEXTURE_SIZE <= orginalTextSize  ) {
+
+    imageName = state.objects[0].volume.url + '_l.png';
+    res_size = 1;
+
+  } else if ( MAX_TEXTURE_SIZE <= orginalTextSize / 2) {
+
+    imageName = state.objects[0].volume.url + '_m.png';
+    res_size = 2;
+
+  }  else if ( MAX_TEXTURE_SIZE <= orginalTextSize / 4) {
+    
+    imageName = state.objects[0].volume.url + '_s.png';
+    res_size = 4;
+    
+  }  else if ( MAX_TEXTURE_SIZE <= orginalTextSize / 8) {
+    
+    imageName = state.objects[0].volume.url + '_xs.png';
+    res_size = 8;
+    
+  }
+
+  
+
+  loadImage(imageName, function () {
     image = new Image();
 
     var headers = request.getAllResponseHeaders();
