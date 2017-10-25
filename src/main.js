@@ -189,14 +189,13 @@ function getData(compact, matrix) {
     object.density = vdat.properties.density;
     object.power = vdat.properties.power;
     object.tricubicfilter = vdat.properties.tricubicFilter;
+
     if (vdat.properties.usecolourmap)
       object.colourmap = 0;
     else
       delete object.colourmap;
 
     object.intersections = [];
-
-  
 
     for ( boxKey of Object.keys(volume.interSectionBoxes) ) {
 
@@ -208,15 +207,13 @@ function getData(compact, matrix) {
 
           name: boxToSave.name,
           color: boxToSave.color,
-          minVertices:[boxToSave.minVertices[0] * slicer.dims[0],boxToSave.minVertices[1]* slicer.dims[1],boxToSave.minVertices[2] * slicer.dims[2]],
-          maxVertices:[boxToSave.maxVertices[0] * slicer.dims[0],boxToSave.maxVertices[1]* slicer.dims[1],boxToSave.maxVertices[2] * slicer.dims[2]]
+          minVertices:[boxToSave.minVertices[0] * slicer.dims[0] * res_size, boxToSave.minVertices[1]* slicer.dims[1] * res_size, boxToSave.minVertices[2] * slicer.dims[2]],
+          maxVertices:[boxToSave.maxVertices[0] * slicer.dims[0] * res_size, boxToSave.maxVertices[1]* slicer.dims[1] * res_size, boxToSave.maxVertices[2] * slicer.dims[2]]
         
         }
       );
 
     }
-
-
 
     //Views - single only in old data
     state.views[0].axes = vdat.properties.axes;
@@ -227,6 +224,14 @@ function getData(compact, matrix) {
     if (slicer)
        state.objects[0].slices = slicer.get();
 
+    //console.log(vdat);
+    state.objects[0].volume.res[0] *= res_size;
+    state.objects[0].volume.res[1] *= res_size;
+  
+    //console.log(state.objects[0].slices);
+    state.objects[0].slices.properties.X *=  res_size;
+    state.objects[0].slices.properties.Y *=  res_size;
+    state.objects[0].slices.properties.zoom /=  res_size;
     //Colourmap
     state.colourmaps = [colours.palette.get()];
     delete state.colourmaps[0].background;
@@ -237,11 +242,21 @@ function getData(compact, matrix) {
   console.log(JSON.stringify(state, null, 2));
   if (compact) return JSON.stringify(state);
   //Otherwise return indented json string
+
   return JSON.stringify(state, null, 2);
 }
 
 function exportData() {
   window.open('data:text/json;base64,' + window.btoa(getData()));
+
+  state.objects[0].volume.res[0] /= res_size;
+  state.objects[0].volume.res[1] /= res_size;
+
+  //console.log(state.objects[0].slices);
+  state.objects[0].slices.properties.X /=  res_size;
+  state.objects[0].slices.properties.Y /=  res_size;
+
+  state.objects[0].slices.properties.zoom *=  res_size;
 }
 
 function resetFromData(src) {
@@ -264,10 +279,10 @@ function loadTexture() {
   //console.log(MAX_TEXTURE_SIZE);
   //console.log( state.objects[0].volume.res);
   var imageName;
-  var orginalTextSize = 7200;
+  var orginalTextSize = state.objects[0].volume.originalSize;
 
   //develop
-  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE /2;
+  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE / 4;
  // console.log(state.objects[0].volume.res);
 
   if ( MAX_TEXTURE_SIZE >= orginalTextSize  ) {
@@ -298,6 +313,7 @@ function loadTexture() {
   //console.log(state.objects[0].slices);
   state.objects[0].slices.properties.X /=  res_size;
   state.objects[0].slices.properties.Y /=  res_size;
+  state.objects[0].slices.properties.zoom *=  res_size;
   //state.objects[0].slices.properties.Z /=  res_size;
 
   loadImage(imageName, function () {

@@ -91,6 +91,7 @@
         "colourmap": 0,
         "volume": {
             "url": "178_orig",
+            "originalSize": 7200,
             "res": [400, 400, 300],
             "scale": [1, 1, 1],
             "autoscale": true
@@ -107,7 +108,7 @@
     "views": [{
         "translate": [-0.031176914536239782, -0.05715767664977255, -1.6454482671904334],
         "axes": true,
-        "border": false,
+        "border": true,
         "rotate": [0.7071067690849304, 0, 0, -0.7071067690849304]
     }]
 }
