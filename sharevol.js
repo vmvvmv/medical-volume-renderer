@@ -10028,10 +10028,10 @@ Slicer.prototype.exportBrush = function() {
   }
 
   ctx.fillStyle = "rgba(255,255,255,1)";
-
-  this.currentBrush.lineCoords.push( {x:0.5, y:0.5, z:0.3});
-  this.currentBrush.lineCoords.push( {x:0.23, y:0.1, z:0.5});
-  this.currentBrush.lineCoords.push( {x:0.1, y:0.5, z:0.5});
+  // must be coords which can be related to x,y,z and convert which is correct x,y 
+  // this.currentBrush.lineCoords.push( {x:0.5, y:0.5, z:0.3});
+  // this.currentBrush.lineCoords.push( {x:0.23, y:0.1, z:0.5});
+  // this.currentBrush.lineCoords.push( {x:0.1, y:0.5, z:0.5});
 
   for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
 
@@ -10040,9 +10040,11 @@ Slicer.prototype.exportBrush = function() {
     var col = this.currentBrush.lineCoords[i].z*this.res[2] % this.dimx;
     //console.log(col);
     
-
     var x = this.currentBrush.lineCoords[i].x*this.res[0] + col * this.res[0];
     var y = this.currentBrush.lineCoords[i].y*this.res[1] + row * this.res[1];
+
+    x = Math.round(x);
+    y = Math.round(y);
 
     console.log(x,y);
     
@@ -10104,21 +10106,19 @@ Slicer.prototype.importBrush = function() {
 
       if( (r!==0 || g!==0|| b!==0) ) {
 
-        //console.log(r,g,b,a);
-
         var pixely = Math.round( (i) / 4 / image.width );
-        var pixelx = (((i) / 4) % image.width);
+        var pixelx = ((i / 4) % image.width);
 
         var z =  Math.ceil (pixelx / slicer.res[0]) - 1 + Math.ceil( pixely / slicer.res[1]) * slicer.dimx - slicer.dimx;
-        var x =  Math.ceil (  pixelx % slicer.res[0]);
-        var y =  Math.ceil (  pixely % slicer.res[1]);
+        var x = (  pixelx % slicer.res[0]);
+        var y = (  pixely % slicer.res[1]);
 
 
         x = x /  slicer.res[0] * 1;
         y = y /  slicer.res[1] * 1;
         z = z /  slicer.res[2] * 1;
 
-        console.log(pixelx,pixely);
+        console.log(x,y,z);
 
         slicer.currentBrush.lineCoords.push({x:x,y:y,z:z});
 
