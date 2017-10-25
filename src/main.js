@@ -264,31 +264,41 @@ function loadTexture() {
   //console.log(MAX_TEXTURE_SIZE);
   //console.log( state.objects[0].volume.res);
   var imageName;
-  var orginalTextSize = state.objects[0].volume.res[0] * state.objects[0].volume.res[1] / 2;
+  var orginalTextSize = 7200;
 
-  if ( MAX_TEXTURE_SIZE <= orginalTextSize  ) {
+  //develop
+  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE /2;
+ // console.log(state.objects[0].volume.res);
+
+  if ( MAX_TEXTURE_SIZE >= orginalTextSize  ) {
 
     imageName = state.objects[0].volume.url + '_l.png';
     res_size = 1;
 
-  } else if ( MAX_TEXTURE_SIZE <= orginalTextSize / 2) {
+  } else if ( MAX_TEXTURE_SIZE >= orginalTextSize / 2) {
 
     imageName = state.objects[0].volume.url + '_m.png';
     res_size = 2;
 
-  }  else if ( MAX_TEXTURE_SIZE <= orginalTextSize / 4) {
+  }  else if ( MAX_TEXTURE_SIZE >= orginalTextSize / 4) {
     
     imageName = state.objects[0].volume.url + '_s.png';
     res_size = 4;
     
-  }  else if ( MAX_TEXTURE_SIZE <= orginalTextSize / 8) {
+  }  else if ( MAX_TEXTURE_SIZE >= orginalTextSize / 8) {
     
     imageName = state.objects[0].volume.url + '_xs.png';
     res_size = 8;
     
   }
 
-  
+  state.objects[0].volume.res[0] /= res_size;
+  state.objects[0].volume.res[1] /= res_size;
+
+  //console.log(state.objects[0].slices);
+  state.objects[0].slices.properties.X /=  res_size;
+  state.objects[0].slices.properties.Y /=  res_size;
+  //state.objects[0].slices.properties.Z /=  res_size;
 
   loadImage(imageName, function () {
     image = new Image();

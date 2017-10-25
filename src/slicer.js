@@ -525,7 +525,10 @@ Slicer.prototype.drawBrush = function() {
 
         var coords = this.currentBrush.lineCoords[i];
 
-        var z = deepDimension/this.dims[axis];
+        //if(axis !== 2)
+          var z = deepDimension / this.dims[axis];
+        //else
+        //  var z = deepDimension / this.dims[axis] * res_size;
         //console.log(coords[zkey] * this.res[axis],  z * this.res[axis]);
         
         if ( Math.round( coords[zkey] * this.res[axis] ) ===  Math.round ( z * this.res[axis] )) {
@@ -830,8 +833,12 @@ function SliceView(slicer, x, y, axis, rotate, magnify) {
   if (axis == 0) this.i = 2;
   if (axis == 1) this.j = 2;
 
-  var w = Math.round(slicer.dims[this.i] * slicer.properties.zoom * this.magnify);
-  var h = Math.round(slicer.dims[this.j] * slicer.properties.zoom * this.magnify);
+  //console.log(slicer.dims);
+  var dimI = this.i === 2? slicer.dims[this.i] / res_size: slicer.dims[this.i];
+  var dimJ = this.j === 2? slicer.dims[this.j] / res_size: slicer.dims[this.j];
+
+  var w = Math.round(dimI * slicer.properties.zoom * this.magnify);
+  var h = Math.round(dimJ * slicer.properties.zoom * this.magnify);
 
   if (this.rotate == 90)
     this.viewport = new Viewport(x, y, h, w);

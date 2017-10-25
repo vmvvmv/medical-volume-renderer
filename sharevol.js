@@ -9272,31 +9272,41 @@ function loadTexture() {
   //console.log(MAX_TEXTURE_SIZE);
   //console.log( state.objects[0].volume.res);
   var imageName;
-  var orginalTextSize = state.objects[0].volume.res[0] * state.objects[0].volume.res[1] / 2;
+  var orginalTextSize = 7200;
 
-  if ( MAX_TEXTURE_SIZE <= orginalTextSize  ) {
+  //develop
+  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE /2;
+ // console.log(state.objects[0].volume.res);
+
+  if ( MAX_TEXTURE_SIZE >= orginalTextSize  ) {
 
     imageName = state.objects[0].volume.url + '_l.png';
     res_size = 1;
 
-  } else if ( MAX_TEXTURE_SIZE <= orginalTextSize / 2) {
+  } else if ( MAX_TEXTURE_SIZE >= orginalTextSize / 2) {
 
     imageName = state.objects[0].volume.url + '_m.png';
     res_size = 2;
 
-  }  else if ( MAX_TEXTURE_SIZE <= orginalTextSize / 4) {
+  }  else if ( MAX_TEXTURE_SIZE >= orginalTextSize / 4) {
     
     imageName = state.objects[0].volume.url + '_s.png';
     res_size = 4;
     
-  }  else if ( MAX_TEXTURE_SIZE <= orginalTextSize / 8) {
+  }  else if ( MAX_TEXTURE_SIZE >= orginalTextSize / 8) {
     
     imageName = state.objects[0].volume.url + '_xs.png';
     res_size = 8;
     
   }
 
-  
+  state.objects[0].volume.res[0] /= res_size;
+  state.objects[0].volume.res[1] /= res_size;
+
+  //console.log(state.objects[0].slices);
+  state.objects[0].slices.properties.X /=  res_size;
+  state.objects[0].slices.properties.Y /=  res_size;
+  //state.objects[0].slices.properties.Z /=  res_size;
 
   loadImage(imageName, function () {
     image = new Image();
@@ -9999,7 +10009,10 @@ Slicer.prototype.drawBrush = function() {
 
         var coords = this.currentBrush.lineCoords[i];
 
-        var z = deepDimension/this.dims[axis];
+        //if(axis !== 2)
+          var z = deepDimension / this.dims[axis];
+        //else
+        //  var z = deepDimension / this.dims[axis] * res_size;
         //console.log(coords[zkey] * this.res[axis],  z * this.res[axis]);
         
         if ( Math.round( coords[zkey] * this.res[axis] ) ===  Math.round ( z * this.res[axis] )) {
@@ -10304,8 +10317,12 @@ function SliceView(slicer, x, y, axis, rotate, magnify) {
   if (axis == 0) this.i = 2;
   if (axis == 1) this.j = 2;
 
-  var w = Math.round(slicer.dims[this.i] * slicer.properties.zoom * this.magnify);
-  var h = Math.round(slicer.dims[this.j] * slicer.properties.zoom * this.magnify);
+  //console.log(slicer.dims);
+  var dimI = this.i === 2? slicer.dims[this.i] / res_size: slicer.dims[this.i];
+  var dimJ = this.j === 2? slicer.dims[this.j] / res_size: slicer.dims[this.j];
+
+  var w = Math.round(dimI * slicer.properties.zoom * this.magnify);
+  var h = Math.round(dimJ * slicer.properties.zoom * this.magnify);
 
   if (this.rotate == 90)
     this.viewport = new Viewport(x, y, h, w);
@@ -10478,10 +10495,11 @@ function Volume(props, image, interactive, parentEl) {
   //Auto compensate for differences in resolution..
   if (props.volume.autoscale) {
     //Divide all by the highest res
+    // res size is global variavle for scaling different atlas sizes
     var maxn = Math.max.apply(null, this.res);
     this.scaling = [this.res[0] / maxn * this.dims[0], 
                     this.res[1] / maxn * this.dims[1],
-                    this.res[2] / maxn * this.dims[2]];
+                    this.res[2] / maxn * this.dims[2] / res_size];
   }
   this.tiles = [this.image.width / this.res[0],
                 this.image.height / this.res[1]];
@@ -10549,8 +10567,8 @@ function Volume(props, image, interactive, parentEl) {
 
       this.interSectionBoxes[ props.intersections[i].name ] = {
 
-        minVertices : [ props.intersections[i].minVertices[0] / this.res[0],props.intersections[i].minVertices[1]/ this.res[1],props.intersections[i].minVertices[2]/ this.res[2]],
-        maxVertices:  [ props.intersections[i].maxVertices[0]/ this.res[0],props.intersections[i].maxVertices[1]/ this.res[1],props.intersections[i].maxVertices[2] / this.res[2]],
+        minVertices : [ props.intersections[i].minVertices[0] / this.res[0] / res_size ,props.intersections[i].minVertices[1] / this.res[1] / res_size, props.intersections[i].minVertices[2] / this.res[2] ],
+        maxVertices:  [ props.intersections[i].maxVertices[0] / this.res[0] / res_size ,props.intersections[i].maxVertices[1]/ this.res[1] / res_size, props.intersections[i].maxVertices[2] / this.res[2] ],
         name:  props.intersections[i].name,
         color:  props.intersections[i].color,
         IntersectionBoxPositionBuffer : null,

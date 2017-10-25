@@ -59,10 +59,11 @@ function Volume(props, image, interactive, parentEl) {
   //Auto compensate for differences in resolution..
   if (props.volume.autoscale) {
     //Divide all by the highest res
+    // res size is global variavle for scaling different atlas sizes
     var maxn = Math.max.apply(null, this.res);
     this.scaling = [this.res[0] / maxn * this.dims[0], 
                     this.res[1] / maxn * this.dims[1],
-                    this.res[2] / maxn * this.dims[2]];
+                    this.res[2] / maxn * this.dims[2] / res_size];
   }
   this.tiles = [this.image.width / this.res[0],
                 this.image.height / this.res[1]];
@@ -130,8 +131,8 @@ function Volume(props, image, interactive, parentEl) {
 
       this.interSectionBoxes[ props.intersections[i].name ] = {
 
-        minVertices : [ props.intersections[i].minVertices[0] / this.res[0],props.intersections[i].minVertices[1]/ this.res[1],props.intersections[i].minVertices[2]/ this.res[2]],
-        maxVertices:  [ props.intersections[i].maxVertices[0]/ this.res[0],props.intersections[i].maxVertices[1]/ this.res[1],props.intersections[i].maxVertices[2] / this.res[2]],
+        minVertices : [ props.intersections[i].minVertices[0] / this.res[0] / res_size ,props.intersections[i].minVertices[1] / this.res[1] / res_size, props.intersections[i].minVertices[2] / this.res[2] ],
+        maxVertices:  [ props.intersections[i].maxVertices[0] / this.res[0] / res_size ,props.intersections[i].maxVertices[1]/ this.res[1] / res_size, props.intersections[i].maxVertices[2] / this.res[2] ],
         name:  props.intersections[i].name,
         color:  props.intersections[i].color,
         IntersectionBoxPositionBuffer : null,
