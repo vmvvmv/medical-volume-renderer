@@ -10659,8 +10659,8 @@ function Volume(props, image, interactive, parentEl) {
   this.properties.xmax = this.properties.ymax = this.properties.zmax = 1.0;
   this.drawCub = {};
   this.drawCub.xmin = this.drawCub.ymin = this.drawCub.zmin = 1;
-  this.drawCub.xmax = this.res[0];
-  this.drawCub.ymax = this.res[1];
+  this.drawCub.xmax = this.res[0] * res_size;
+  this.drawCub.ymax = this.res[1] * res_size;
   this.drawCub.zmax = this.res[2];
   this.properties.density = 10.0;
   this.properties.saturation = 1.0;
@@ -10820,8 +10820,8 @@ var f2 = this.gui.addFolder('Intersections');
     that.properties.xmax = that.properties.ymax = that.properties.zmax = 1.0;
     
     that.drawCub.xmin = that.drawCub.ymin = that.drawCub.zmin = 1;
-    that.drawCub.xmax = that.res[0];
-    that.drawCub.ymax = that.res[1];
+    that.drawCub.xmax = that.res[0] * res_size;
+    that.drawCub.ymax = that.res[1] * res_size;
     that.drawCub.zmax = that.res[2];
 
     that.currentIntersectBox = {
@@ -10857,11 +10857,11 @@ var f2 = this.gui.addFolder('Intersections');
     
       that.showIntersection = true;
       that.currentIntersectBox = that.interSectionBoxes[currentItem.selecTedBox];
-      that.drawCub.xmin =  that.currentIntersectBox.minVertices[0] * that.res[0];
-      that.drawCub.ymin =  that.currentIntersectBox.minVertices[1] * that.res[1];
+      that.drawCub.xmin =  that.currentIntersectBox.minVertices[0] * that.res[0] * res_size;
+      that.drawCub.ymin =  that.currentIntersectBox.minVertices[1] * that.res[1] * res_size;
       that.drawCub.zmin =  that.currentIntersectBox.minVertices[2] * that.res[2];
-      that.drawCub.xmax =  that.currentIntersectBox.maxVertices[0] * that.res[0];
-      that.drawCub.ymax =  that.currentIntersectBox.maxVertices[1] * that.res[1];
+      that.drawCub.xmax =  that.currentIntersectBox.maxVertices[0] * that.res[0] * res_size;
+      that.drawCub.ymax =  that.currentIntersectBox.maxVertices[1] * that.res[1] * res_size;
       that.drawCub.zmax =  that.currentIntersectBox.maxVertices[2] * that.res[2];
   
       for (var i in f2.__controllers) {
@@ -10882,8 +10882,8 @@ var f2 = this.gui.addFolder('Intersections');
     
     that.showIntersection = false;
     that.drawCub.xmin = that.drawCub.ymin = that.drawCub.zmin = 1;
-    that.drawCub.xmax = that.res[0];
-    that.drawCub.ymax = that.res[1];
+    that.drawCub.xmax = that.res[0] * res_size;
+    that.drawCub.ymax = that.res[1] * res_size;
     that.drawCub.zmax = that.res[2];
 
     that.properties.xmin = that.properties.ymin = that.properties.zmin = 0.0;
@@ -10897,11 +10897,11 @@ var f2 = this.gui.addFolder('Intersections');
 
   f2.add({"Обрезать" : function() {
 
-    that.properties.xmin =  that.drawCub.xmin / that.res[0];
-    that.properties.ymin =  that.drawCub.ymin / that.res[1];
+    that.properties.xmin =  that.drawCub.xmin / that.res[0] /  res_size;
+    that.properties.ymin =  that.drawCub.ymin / that.res[1] /  res_size;
     that.properties.zmin =  that.drawCub.zmin / that.res[2];
-    that.properties.xmax =  that.drawCub.xmax / that.res[0];
-    that.properties.ymax =  that.drawCub.ymax / that.res[1];
+    that.properties.xmax =  that.drawCub.xmax / that.res[0] /  res_size;
+    that.properties.ymax =  that.drawCub.ymax / that.res[1] /  res_size;
     that.properties.zmax =  that.drawCub.zmax / that.res[2];
 
     that.delayedRender(250);
@@ -10910,8 +10910,8 @@ var f2 = this.gui.addFolder('Intersections');
 
   var changeIntesection = function(value) {
 
-    that.currentIntersectBox.minVertices = [that.drawCub.xmin / that.res[0], that.drawCub.ymin / that.res[1], that.drawCub.zmin / that.res[2]];
-    that.currentIntersectBox.maxVertices = [that.drawCub.xmax / that.res[0], that.drawCub.ymax / that.res[1], that.drawCub.zmax / that.res[2]];
+    that.currentIntersectBox.minVertices = [that.drawCub.xmin / that.res[0] /  res_size, that.drawCub.ymin / that.res[1] /  res_size, that.drawCub.zmin / that.res[2]];
+    that.currentIntersectBox.maxVertices = [that.drawCub.xmax / that.res[0] /  res_size, that.drawCub.ymax / that.res[1] /  res_size, that.drawCub.zmax / that.res[2]];
 
     that.computeIntersectionBox( that.currentIntersectBox );
 
@@ -10923,10 +10923,10 @@ var f2 = this.gui.addFolder('Intersections');
 
   };
 
-  f2.add(this.drawCub, 'xmin', 1, this.res[0], 0.01).step(1).onChange(changeIntesection);
-  f2.add(this.drawCub, 'xmax', 1, this.res[0], 0.01).step(1).onChange(changeIntesection);
-  f2.add(this.drawCub, 'ymin', 1, this.res[1], 0.01).step(1).onChange(changeIntesection);
-  f2.add(this.drawCub, 'ymax', 1, this.res[1], 0.01).step(1).onChange(changeIntesection);
+  f2.add(this.drawCub, 'xmin', 1, this.res[0] * res_size, 0.01).step(1).onChange(changeIntesection);
+  f2.add(this.drawCub, 'xmax', 1, this.res[0] * res_size, 0.01).step(1).onChange(changeIntesection);
+  f2.add(this.drawCub, 'ymin', 1, this.res[1] * res_size, 0.01).step(1).onChange(changeIntesection);
+  f2.add(this.drawCub, 'ymax', 1, this.res[1] * res_size, 0.01).step(1).onChange(changeIntesection);
   f2.add(this.drawCub, 'zmin', 1, this.res[2], 0.01).step(1).onChange(changeIntesection);
   f2.add(this.drawCub, 'zmax', 1, this.res[2], 0.01).step(1).onChange(changeIntesection);
 
@@ -10937,11 +10937,11 @@ var f2 = this.gui.addFolder('Intersections');
 
     //console.log(that.currentIntersectBox);
 
-    that.drawCub.xmin =  that.currentIntersectBox.minVertices[0] * that.res[0];
-    that.drawCub.ymin =  that.currentIntersectBox.minVertices[1] * that.res[1];
+    that.drawCub.xmin =  that.currentIntersectBox.minVertices[0] * that.res[0] * res_size;
+    that.drawCub.ymin =  that.currentIntersectBox.minVertices[1] * that.res[1] * res_size;
     that.drawCub.zmin =  that.currentIntersectBox.minVertices[2] * that.res[2];
-    that.drawCub.xmax =  that.currentIntersectBox.maxVertices[0] * that.res[0];
-    that.drawCub.ymax =  that.currentIntersectBox.maxVertices[1] * that.res[1];
+    that.drawCub.xmax =  that.currentIntersectBox.maxVertices[0] * that.res[0] * res_size;
+    that.drawCub.ymax =  that.currentIntersectBox.maxVertices[1] * that.res[1] * res_size;
     that.drawCub.zmax =  that.currentIntersectBox.maxVertices[2] * that.res[2];
 
     for (var i in f2.__controllers) {
