@@ -46,11 +46,11 @@
         "zmax": 1,
         "slices": {
             "properties": {
-                "layout": "YzX",
+                "layout": "x|y|z|X|Y",
                 "power": 1,
                 "brightness": 0,
                 "show": true,
-                "zoom": 0.62,
+                "zoom": 0.3,
                 "Y": 200,
                 "X": 200,
                 "Z": 150,

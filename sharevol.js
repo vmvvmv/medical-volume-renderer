@@ -9237,8 +9237,8 @@ function getData(compact, matrix) {
     state.objects[0].volume.res[1] *= res_size;
   
     //console.log(state.objects[0].slices);
-    state.objects[0].slices.properties.X *=  res_size;
-    state.objects[0].slices.properties.Y *=  res_size;
+    //state.objects[0].slices.properties.X *=  res_size;
+    //state.objects[0].slices.properties.Y *=  res_size;
     state.objects[0].slices.properties.zoom /=  res_size;
     //Colourmap
     state.colourmaps = [colours.palette.get()];
@@ -9261,8 +9261,8 @@ function exportData() {
   state.objects[0].volume.res[1] /= res_size;
 
   //console.log(state.objects[0].slices);
-  state.objects[0].slices.properties.X /=  res_size;
-  state.objects[0].slices.properties.Y /=  res_size;
+  //state.objects[0].slices.properties.X /=  res_size;
+  //state.objects[0].slices.properties.Y /=  res_size;
 
   state.objects[0].slices.properties.zoom *=  res_size;
 }
@@ -9319,8 +9319,8 @@ function loadTexture() {
   state.objects[0].volume.res[1] /= res_size;
 
   //console.log(state.objects[0].slices);
-  state.objects[0].slices.properties.X /=  res_size;
-  state.objects[0].slices.properties.Y /=  res_size;
+  //state.objects[0].slices.properties.X /=  res_size;
+//state.objects[0].slices.properties.Y /=  res_size;
   state.objects[0].slices.properties.zoom *=  res_size;
   //state.objects[0].slices.properties.Z /=  res_size;
 
@@ -9637,14 +9637,17 @@ Slicer.prototype.addGUI = function(gui) {
   f1.add(this.properties, 'usecolourmap');
   f1.add(this.properties, 'drawRectangles').onChange( function(){ that.draw });
   f1.add(this.properties, 'layout').onFinishChange(function(l) {that.doLayout(); that.draw();});
+
   // this.properties.resX = this.properties.X;
   // this.properties.resY = this.properties.Y;
 
-  // f1.add(this.properties, 'resX', 0, this.res[0] * res_size, 1).listen().onFinishChange(function( val ) { console.log(val); that.properties.X = val / res_size });
-  // f1.add(this.properties, 'resY', 0, this.res[1] * res_size, 1).listen().onFinishChange(function( val ) {  that.properties.Y = val / res_size });
-  f1.add(this.properties, 'X', 0, this.res[0], 1).listen();
-  f1.add(this.properties, 'Y', 0, this.res[1], 1).listen();
+  //f1.add(this.properties, 'X', 0, this.res[0] * res_size, 1).listen().onFinishChange(function( l ) { console.log(l); that.properties.X = l / res_size });
+  //f1.add(this.properties, 'Y', 0, this.res[1] * res_size, 1).listen().onFinishChange(function( l ) { console.log(l); that.properties.Y = l / res_size });
+  f1.add(this.properties, 'X', 0, this.res[0] * res_size, 1).listen();
+  f1.add(this.properties, 'Y', 0, this.res[1] * res_size, 1).listen();
   f1.add(this.properties, 'Z', 0, this.res[2], 1).listen();
+
+  f1.open();
   
   var f2 = this.gui.addFolder('Область интереса (слои)');
   f2.add(this.properties, 'minX', 0, this.res[0] * res_size, 1).listen().onFinishChange(function(l) {if (volume) volume.clipminX(l / res_size);});
@@ -9913,14 +9916,33 @@ Slicer.prototype.drawSlice = function(idx) {
 
   //Set selection crosshairs
   var sel;
-  if (view.rotate == -90)
-    sel = [this.slices[view.j], 1.0 - this.slices[view.i]];
-  else if (view.rotate == 180) 
-    sel = [1 - this.slices[view.i], 1 - this.slices[view.j]];
-  else if (view.rotate == 360) 
-    sel = [1 - this.slices[view.i], this.slices[view.j]];
-  else
-    sel = [this.slices[view.i], this.slices[view.j]];
+  if (view.rotate == -90) {
+
+      sel = [this.slices[view.j] / res_size, 1.0 - this.slices[view.i]];
+
+  }
+  else if (view.rotate == 180) {
+
+      sel = [1 - this.slices[view.i] / res_size, 1 - this.slices[view.j]];
+
+  }
+  else if (view.rotate == 360) {
+
+      sel = [1 - this.slices[view.i], this.slices[view.j]];
+
+  }
+  else {
+
+      if( view.axis===2 )
+        sel = [this.slices[view.i] / res_size, this.slices[view.j] / res_size];
+      else if( view.axis===1 )
+        sel = [this.slices[view.i] / res_size, this.slices[view.j]];
+      else if( view.axis===0 )
+        sel = [this.slices[view.i], this.slices[view.j] / res_size];
+
+  }
+
+  
   
   //Swap y-coord
   if (!this.flipY) sel[1] = 1.0 - sel[1];
@@ -9943,7 +9965,7 @@ Slicer.prototype.drawSlice = function(idx) {
 
   //Texturing
   //this.gl.uniform1i(this.program.uniforms["slice"], ));
-  this.gl.uniform3f(this.program.uniforms['slice'], this.slices[0], this.slices[1], this.slices[2]);
+  this.gl.uniform3f(this.program.uniforms['slice'], this.slices[0] / res_size, this.slices[1] / res_size, this.slices[2]);
   this.gl.uniform2f(this.program.uniforms["dim"], this.dimx, this.dimy);
   this.gl.uniform3i(this.program.uniforms["res"], this.res[0], this.res[1], this.res[2]);
   this.gl.uniform1i(this.program.uniforms["axis"], view.axis);
@@ -10028,7 +10050,7 @@ Slicer.prototype.drawBrush = function() {
     for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
 
         var coords = this.currentBrush.lineCoords[i];
-
+        console.log(coords);
         //if(axis !== 2)
           var z = deepDimension / this.dims[axis];
         //else
@@ -10406,15 +10428,15 @@ SliceView.prototype.click = function(event, mouse) {
   var newBrushCoords ={};
 
   if (this.axis == 0) {
-    slicer.properties.Z = A;
-    slicer.properties.Y = B;
+    slicer.properties.Z = A ;
+    slicer.properties.Y = B * res_size;
     
     newBrushCoords.z = coord[0];
     newBrushCoords.y = coord[1];
     newBrushCoords.x = slicer.properties.X / this.slicer.res[0];
 
   } else if (this.axis == 1) {
-    slicer.properties.X = A;
+    slicer.properties.X = A * res_size;
     slicer.properties.Z = B;
 
     newBrushCoords.x = coord[0];
@@ -10422,8 +10444,8 @@ SliceView.prototype.click = function(event, mouse) {
     newBrushCoords.y = slicer.properties.Y / this.slicer.res[1];
     
   } else {
-    slicer.properties.X = A;
-    slicer.properties.Y = B;
+    slicer.properties.X = A * res_size;
+    slicer.properties.Y = B * res_size;
 
     newBrushCoords.x = coord[0];
     newBrushCoords.y = coord[1];

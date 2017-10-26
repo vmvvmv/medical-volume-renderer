@@ -229,8 +229,8 @@ function getData(compact, matrix) {
     state.objects[0].volume.res[1] *= res_size;
   
     //console.log(state.objects[0].slices);
-    state.objects[0].slices.properties.X *=  res_size;
-    state.objects[0].slices.properties.Y *=  res_size;
+    //state.objects[0].slices.properties.X *=  res_size;
+    //state.objects[0].slices.properties.Y *=  res_size;
     state.objects[0].slices.properties.zoom /=  res_size;
     //Colourmap
     state.colourmaps = [colours.palette.get()];
@@ -253,8 +253,8 @@ function exportData() {
   state.objects[0].volume.res[1] /= res_size;
 
   //console.log(state.objects[0].slices);
-  state.objects[0].slices.properties.X /=  res_size;
-  state.objects[0].slices.properties.Y /=  res_size;
+  //state.objects[0].slices.properties.X /=  res_size;
+  //state.objects[0].slices.properties.Y /=  res_size;
 
   state.objects[0].slices.properties.zoom *=  res_size;
 }
@@ -311,8 +311,8 @@ function loadTexture() {
   state.objects[0].volume.res[1] /= res_size;
 
   //console.log(state.objects[0].slices);
-  state.objects[0].slices.properties.X /=  res_size;
-  state.objects[0].slices.properties.Y /=  res_size;
+  //state.objects[0].slices.properties.X /=  res_size;
+//state.objects[0].slices.properties.Y /=  res_size;
   state.objects[0].slices.properties.zoom *=  res_size;
   //state.objects[0].slices.properties.Z /=  res_size;
 
