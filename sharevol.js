@@ -9290,7 +9290,7 @@ function loadTexture() {
   var orginalTextSize = state.objects[0].volume.originalSize;
 
   //develop
-  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE / 4;
+  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE / 2;
  // console.log(state.objects[0].volume.res);
 
   if ( MAX_TEXTURE_SIZE >= orginalTextSize  ) {
@@ -9637,16 +9637,20 @@ Slicer.prototype.addGUI = function(gui) {
   f1.add(this.properties, 'usecolourmap');
   f1.add(this.properties, 'drawRectangles').onChange( function(){ that.draw });
   f1.add(this.properties, 'layout').onFinishChange(function(l) {that.doLayout(); that.draw();});
+  // this.properties.resX = this.properties.X;
+  // this.properties.resY = this.properties.Y;
 
+  // f1.add(this.properties, 'resX', 0, this.res[0] * res_size, 1).listen().onFinishChange(function( val ) { console.log(val); that.properties.X = val / res_size });
+  // f1.add(this.properties, 'resY', 0, this.res[1] * res_size, 1).listen().onFinishChange(function( val ) {  that.properties.Y = val / res_size });
   f1.add(this.properties, 'X', 0, this.res[0], 1).listen();
   f1.add(this.properties, 'Y', 0, this.res[1], 1).listen();
   f1.add(this.properties, 'Z', 0, this.res[2], 1).listen();
   
   var f2 = this.gui.addFolder('Область интереса (слои)');
-  f2.add(this.properties, 'minX', 0, this.res[0], 1).listen().onFinishChange(function(l) {if (volume) volume.clipminX(l);});
-  f2.add(this.properties, 'maxX', 0, this.res[0], 1).listen().onFinishChange(function(l) {if (volume) volume.clipmaxX(l);});
-  f2.add(this.properties, 'minY', 0, this.res[1], 1).listen().onFinishChange(function(l) {if (volume) volume.clipminY(l);});
-  f2.add(this.properties, 'maxY', 0, this.res[1], 1).listen().onFinishChange(function(l) {if (volume) volume.clipmaxY(l);});
+  f2.add(this.properties, 'minX', 0, this.res[0] * res_size, 1).listen().onFinishChange(function(l) {if (volume) volume.clipminX(l / res_size);});
+  f2.add(this.properties, 'maxX', 0, this.res[0] * res_size, 1).listen().onFinishChange(function(l) {if (volume) volume.clipmaxX(l / res_size);});
+  f2.add(this.properties, 'minY', 0, this.res[1] * res_size, 1).listen().onFinishChange(function(l) {if (volume) volume.clipminY(l / res_size);});
+  f2.add(this.properties, 'maxY', 0, this.res[1] * res_size, 1).listen().onFinishChange(function(l) {if (volume) volume.clipmaxY(l / res_size);});
   f2.add(this.properties, 'minZ', 0, this.res[2], 1).listen().onFinishChange(function(l) {if (volume) volume.clipminZ(l);});
   f2.add(this.properties, 'maxZ', 0, this.res[2], 1).listen().onFinishChange(function(l) {if (volume) volume.clipmaxZ(l);});
   state.properties.server = ''
