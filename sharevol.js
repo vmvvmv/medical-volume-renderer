@@ -10014,7 +10014,7 @@ Slicer.prototype.drawBrush = function() {
 
   for( viewport of this.viewers ) {
 
-    var brushSize = viewport.viewport.width / this.dims[0] * 3;
+    var brushSize = viewport.viewport.width / this.dims[0] * 3 / res_size;
     var v = viewport.viewport;
     var deepDimension;
     var axis = viewport.axis;
