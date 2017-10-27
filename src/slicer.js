@@ -775,11 +775,11 @@ Slicer.prototype.drawIntersections = function() {
     switch(axis){
 
       case 0:
-        deepDimension = this.properties.X;
+        deepDimension = this.properties.X / res_size;
 
         break;
       case 1:
-        deepDimension = this.properties.Y;
+        deepDimension = this.properties.Y / res_size;
 
         break;
       case 2:
