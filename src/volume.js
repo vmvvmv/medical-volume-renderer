@@ -748,8 +748,8 @@ Volume.prototype.drawAxis = function(alpha) {
   //Axis position, default centre, use slicer positions if available
   var pos = [0.5*this.scaling[0], 0.5*this.scaling[1], 0.5*this.scaling[2]];
   if (this.slicer) {
-    pos = [this.slicer.slices[0]*this.scaling[0], 
-           this.slicer.slices[1]*this.scaling[1],
+    pos = [this.slicer.slices[0]*this.scaling[0] / res_size, 
+           this.slicer.slices[1]*this.scaling[1] / res_size,
            this.slicer.slices[2]*this.scaling[2]];
   }
   this.webgl.modelView.translate(pos);
