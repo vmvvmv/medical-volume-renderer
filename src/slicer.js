@@ -550,11 +550,11 @@ Slicer.prototype.drawBrush = function() {
     for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
 
         var coords = this.currentBrush.lineCoords[i];
-        console.log(coords);
-        //if(axis !== 2)
+        //console.log(coords);
+        if(axis !== 2)
+          var z = deepDimension / this.dims[axis] / res_size;
+        else
           var z = deepDimension / this.dims[axis];
-        //else
-        //  var z = deepDimension / this.dims[axis] * res_size;
         //console.log(coords[zkey] * this.res[axis],  z * this.res[axis]);
         
         if ( Math.round( coords[zkey] * this.res[axis] ) ===  Math.round ( z * this.res[axis] )) {
@@ -923,17 +923,18 @@ SliceView.prototype.click = function(event, mouse) {
   var A = Math.round(this.slicer.res[this.i] * coord[0]);
   var B = Math.round(this.slicer.res[this.j] * coord[1]);
 
+  // 0-1 ok remove negative values 
   //console.log(coord);
 
   var newBrushCoords ={};
 
   if (this.axis == 0) {
-    slicer.properties.Z = A ;
+    slicer.properties.Z = A;
     slicer.properties.Y = B * res_size;
     
     newBrushCoords.z = coord[0];
     newBrushCoords.y = coord[1];
-    newBrushCoords.x = slicer.properties.X / this.slicer.res[0];
+    newBrushCoords.x = slicer.properties.X / this.slicer.res[0] / res_size;
 
   } else if (this.axis == 1) {
     slicer.properties.X = A * res_size;
@@ -941,7 +942,7 @@ SliceView.prototype.click = function(event, mouse) {
 
     newBrushCoords.x = coord[0];
     newBrushCoords.z = coord[1];
-    newBrushCoords.y = slicer.properties.Y / this.slicer.res[1];
+    newBrushCoords.y = slicer.properties.Y / this.slicer.res[1] / res_size;
     
   } else {
     slicer.properties.X = A * res_size;
