@@ -112,8 +112,8 @@ function Slicer(props, image, filter, parentEl) {
   //console.log(this);
   //exportBrush canvas
   this.exportCanvas = document.createElement("canvas");
-  this.exportCanvas.width = this.image.width;
-  this.exportCanvas.height = this.image.height;
+  this.exportCanvas.width = this.image.width * res_size;
+  this.exportCanvas.height = this.image.height * res_size;
 }
 
 Slicer.prototype.toggle = function() {
@@ -653,7 +653,7 @@ Slicer.prototype.exportBrush = function() {
       imgData.data[j+3] = 255;
 
     }
-    ctx.putImageData(imgData, x, y);
+    ctx.putImageData(imgData, x * res_size, y * res_size);
   }
 
   var exportImage =  this.exportCanvas.toDataURL("image/png");
@@ -700,24 +700,26 @@ Slicer.prototype.importBrush = function() {
         var pixely = Math.round( (i) / 4 / image.width );
         var pixelx = ((i / 4) % image.width);
 
-        var z =  Math.ceil (pixelx / slicer.res[0]) - 1 + Math.ceil( pixely / slicer.res[1]) * slicer.dimx - slicer.dimx;
-        var x = (  pixelx % slicer.res[0]);
-        var y = (  pixely % slicer.res[1]);
+        var z =  Math.ceil (pixelx / slicer.res[0] / res_size) - 1 + Math.ceil( pixely / slicer.res[1] / res_size ) * slicer.dimx - slicer.dimx;
+        var x = (  pixelx % ( slicer.res[0] * res_size ));
+        var y = (  pixely % ( slicer.res[1] * res_size));
 
 
         x = x /  slicer.res[0] * 1;
         y = y /  slicer.res[1] * 1;
         z = z /  slicer.res[2] * 1;
 
-        console.log(x,y,z);
+        //console.log(x,y,z);
 
-        slicer.currentBrush.lineCoords.push({x:x,y:y,z:z});
+        slicer.currentBrush.lineCoords.push({x:x / res_size, y:y / res_size, z:z});
 
-
-      }
 
       }
-    
+
+      }
+      
+      console.log( slicer.currentBrush.lineCoords);
+      
       console.log('brush import finish');
       //console.log( slicer.currentBrush.lineCoords);
       if(slicer.properties.enableBrush || slicer.properties.showBrush)

@@ -55,7 +55,8 @@
                 "X": 200,
                 "Z": 150,
                 "usecolourmap": false,
-                "contrast": 1
+                "contrast": 1,
+                "importAtlasUrl": "index.png"
             }
         },
         "zmin": 0,
