@@ -652,7 +652,7 @@ Slicer.prototype.exportBrush = function() {
       imgData.data[j+3] = 255;
 
     }
-    //console.log( x * res_size, y * res_size);
+    console.log( x * res_size, y * res_size);
     ctx.putImageData(imgData, x * res_size, y * res_size);
   }
 
@@ -711,9 +711,9 @@ Slicer.prototype.importBrush = function() {
           
               if( (r!==0 || g!==0|| b!==0) ) {
                 //console.log(j,k);
-                var pixely = Math.round( ( i / 4 ) / imageQuadWidth ) + k * imageQuadHeight;
+                var pixely = Math.floor( ( i / 4 ) / imageQuadWidth ) + k * imageQuadHeight;
                 var pixelx = ( ( i / 4  ) % imageQuadWidth) + j * imageQuadWidth;
-                //console.log(pixely ,pixelx);
+                console.log(pixelx, pixely);
               
                 var z =  Math.ceil (pixelx / slicer.res[0] / res_size) - 1 + Math.ceil( pixely / slicer.res[1] / res_size ) * slicer.dimx - slicer.dimx;
                 var x = (  pixelx % ( slicer.res[0] * res_size ));
