@@ -618,16 +618,12 @@ Slicer.prototype.exportBrush = function() {
   }
 
   ctx.fillStyle = "rgba(255,255,255,1)";
-  // must be coords which can be related to x,y,z and convert which is correct x,y 
-  //this.currentBrush.lineCoords.push( {x:0.5, y:0.5, z:0.5});
-  // this.currentBrush.lineCoords.push( {x:0.23, y:0.1, z:0.5});
-  // this.currentBrush.lineCoords.push( {x:0.1, y:0.5, z:0.5});
 
   for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
 
-    var row = Math.round(this.currentBrush.lineCoords[i].z*this.res[2] /  this.dimx);
+    var row = Math.ceil(this.currentBrush.lineCoords[i].z*this.res[2] /  this.dimx);
     //console.log(row);
-    var col = this.currentBrush.lineCoords[i].z*this.res[2] % this.dimx;
+    var col = Math.ceil(this.currentBrush.lineCoords[i].z*this.res[2] % this.dimx);
     //console.log(col);
     
     var x = this.currentBrush.lineCoords[i].x*this.res[0] + col * this.res[0];
@@ -652,8 +648,11 @@ Slicer.prototype.exportBrush = function() {
       imgData.data[j+3] = 255;
 
     }
-    console.log( x * res_size, y * res_size);
+
+    console.log(row, col, this.currentBrush.lineCoords[i].z * slicer.res[2]);
+
     ctx.putImageData(imgData, x * res_size, y * res_size);
+
   }
 
   var exportImage =  this.exportCanvas.toDataURL("image/png");
@@ -710,24 +709,26 @@ Slicer.prototype.importBrush = function() {
               var a = pix[i+3];
           
               if( (r!==0 || g!==0|| b!==0) ) {
-                //console.log(j,k);
+
                 var pixely = Math.floor( ( i / 4 ) / imageQuadWidth ) + k * imageQuadHeight;
                 var pixelx = ( ( i / 4  ) % imageQuadWidth) + j * imageQuadWidth;
-                console.log(pixelx, pixely);
-              
-                var z =  Math.ceil (pixelx / slicer.res[0] / res_size) - 1 + Math.ceil( pixely / slicer.res[1] / res_size ) * slicer.dimx - slicer.dimx;
+
+                var row =  Math.floor( pixely / slicer.res[1] / res_size );
+                var col =  Math.floor( pixelx / slicer.res[0] / res_size );
+                
+                var z = row * slicer.dimx - slicer.dimx + col - 1;
+
+                //console.log( row, col, z );
+            
                 var x = (  pixelx % ( slicer.res[0] * res_size ));
                 var y = (  pixely % ( slicer.res[1] * res_size));
-              
+                
               
                 x = x /  slicer.res[0] * 1;
                 y = y /  slicer.res[1] * 1;
                 z = z /  slicer.res[2] * 1;
-              
-                //console.log(x,y,z);
-              
+                              
                 slicer.currentBrush.lineCoords.push({x:x / res_size, y:y / res_size, z:z});
-              
               
             }
 
