@@ -606,7 +606,6 @@ Slicer.prototype.exportBrush = function() {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
 
-  //console.log(this.currentBrush.color);
 
   if (this.currentBrush.color instanceof Array) {
     var color =   rgbToHex( Math.floor(this.currentBrush.color[0]),
@@ -620,7 +619,7 @@ Slicer.prototype.exportBrush = function() {
 
   ctx.fillStyle = "rgba(255,255,255,1)";
   // must be coords which can be related to x,y,z and convert which is correct x,y 
-  this.currentBrush.lineCoords.push( {x:0.5, y:0.5, z:0.5});
+  //this.currentBrush.lineCoords.push( {x:0.5, y:0.5, z:0.5});
   // this.currentBrush.lineCoords.push( {x:0.23, y:0.1, z:0.5});
   // this.currentBrush.lineCoords.push( {x:0.1, y:0.5, z:0.5});
 
@@ -689,21 +688,20 @@ Slicer.prototype.importBrush = function() {
 
       console.log('brush import begin');
 
-      var imageQuadWidth = image.width / 8;
-      var imageQuadHeight = image.height / 8;
-      
-      for( var k = 0; k < 8; k++) { 
+      var quadsNum = 8;
 
-        for( var j = 0; j < 8; j++) {  
+      var imageQuadWidth = image.width / quadsNum;
+      var imageQuadHeight = image.height / quadsNum;
+      
+      for( var k = 0; k < quadsNum; k++) { 
+
+        for( var j = 0; j < quadsNum; j++) {  
           
-          var width = (j * imageQuadWidth + imageQuadWidth) > image.width ? image.width / 8 - image.width - (j * imageQuadWidth + imageQuadWidth) : image.width / 8;
-          var height = (k * imageQuadHeight + imageQuadHeight) > image.height ? image.height / 8 - image.height - (k * imageQuadHeight + imageQuadHeight) : image.height / 8;
+          var width = (j * imageQuadWidth + imageQuadWidth) > image.width ? image.width / quadsNum - image.width - (j * imageQuadWidth + imageQuadWidth) : image.width / quadsNum;
+          var height = (k * imageQuadHeight + imageQuadHeight) > image.height ? image.height / quadsNum - image.height - (k * imageQuadHeight + imageQuadHeight) : image.height / quadsNum;
 
           var pix = ctx.getImageData( j * imageQuadWidth, k * imageQuadHeight, width, height ).data;
-          //console.log( (j * imageQuadWidth + imageQuadWidth) , image.width);
-          //console.log( (k * imageQuadHeight + imageQuadHeight) , image.height);
-          //console.log(pix.length);
-          //console.log(j * imageQuadWidth, k * imageQuadHeight, width - 1, height - 1 );
+
           for( var i = 0; i<pix.length; i+=4 ) {
               
               var r = pix[i];
@@ -738,8 +736,6 @@ Slicer.prototype.importBrush = function() {
       }
 
     }
-      
-    console.log( slicer.currentBrush.lineCoords);
     
     console.log('brush import finish');
     //console.log( slicer.currentBrush.lineCoords);
