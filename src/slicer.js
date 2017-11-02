@@ -43,8 +43,7 @@ function Slicer(props, image, filter, parentEl) {
   this.flipY = false;
   this.properties.zoom = 1.0;
 
-  //brush
-  this.properties.brushSize = 1;
+  //brush---------------------------------------------------
   this.properties.enableBrush = true;
   this.properties.brushColour =  [214, 188, 86];
   this.properties.drawRectangles = true;
@@ -54,14 +53,19 @@ function Slicer(props, image, filter, parentEl) {
 
   this.currentBrush = {
 
+    label:'orange',
     color: [214, 188, 86],
     lineCoords:[],
 
   }
   
-  this.properties.brushCoords = [];
+  this.labels = {};
+
+  this.labels[this.currentBrush.label] = this.currentBrush;
+
   this.properties.importAtlasUrl = props.slices.properties.importAtlasUrl||undefined;
 
+  //-----------------------------------------------------------------------------------
   this.container = document.createElement("div");
   this.container.style.cssText = "position: absolute; bottom: 10px; left: 10px; margin: 0px; padding: 0px; pointer-events: none;";
   if (!parentEl) parentEl = document.body;
@@ -171,8 +175,49 @@ Slicer.prototype.addGUI = function(gui) {
   //--------------Brush
 
   var f3 = this.gui.addFolder('Кисточка');
-  //this.properties.brushName
 
+  var newName = { name: 'new label', color: [214, 188, 86] };
+  var currentItem = { label: null };
+
+  f3.add(newName, 'name').onChange( function(){
+
+    that.currentBrush.name = newName.name;
+
+  });
+
+
+  f3.add( {"new label": function() {
+    
+    that.currentBrush = {
+      
+          label: newName.name,
+          color: newName.color,
+          lineCoords:[],
+      
+    }
+    
+  }}, 'new label');
+
+  f3.add( {"save label": function() {
+    
+    that.labels[that.currentBrush.label] = that.currentBrush;
+
+    f3.__controllers[f3.__controllers.length-1].remove();
+
+    f3.add( currentItem, 'label', Object.keys(that.labels) ).onChange(function(val) {
+      
+      that.currentBrush = that.labels[ val ];
+
+      //console.log(that.labels);
+      that.draw();
+
+      for (var i in f3.__controllers) {
+        f3.__controllers[i].updateDisplay();
+      }
+      
+    });
+
+  }}, 'save label');
   
   f3.add( {"export brush atlas": function(){
         
@@ -204,6 +249,16 @@ Slicer.prototype.addGUI = function(gui) {
     that.currentBrush.color = that.properties.brushColour;
     that.draw();
 
+  });
+
+  f3.add( currentItem, 'label', Object.keys(this.labels) ).onChange(function(val) {
+        
+        that.currentBrush = that.labels[ val ];
+        that.draw();
+        for (var i in f3.__controllers) {
+          f3.__controllers[i].updateDisplay();
+        }
+        
   });
 
 
@@ -514,7 +569,7 @@ Slicer.prototype.drawBrush = function() {
 
   for( viewport of this.viewers ) {
 
-    var brushSize = viewport.viewport.width / this.dims[0] * 3 / res_size;
+    var brushSize = viewport.viewport.width / this.dims[0] / res_size * 6;
     var v = viewport.viewport;
     var deepDimension;
     var axis = viewport.axis;
