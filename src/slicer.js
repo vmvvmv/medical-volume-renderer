@@ -45,11 +45,10 @@ function Slicer(props, image, filter, parentEl) {
 
   //brush---------------------------------------------------
   this.properties.enableBrush = true;
-  this.properties.brushColour =  [214, 188, 86];
   this.properties.drawRectangles = true;
   this.properties.showBrush = true;
   this.properties.brushTransperency = 255;
-
+  this.properties.brushColour =  [214, 188, 86];
 
   this.currentBrush = {
 
@@ -62,6 +61,26 @@ function Slicer(props, image, filter, parentEl) {
   this.labels = {};
 
   this.labels[this.currentBrush.label] = this.currentBrush;
+
+ //console.log(props);
+
+  if ( props.slices.savedLabels ) {
+
+    for( key  of  Object.keys(props.slices.savedLabels) ) {
+
+      var label = props.slices.savedLabels[key];
+      //console.log(label);
+      this.labels[key] = {
+
+        label:label.label,
+        color: label.color,
+        lineCoords:[],
+
+      }
+
+    }
+
+  }
 
   this.properties.importAtlasUrl = props.slices.properties.importAtlasUrl||undefined;
 
@@ -270,6 +289,22 @@ Slicer.prototype.get = function() {
   var data = {};
   //data.colourmap = colours.palette.toString();
   data.properties = this.properties;
+
+  data.savedLabels = {};
+
+  for( key of Object.keys( this.labels ) ) {
+
+    var label = this.labels[key];
+
+    data.savedLabels[key] = {
+
+        label:label.label,
+        color: label.color
+
+    }
+
+  }
+  
   return data;
 }
 
