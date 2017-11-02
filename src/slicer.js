@@ -151,7 +151,7 @@ Slicer.prototype.addGUI = function(gui) {
   f1.add(this.properties, 'Y', 0, this.res[1] * res_size, 1).listen();
   f1.add(this.properties, 'Z', 0, this.res[2], 1).listen();
 
-  f1.open();
+  //f1.open();
   
   var f2 = this.gui.addFolder('Область интереса (слои)');
   f2.add(this.properties, 'minX', 0, this.res[0] * res_size, 1).listen().onFinishChange(function(l) {if (volume) volume.clipminX(l / res_size);});
@@ -553,96 +553,105 @@ Slicer.prototype.drawBrush = function() {
   }
 
 
-  if (this.currentBrush.color instanceof Array) {
-    var color =   rgbToHex( Math.floor(this.currentBrush.color[0]),
-                            Math.floor(this.currentBrush.color[1]),
-                            Math.floor(this.currentBrush.color[2]));
-  } else {
+  for ( key of Object.keys( this.labels ) ) {   
 
-    var color =   this.currentBrush.color;
+    var brush = this.labels[key];
+    var color;
 
-  }
+    if (brush.color instanceof Array) {
 
-  var rgb = hexToRgb(color);
+      color =   rgbToHex( Math.floor(brush.color[0]),
+                              Math.floor(brush.color[1]),
+                              Math.floor(brush.color[2]));
+    } else {
 
-  this.overlayCanvasContext.fillStyle = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + "," +  this.properties.brushTransperency / 255 +")";
+      color =   brush.color;
 
-  for( viewport of this.viewers ) {
-
-    var brushSize = viewport.viewport.width / this.dims[0] / res_size * 6;
-    var v = viewport.viewport;
-    var deepDimension;
-    var axis = viewport.axis;
-    var rotate = viewport.rotate;
-    var xkey;
-    var ykey;
-    var zkey;
-
-    switch(axis){
-      
-            case 0:
-              deepDimension = this.properties.X;
-              xkey = 'z';
-              ykey = 'y';
-              zkey = 'x';
-              break;
-            case 1:
-              deepDimension = this.properties.Y;
-              xkey = 'x';
-              ykey = 'z';
-              zkey = 'y';
-              break;
-            case 2:
-              deepDimension = this.properties.Z;
-              xkey = 'x';
-              ykey = 'y';
-              zkey = 'z';
-              break;
-      
-          }
-    
-
-    for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
-
-        var coords = this.currentBrush.lineCoords[i];
-        //console.log(coords);
-        if(axis !== 2)
-          var z = deepDimension / this.dims[axis] / res_size;
-        else
-          var z = deepDimension / this.dims[axis];
-        //console.log(coords[zkey] * this.res[axis],  z * this.res[axis]);
-        
-        if ( Math.round( coords[zkey] * this.res[axis] ) ===  Math.round ( z * this.res[axis] )) {
-
-            //console.log(this.height - v.y - v.height);
-            switch(rotate){
-          
-                case -90:
-                  var x = ( coords[ykey] ) * v.width + v.x;
-                  var y = ( 1 - coords[xkey] ) * v.height + (this.height - v.y - v.height);
-                  break;
-                case 180:
-                  var x = ( 1 - coords[xkey] ) * v.width + v.x;
-                  var y = ( 1 - coords[ykey] ) * v.height + (this.height - v.y - v.height);
-                  break;
-                default:
-                  var x = ( coords[xkey] ) * v.width + v.x;
-                  var y = ( coords[ykey] ) * v.height + (this.height - v.y - v.height);
-                  //console.log(y);
-                  
-                  break;
-          
-              }
-            
-            //console.log('axis' + axis + ' ',rotate,x,y);
-
-            this.overlayCanvasContext.beginPath();
-            this.overlayCanvasContext.arc(x, y, brushSize, 0, 2 * Math.PI);
-            this.overlayCanvasContext.fill();
-
-        }
-        
     }
+
+    //console.log(color);
+
+    var rgb = hexToRgb(color);
+
+    this.overlayCanvasContext.fillStyle = "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + "," +  this.properties.brushTransperency / 255 +")";
+
+    for( viewport of this.viewers ) {
+
+      var brushSize = viewport.viewport.width / this.dims[0] / res_size * 6;
+      var v = viewport.viewport;
+      var deepDimension;
+      var axis = viewport.axis;
+      var rotate = viewport.rotate;
+      var xkey;
+      var ykey;
+      var zkey;
+
+      switch(axis){
+
+              case 0:
+                deepDimension = this.properties.X;
+                xkey = 'z';
+                ykey = 'y';
+                zkey = 'x';
+                break;
+              case 1:
+                deepDimension = this.properties.Y;
+                xkey = 'x';
+                ykey = 'z';
+                zkey = 'y';
+                break;
+              case 2:
+                deepDimension = this.properties.Z;
+                xkey = 'x';
+                ykey = 'y';
+                zkey = 'z';
+                break;
+
+            }
+          
+
+      for ( var i = 0; i < brush.lineCoords.length; i++ ) {
+
+          var coords = brush.lineCoords[i];
+          //console.log(coords);
+          if(axis !== 2)
+            var z = deepDimension / this.dims[axis] / res_size;
+          else
+            var z = deepDimension / this.dims[axis];
+          //console.log(coords[zkey] * this.res[axis],  z * this.res[axis]);
+
+          if ( Math.round( coords[zkey] * this.res[axis] ) ===  Math.round ( z * this.res[axis] )) {
+
+              //console.log(this.height - v.y - v.height);
+              switch(rotate){
+              
+                  case -90:
+                    var x = ( coords[ykey] ) * v.width + v.x;
+                    var y = ( 1 - coords[xkey] ) * v.height + (this.height - v.y - v.height);
+                    break;
+                  case 180:
+                    var x = ( 1 - coords[xkey] ) * v.width + v.x;
+                    var y = ( 1 - coords[ykey] ) * v.height + (this.height - v.y - v.height);
+                    break;
+                  default:
+                    var x = ( coords[xkey] ) * v.width + v.x;
+                    var y = ( coords[ykey] ) * v.height + (this.height - v.y - v.height);
+                    //console.log(y);
+
+                    break;
+              
+                }
+              
+              //console.log('axis' + axis + ' ',rotate,x,y);
+
+              this.overlayCanvasContext.beginPath();
+              this.overlayCanvasContext.arc(x, y, brushSize, 0, 2 * Math.PI);
+              this.overlayCanvasContext.fill();
+
+          }
+
+      }
+  }
 
   }
 
