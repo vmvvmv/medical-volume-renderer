@@ -681,42 +681,49 @@ Slicer.prototype.exportBrush = function() {
     
   }
 
-  ctx.fillStyle = "rgba(255,255,255,1)";
+  //ctx.fillStyle = "rgba(255,255,255,1)";
 
-  for ( var i = 0; i < this.currentBrush.lineCoords.length; i++ ) {
+    for( key of Object.keys( this.labels ) ) {
 
-    var row = Math.ceil(this.currentBrush.lineCoords[i].z*this.res[2] /  this.dimx);
-    //console.log(row);
-    var col = Math.ceil(this.currentBrush.lineCoords[i].z*this.res[2] % this.dimx);
-    //console.log(col);
-    
-    var x = this.currentBrush.lineCoords[i].x*this.res[0] + col * this.res[0];
-    var y = this.currentBrush.lineCoords[i].y*this.res[1] + row * this.res[1];
+      var brush = this.labels[key];
 
-    x = Math.round(x);
-    y = Math.round(y);
+      //console.log(brush);
 
-    //console.log(x,y);
-    
-    var imgData = ctx.createImageData(1,1);
+      for ( var i = 0; i < brush.lineCoords.length; i++ ) {
 
-    for (var j = 0; j < imgData.data.length; j+=4) {
+        var row = Math.ceil( brush.lineCoords[i].z*this.res[2] /  this.dimx );
+        //console.log(row);
+        var col = Math.ceil( brush.lineCoords[i].z*this.res[2] % this.dimx );
+        //console.log(col);
 
-      // R
-      imgData.data[j] = 255;
-      // G
-      imgData.data[j+1] = 0;
-      // B
-      imgData.data[j+2] = 0;
-      // Alpha
-      imgData.data[j+3] = 255;
+        var x = brush.lineCoords[i].x*this.res[0] + col * this.res[0];
+        var y = brush.lineCoords[i].y*this.res[1] + row * this.res[1];
+
+        x = Math.round(x);
+        y = Math.round(y);
+
+        //console.log(x,y);
+
+        var imgData = ctx.createImageData(1,1);
+
+        for (var j = 0; j < imgData.data.length; j+=4) {
+
+          // R
+          imgData.data[j] = Math.ceil(brush.color[0]);
+          // G
+          imgData.data[j+1] = Math.ceil(brush.color[1]);
+          // B
+          imgData.data[j+2] = Math.ceil(brush.color[2]);
+          // Alpha
+          imgData.data[j+3] = 255;
+
+        }
+
+        //console.log(row, col, this.currentBrush.lineCoords[i].z * slicer.res[2]);
+
+        ctx.putImageData(imgData, x * res_size, y * res_size);
 
     }
-
-    console.log(row, col, this.currentBrush.lineCoords[i].z * slicer.res[2]);
-
-    ctx.putImageData(imgData, x * res_size, y * res_size);
-
   }
 
   var exportImage =  this.exportCanvas.toDataURL("image/png");
@@ -791,9 +798,19 @@ Slicer.prototype.importBrush = function() {
                 x = x /  slicer.res[0] * 1;
                 y = y /  slicer.res[1] * 1;
                 z = z /  slicer.res[2] * 1;
-                              
-                slicer.currentBrush.lineCoords.push({x:x / res_size, y:y / res_size, z:z});
-              
+
+                for( key of Object.keys( slicer.labels ) ) {
+
+                  var brush = slicer.labels[key];
+
+                  if( r === Math.ceil(brush.color[0]) && g === Math.ceil(brush.color[1]) && b === Math.ceil(brush.color[2])) {
+
+                    brush.lineCoords.push({x:x / res_size, y:y / res_size, z:z});
+
+                  }
+
+                }
+                                            
             }
 
         }
