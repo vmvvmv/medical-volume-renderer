@@ -774,7 +774,27 @@ Slicer.prototype.exportBrush = function() {
 
 Slicer.prototype.importBrush = function() {
 
-  loadImage(this.properties.importAtlasUrl, function () {
+  var imageName;
+
+  if ( res_size === 1  ) {
+    
+    imageName = this.properties.importAtlasUrl + '_l.png';
+    
+  } else if ( res_size === 2 ) {
+
+    imageName = this.properties.importAtlasUrl + '_m.png';
+
+  }  else if ( res_size === 4 ) {
+    
+    imageName = this.properties.importAtlasUrl + '_s.png';
+    
+  }  else if ( res_size ===  8 ) {
+    
+    imageName = this.properties.importAtlasUrl + '_xs.png';
+    
+  }
+
+  loadImage(imageName, function () {
     var image = new Image();
     var headers = request.getAllResponseHeaders();
     var match = headers.match( /^Content-Type\:\s*(.*?)$/mi );
@@ -824,15 +844,19 @@ Slicer.prototype.importBrush = function() {
                 var pixely = Math.floor( ( i / 4 ) / imageQuadWidth ) + k * imageQuadHeight;
                 var pixelx = ( ( i / 4  ) % imageQuadWidth) + j * imageQuadWidth;
 
-                var row =  Math.floor( pixely / slicer.res[1] / res_size );
-                var col =  Math.floor( pixelx / slicer.res[0] / res_size );
+                //console.log(pixely,pixelx);
+
+                var row =  Math.floor( pixely / slicer.res[1] );
+                var col =  Math.floor( pixelx / slicer.res[0]  );
+
+                //console.log(row,col);
                 
                 var z = row * slicer.dimx - slicer.dimx + col - 1;
 
                 //console.log( row, col, z );
             
-                var x = (  pixelx % ( slicer.res[0] * res_size ));
-                var y = (  pixely % ( slicer.res[1] * res_size));
+                var x = (  pixelx % ( slicer.res[0] ));
+                var y = (  pixely % ( slicer.res[1] ));
                 
               
                 x = x /  slicer.res[0] * 1;
@@ -852,7 +876,7 @@ Slicer.prototype.importBrush = function() {
 
                 // }
 
-                slicer.currentBrush.lineCoords.push({x:x / res_size, y:y / res_size, z:z});
+                slicer.currentBrush.lineCoords.push({x:x, y:y, z:z});
                 
                                             
             }
