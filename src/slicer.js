@@ -862,7 +862,7 @@ Slicer.prototype.importBrush = function() {
 
                 //console.log(row,col);
                 
-                var z = row * slicer.dimx - slicer.dimx + col - 1;
+                var z = row * slicer.dimx  + col;
 
                 //console.log( row, col, z );
             

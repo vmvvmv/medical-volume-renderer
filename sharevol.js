@@ -9290,7 +9290,7 @@ function loadTexture() {
   var orginalTextSize = state.objects[0].volume.originalSize;
 
   //develop
-  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE / 4;
+  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE / 2;
  // console.log(state.objects[0].volume.res);
 
   if ( MAX_TEXTURE_SIZE >= orginalTextSize  ) {
@@ -10362,7 +10362,7 @@ Slicer.prototype.importBrush = function() {
 
                 //console.log(row,col);
                 
-                var z = row * slicer.dimx - slicer.dimx + col - 1;
+                var z = row * slicer.dimx  + col;
 
                 //console.log( row, col, z );
             
