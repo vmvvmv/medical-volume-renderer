@@ -135,8 +135,8 @@ function Slicer(props, image, filter, parentEl) {
   //console.log(this);
   //exportBrush canvas
   this.exportCanvas = document.createElement("canvas");
-  this.exportCanvas.width = this.image.width * res_size;
-  this.exportCanvas.height = this.image.height * res_size;
+  this.exportCanvas.width = this.image.width;
+  this.exportCanvas.height = this.image.height;
 }
 
 Slicer.prototype.toggle = function() {
@@ -737,7 +737,8 @@ Slicer.prototype.exportBrush = function() {
         x = Math.round(x);
         y = Math.round(y);
 
-        //console.log(x,y);
+        //console.log(brush.lineCoords[i].x,brush.lineCoords[i].y);
+        console.log(x,y);
 
         var imgData = ctx.createImageData(1,1);
 
@@ -759,7 +760,7 @@ Slicer.prototype.exportBrush = function() {
 
         //console.log(row, col, this.currentBrush.lineCoords[i].z * slicer.res[2]);
 
-        ctx.putImageData(imgData, x * res_size, y * res_size);
+        ctx.putImageData(imgData, x, y);
 
         //console.log('putData');
     }
@@ -818,33 +819,43 @@ Slicer.prototype.importBrush = function() {
 
       console.log('brush import begin');
 
-      var quadsNum = 8;
+      // var quadsNum = 8;
 
-      var imageQuadWidth = image.width / quadsNum;
-      var imageQuadHeight = image.height / quadsNum;
+      // var imageQuadWidth = image.width / quadsNum;
+      // var imageQuadHeight = image.height / quadsNum;
       
-      for( var k = 0; k < quadsNum; k++) { 
+      // for( var k = 0; k < quadsNum; k++) { 
 
-        for( var j = 0; j < quadsNum; j++) {  
+      //   for( var j = 0; j < quadsNum; j++) {  
           
-          var width = (j * imageQuadWidth + imageQuadWidth) > image.width ? image.width / quadsNum - image.width - (j * imageQuadWidth + imageQuadWidth) : image.width / quadsNum;
-          var height = (k * imageQuadHeight + imageQuadHeight) > image.height ? image.height / quadsNum - image.height - (k * imageQuadHeight + imageQuadHeight) : image.height / quadsNum;
+      //     var width = (j * imageQuadWidth + imageQuadWidth) > image.width ? image.width / quadsNum - image.width - (j * imageQuadWidth + imageQuadWidth) : image.width / quadsNum;
+      //     var height = (k * imageQuadHeight + imageQuadHeight) > image.height ? image.height / quadsNum - image.height - (k * imageQuadHeight + imageQuadHeight) : image.height / quadsNum;
 
-          var pix = ctx.getImageData( j * imageQuadWidth, k * imageQuadHeight, width, height ).data;
+          //var pix = ctx.getImageData( j * imageQuadWidth, k * imageQuadHeight, width, height ).data;
 
+          var pix = ctx.getImageData(0,0, image.width,image.height).data;
+
+          //console.log(pix.length );
           for( var i = 0; i<pix.length; i+=4 ) {
               
               var r = pix[i];
               var g = pix[i+1];
               var b = pix[i+2];
               var a = pix[i+3];
+              //console.log(i );
           
               if( (r!==0 || g!==0|| b!==0) ) {
 
-                var pixely = Math.floor( ( i / 4 ) / imageQuadWidth ) + k * imageQuadHeight;
-                var pixelx = ( ( i / 4  ) % imageQuadWidth) + j * imageQuadWidth;
+                //console.log(i );
+                //var pixely = Math.floor( ( i / 4 ) / imageQuadWidth ) + k * imageQuadHeight;
+                //var pixelx =  ( ( i / 4  ) % imageQuadWidth) + j * imageQuadWidth;
 
-                //console.log(pixely,pixelx);
+                var pixely = Math.floor( (i / 4) /  image.width);
+                var pixelx = Math.floor( (i / 4) %  image.width);
+                
+
+                //console.log((i / 4) %pixely);
+                //console.log(pixelx,pixely);
 
                 var row =  Math.floor( pixely / slicer.res[1] );
                 var col =  Math.floor( pixelx / slicer.res[0]  );
@@ -883,9 +894,9 @@ Slicer.prototype.importBrush = function() {
 
         }
 
-      }
+     // }
 
-    }
+    //}
     
     console.log('brush import finish');
     //console.log( slicer.currentBrush.lineCoords);
