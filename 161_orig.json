@@ -55,7 +55,8 @@
                 "X": 250,
                 "Z": 250,
                 "usecolourmap": false,
-                "contrast": 1
+                "contrast": 1,
+                "importAtlasUrl": "161_bone_array_l.png"
             }
         },
         "zmin": 0,

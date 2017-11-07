@@ -10241,8 +10241,11 @@ Slicer.prototype.exportBrush = function() {
 
         var imgData = ctx.createImageData(1,1);
 
+        //console.log(ctx);
+
         for (var j = 0; j < imgData.data.length; j+=4) {
 
+          //console.log(imgData.data);
           // R
           imgData.data[j] = Math.ceil(brush.color[0]);
           // G
@@ -10258,11 +10261,13 @@ Slicer.prototype.exportBrush = function() {
 
         ctx.putImageData(imgData, x * res_size, y * res_size);
 
+        //console.log('putData');
     }
   }
+  console.log('export finish');
 
   var exportImage =  this.exportCanvas.toDataURL("image/png");
-  
+  //console.log(exportImage);
   window.open(exportImage, '_blank');
 
 }
@@ -10334,17 +10339,21 @@ Slicer.prototype.importBrush = function() {
                 y = y /  slicer.res[1] * 1;
                 z = z /  slicer.res[2] * 1;
 
-                for( key of Object.keys( slicer.labels ) ) {
+                // for( key of Object.keys( slicer.labels ) ) {
 
-                  var brush = slicer.labels[key];
+                //   var brush = slicer.labels[key];
 
-                  if( r === Math.ceil(brush.color[0]) && g === Math.ceil(brush.color[1]) && b === Math.ceil(brush.color[2])) {
+                //   if( r === Math.ceil(brush.color[0]) && g === Math.ceil(brush.color[1]) && b === Math.ceil(brush.color[2])) {
 
-                    brush.lineCoords.push({x:x / res_size, y:y / res_size, z:z});
+                //     brush.lineCoords.push({x:x / res_size, y:y / res_size, z:z});
 
-                  }
+                //   }
+                  
 
-                }
+                // }
+
+                slicer.currentBrush.lineCoords.push({x:x / res_size, y:y / res_size, z:z});
+                
                                             
             }
 
