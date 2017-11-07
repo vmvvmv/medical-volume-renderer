@@ -10254,7 +10254,7 @@ Slicer.prototype.exportBrush = function() {
           imgData.data[j+2] = Math.ceil(brush.color[2]);
           // Alpha
           imgData.data[j+3] = 255;
-
+          
         }
 
         //console.log(row, col, this.currentBrush.lineCoords[i].z * slicer.res[2]);
