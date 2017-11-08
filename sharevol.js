@@ -10319,89 +10319,49 @@ Slicer.prototype.importBrush = function() {
 
       console.log('brush import begin');
 
-      // var quadsNum = 8;
 
-      // var imageQuadWidth = image.width / quadsNum;
-      // var imageQuadHeight = image.height / quadsNum;
+      var pix = ctx.getImageData(0,0, image.width,image.height).data
+      //console.log(pix.length );
+      for( var i = 0; i<pix.length; i+=4 ) {
+          
+          var r = pix[i];
+          var g = pix[i+1];
+          var b = pix[i+2];
+          var a = pix[i+3];
+          //console.log(i );
       
-      // for( var k = 0; k < quadsNum; k++) { 
+          if( (r!==0 || g!==0|| b!==0) )  {
 
-      //   for( var j = 0; j < quadsNum; j++) {  
-          
-      //     var width = (j * imageQuadWidth + imageQuadWidth) > image.width ? image.width / quadsNum - image.width - (j * imageQuadWidth + imageQuadWidth) : image.width / quadsNum;
-      //     var height = (k * imageQuadHeight + imageQuadHeight) > image.height ? image.height / quadsNum - image.height - (k * imageQuadHeight + imageQuadHeight) : image.height / quadsNum;
-
-          //var pix = ctx.getImageData( j * imageQuadWidth, k * imageQuadHeight, width, height ).data;
-
-          var pix = ctx.getImageData(0,0, image.width,image.height).data;
-
-          //console.log(pix.length );
-          for( var i = 0; i<pix.length; i+=4 ) {
-              
-              var r = pix[i];
-              var g = pix[i+1];
-              var b = pix[i+2];
-              var a = pix[i+3];
-              //console.log(i );
-          
-              if( (r!==0 || g!==0|| b!==0) ) {
-
-                //console.log(i );
-                //var pixely = Math.floor( ( i / 4 ) / imageQuadWidth ) + k * imageQuadHeight;
-                //var pixelx =  ( ( i / 4  ) % imageQuadWidth) + j * imageQuadWidth;
-
-                var pixely = Math.floor( (i / 4) /  image.width);
-                var pixelx = Math.floor( (i / 4) %  image.width);
-                
-
-                //console.log((i / 4) %pixely);
-                //console.log(pixelx,pixely);
-
-                var row =  Math.floor( pixely / slicer.res[1] );
-                var col =  Math.floor( pixelx / slicer.res[0]  );
-
-                //console.log(row,col);
-                
-                var z = row * slicer.dimx  + col;
-
-                //console.log( row, col, z );
+            var pixely = Math.floor( (i / 4) /  image.width);
+            var pixelx = Math.floor( (i / 4) %  image.width);
             
-                var x = (  pixelx % ( slicer.res[0] ));
-                var y = (  pixely % ( slicer.res[1] ));
-                
-              
-                x = x /  slicer.res[0] * 1;
-                y = y /  slicer.res[1] * 1;
-                z = z /  slicer.res[2] * 1;
-
-                // for( key of Object.keys( slicer.labels ) ) {
-
-                //   var brush = slicer.labels[key];
-
-                //   if( r === Math.ceil(brush.color[0]) && g === Math.ceil(brush.color[1]) && b === Math.ceil(brush.color[2])) {
-
-                //     brush.lineCoords.push({x:x / res_size, y:y / res_size, z:z});
-
-                //   }
-                  
-
-                // }
-
-                slicer.currentBrush.lineCoords.push({x:x, y:y, z:z});
-                
-                                            
-            }
+            var row =  Math.floor( pixely / slicer.res[1] );
+            var col =  Math.floor( pixelx / slicer.res[0]  );
+            
+            var z = row * slicer.dimx  + col;
+        
+            var x = (  pixelx % ( slicer.res[0] ));
+            var y = (  pixely % ( slicer.res[1] ));
+            
+          
+            x = x /  slicer.res[0] * 1;
+            y = y /  slicer.res[1] * 1;
+            z = z /  slicer.res[2] * 1
+            // for( key of Object.keys( slicer.labels ) ) 
+            //   var brush = slicer.labels[key]
+            //   if( r === Math.ceil(brush.color[0]) && g === Math.ceil(brush.color[1]) && b === Math.ceil(brush.color[2])) 
+            //     brush.lineCoords.push({x:x / res_size, y:y / res_size, z:z})
+            //   }
+            
+            // 
+            slicer.currentBrush.lineCoords.push({x:x, y:y, z:z});
 
         }
 
-     // }
+      }
 
-    //}
-    
     console.log('brush import finish');
-    //console.log( slicer.currentBrush.lineCoords);
-    if(slicer.properties.enableBrush || slicer.properties.showBrush)
-    slicer.draw();
+    if(slicer.properties.enableBrush || slicer.properties.showBrush) slicer.draw();
 
     }
   }
