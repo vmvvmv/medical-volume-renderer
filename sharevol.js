@@ -9290,7 +9290,7 @@ function loadTexture() {
   var orginalTextSize = state.objects[0].volume.originalSize;
 
   //develop
-  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE;
+  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE / 2;
  // console.log(state.objects[0].volume.res);
 
   if ( MAX_TEXTURE_SIZE >= orginalTextSize  ) {
@@ -10118,7 +10118,7 @@ Slicer.prototype.drawBrush = function() {
 
     for( viewport of this.viewers ) {
 
-      var brushSize = viewport.viewport.width / this.dims[0] / res_size * 2;
+      var brushSize = viewport.viewport.width / this.dims[0] / res_size * 4;
       var v = viewport.viewport;
       var deepDimension;
       var axis = viewport.axis;
