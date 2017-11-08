@@ -618,7 +618,7 @@ Slicer.prototype.drawBrush = function() {
 
     for( viewport of this.viewers ) {
 
-      var brushSize = viewport.viewport.width / this.dims[0] / res_size * 4;
+      //var brushSize = viewport.viewport.width / this.dims[0] / res_size * 4;
       var v = viewport.viewport;
       var deepDimension;
       var axis = viewport.axis;
@@ -626,6 +626,11 @@ Slicer.prototype.drawBrush = function() {
       var xkey;
       var ykey;
       var zkey;
+
+      var voxelWidth = Math.ceil ( v.width / slicer.res[viewport.i] * res_size);
+      var voxelHeight = Math.ceil ( v.height / slicer.res[viewport.j] * res_size);
+
+      //console.log(voxelWidth,voxelHeight);
 
       switch(axis){
 
@@ -682,12 +687,32 @@ Slicer.prototype.drawBrush = function() {
                     break;
               
                 }
+
+                var imgData = this.overlayCanvasContext.createImageData(voxelWidth,voxelHeight);
+                
+                
+                for (var j = 0; j < imgData.data.length; j+=4) {
+        
+                  // R
+                  imgData.data[j] = Math.ceil(brush.color[0]);
+                  // G
+                  imgData.data[j+1] = Math.ceil(brush.color[1]);
+                  // B
+                  imgData.data[j+2] = Math.ceil(brush.color[2]);
+                  // Alpha
+                  imgData.data[j+3] = 255;
+                  
+                }
+                
+                        //console.log(row, col, this.currentBrush.lineCoords[i].z * slicer.res[2]);
+                
+                this.overlayCanvasContext.putImageData(imgData, x, y);
               
               //console.log('axis' + axis + ' ',rotate,x,y);
 
-              this.overlayCanvasContext.beginPath();
-              this.overlayCanvasContext.arc(x, y, brushSize, 0, 2 * Math.PI);
-              this.overlayCanvasContext.fill();
+              // this.overlayCanvasContext.beginPath();
+              // this.overlayCanvasContext.arc(x, y, brushSize, 0, 2 * Math.PI);
+              // this.overlayCanvasContext.fill();
 
           }
 
