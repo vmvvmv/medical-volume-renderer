@@ -627,9 +627,14 @@ Slicer.prototype.drawBrush = function() {
       var ykey;
       var zkey;
 
-      var voxelWidth = Math.ceil ( v.width / slicer.res[viewport.i] * res_size);
-      var voxelHeight = Math.ceil ( v.height / slicer.res[viewport.j] * res_size);
-
+      if( viewport.i!==2 )
+        var voxelWidth = Math.ceil ( v.width / slicer.res[viewport.i] * res_size);
+      else 
+        var voxelWidth = Math.ceil ( v.width / slicer.res[viewport.i]);
+      if( viewport.j!==2 )
+        var voxelHeight = Math.ceil ( v.height / slicer.res[viewport.j] * res_size);
+      else
+        var voxelHeight = Math.ceil ( v.height / slicer.res[viewport.j]);
       //console.log(voxelWidth,voxelHeight);
 
       switch(axis){
