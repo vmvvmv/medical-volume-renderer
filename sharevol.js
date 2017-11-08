@@ -9562,25 +9562,27 @@ function Slicer(props, image, filter, parentEl) {
 
   this.labels[this.currentBrush.label] = this.currentBrush;
 
+  //this.labelKey = 0;
+
  //console.log(props);
 
-  if ( props.slices.savedLabels ) {
+  // if ( props.slices.savedLabels ) {
 
-    for( key  of  Object.keys(props.slices.savedLabels) ) {
+  //   for( key  of  Object.keys(props.slices.savedLabels) ) {
 
-      var label = props.slices.savedLabels[key];
-      //console.log(label);
-      this.labels[key] = {
+  //     var label = props.slices.savedLabels[key];
+  //     //console.log(label);
+  //     this.labels[key] = {
 
-        label:label.label,
-        color: label.color,
-        lineCoords:[],
+  //       label:label.label,
+  //       color: label.color,
+  //       lineCoords:[],
 
-      }
+  //     }
 
-    }
+  //   }
 
-  }
+  // }
 
   this.properties.importAtlasUrl = props.slices.properties.importAtlasUrl||undefined;
 
@@ -9637,6 +9639,10 @@ function Slicer(props, image, filter, parentEl) {
   this.exportCanvas = document.createElement("canvas");
   this.exportCanvas.width = this.image.width;
   this.exportCanvas.height = this.image.height;
+}
+
+function rgbToHex(r, g, b) {
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 
 Slicer.prototype.toggle = function() {
@@ -9696,7 +9702,7 @@ Slicer.prototype.addGUI = function(gui) {
   var f3 = this.gui.addFolder('Кисточка');
 
   var newName = { name: 'new label', color: [214, 188, 86] };
-  var currentItem = { label: null };
+  this.currentItem = { label: null };
 
   f3.add(newName, 'name').onChange( function(){
 
@@ -9723,7 +9729,7 @@ Slicer.prototype.addGUI = function(gui) {
 
     f3.__controllers[f3.__controllers.length-1].remove();
 
-    f3.add( currentItem, 'label', Object.keys(that.labels) ).onChange(function(val) {
+    f3.add( that.currentItem, 'label', Object.keys(that.labels) ).onChange(function(val) {
       
       that.currentBrush = that.labels[ val ];
 
@@ -9770,7 +9776,7 @@ Slicer.prototype.addGUI = function(gui) {
 
   });
 
-  f3.add( currentItem, 'label', Object.keys(this.labels) ).onChange(function(val) {
+  f3.add( that.currentItem, 'label', Object.keys(this.labels) ).onChange(function(val) {
         
         that.currentBrush = that.labels[ val ];
         that.draw();
@@ -10346,21 +10352,52 @@ Slicer.prototype.importBrush = function() {
           
             x = x /  slicer.res[0] * 1;
             y = y /  slicer.res[1] * 1;
-            z = z /  slicer.res[2] * 1
-            // for( key of Object.keys( slicer.labels ) ) 
-            //   var brush = slicer.labels[key]
-            //   if( r === Math.ceil(brush.color[0]) && g === Math.ceil(brush.color[1]) && b === Math.ceil(brush.color[2])) 
-            //     brush.lineCoords.push({x:x / res_size, y:y / res_size, z:z})
-            //   }
-            
-            // 
-            slicer.currentBrush.lineCoords.push({x:x, y:y, z:z});
+            z = z /  slicer.res[2] * 1;
+
+            var hexColor =  rgbToHex(r, g, b);
+
+            if ( slicer.labels [ hexColor ]  === undefined ) {
+
+              slicer.labels [ hexColor ] =  {
+                
+                    label: hexColor,
+                    color: [r,g,b],
+                    lineCoords:[],
+                
+              }
+
+              slicer.labels [ hexColor ].lineCoords.push({x:x, y:y, z:z});
+
+            } else {
+
+              slicer.labels [ hexColor ].lineCoords.push({x:x, y:y, z:z});
+
+            }
 
         }
 
       }
 
     console.log('brush import finish');
+    //console.log(slicer.gui.__folders['Кисточка']);
+
+    var f3 = slicer.gui.__folders['Кисточка'];
+
+    f3.__controllers[f3.__controllers.length-1].remove();
+    
+    f3.add( slicer.currentItem, 'label', Object.keys(slicer.labels) ).onChange(function(val) {
+          
+      slicer.currentBrush = slicer.labels[ val ];
+      
+      //console.log(that.labels);
+      slicer.draw();
+      
+      for (var i in f3.__controllers) {
+        f3.__controllers[i].updateDisplay();
+      }
+          
+    });
+
     if(slicer.properties.enableBrush || slicer.properties.showBrush) slicer.draw();
 
     }
@@ -10372,10 +10409,6 @@ Slicer.prototype.importBrush = function() {
 Slicer.prototype.drawIntersections = function() {
 
   function drawRect ( x,y,width,height, overlayCanvasContext ) {
-
-    function rgbToHex(r, g, b) {
-      return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-    }
     
     if (volume.interSectionBoxes[boxkey].color['red']) {
       var color =   rgbToHex( Math.floor(volume.interSectionBoxes[boxkey].color['red']),
