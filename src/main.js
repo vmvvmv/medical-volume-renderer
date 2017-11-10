@@ -410,6 +410,8 @@ function updateColourmap() {
   var gradient = $('gradient');
   colours.palette.draw(gradient, false);
 
+  //console.log(gradient);
+
   if (volume && volume.webgl) {
     volume.webgl.updateTexture(volume.webgl.gradientTexture, gradient, volume.gl.TEXTURE1);  //Use 2nd texture unit
     volume.applyBackground(colours.palette.background.html());

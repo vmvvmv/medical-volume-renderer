@@ -9418,6 +9418,8 @@ function updateColourmap() {
   var gradient = $('gradient');
   colours.palette.draw(gradient, false);
 
+  //console.log(gradient);
+
   if (volume && volume.webgl) {
     volume.webgl.updateTexture(volume.webgl.gradientTexture, gradient, volume.gl.TEXTURE1);  //Use 2nd texture unit
     volume.applyBackground(colours.palette.background.html());
@@ -9919,6 +9921,10 @@ Slicer.prototype.reset = function() {
 
 Slicer.prototype.updateColourmap = function() {
   this.webgl.updateTexture(this.webgl.gradientTexture, $('gradient'), this.gl.TEXTURE2);  //Use 2nd texture unit
+
+  if(this.brushWebgl)
+  this.brushWebgl.updateTexture(this.brushWebgl.gradientTexture, $('gradient'), this.brushGl.TEXTURE2);  //Use 2nd texture unit
+
   this.draw();
 }
 
@@ -9999,7 +10005,7 @@ Slicer.prototype.draw = function() {
 
     //Options
 
-    this.brushGl.uniform1i(this.brushProgram.uniforms["colourmap"], this.properties.usecolourmap);
+    this.brushGl.uniform1i(this.brushProgram.uniforms["colourmap"], true);
 
     // brightness and contrast
     this.brushGl.uniform1f(this.brushProgram.uniforms["bright"], this.properties.brightness);
