@@ -9562,28 +9562,6 @@ function Slicer(props, image, filter, parentEl) {
 
   this.labels[this.currentBrush.label] = this.currentBrush;
 
-  //this.labelKey = 0;
-
- //console.log(props);
-
-  // if ( props.slices.savedLabels ) {
-
-  //   for( key  of  Object.keys(props.slices.savedLabels) ) {
-
-  //     var label = props.slices.savedLabels[key];
-  //     //console.log(label);
-  //     this.labels[key] = {
-
-  //       label:label.label,
-  //       color: label.color,
-  //       lineCoords:[],
-
-  //     }
-
-  //   }
-
-  // }
-
   this.properties.importAtlasUrl = props.slices.properties.importAtlasUrl||undefined;
 
   //-----------------------------------------------------------------------------------
@@ -9598,13 +9576,7 @@ function Slicer(props, image, filter, parentEl) {
   this.canvas = document.createElement("canvas");
   this.canvas.style.cssText = "position: absolute; bottom: 0px;   z-index: 0; margin: 0px; padding: 0px; border: none; background: rgba(0,0,0,0); pointer-events: none;";
 
-  this.overlayCanvas = document.createElement("canvas");
-  this.overlayCanvas.style.cssText = 'position: absolute; bottom: 0px;   z-index: 1; margin: 0px; padding: 0px; border: none; background: rgba(0,0,0,0); pointer-events: none;';
-  this.overlayCanvasContext =  this.overlayCanvas.getContext('2d');
 
-  this.container.appendChild(this.overlayCanvas);
-
-  this.doLayout();
 
   this.canvas.mouse = new Mouse(this.canvas, this);
 
@@ -9622,7 +9594,6 @@ function Slicer(props, image, filter, parentEl) {
   if (this.program.errors) OK.debug(this.program.errors);
   this.program.setup(["aVertexPosition"], ["palette", "texture", "colourmap", "cont", "bright", "power", "slice", "dim", "res", "axis", "select"]);
 
-
   this.gl.clearColor(0, 0, 0, 0);
   this.gl.enable(this.gl.BLEND);
   this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
@@ -9630,6 +9601,25 @@ function Slicer(props, image, filter, parentEl) {
 
   //Load the textures
   this.loadImage(this.image);
+  
+  //--------Draw brush with shader---------------------------------
+
+  this.brushCanvas = document.createElement("canvas");
+  this.brushCanvas.style.cssText = "position: absolute; bottom: 0px;   z-index: 0; margin: 0px; padding: 0px; border: none; background: rgba(0,0,0,0); pointer-events: none;";
+  
+  
+  this.isImportTextureLoaded = false;
+  //-----------------------------------------------------
+
+  this.overlayCanvas = document.createElement("canvas");
+  this.overlayCanvas.style.cssText = 'position: absolute; bottom: 0px;   z-index: 1; margin: 0px; padding: 0px; border: none; background: rgba(0,0,0,0); pointer-events: none;';
+  this.overlayCanvasContext =  this.overlayCanvas.getContext('2d');
+
+  this.container.appendChild(this.overlayCanvas);
+
+  this.doLayout();
+
+  //------------------------------------------------
 
   //Hidden?
   if (!this.properties.show) this.toggle();
@@ -9678,24 +9668,7 @@ Slicer.prototype.addGUI = function(gui) {
 
   //f1.open();
   
-  var f2 = this.gui.addFolder('Область интереса (слои)');
-  f2.add(this.properties, 'minX', 0, this.res[0] * res_size, 1).listen().onFinishChange(function(l) {if (volume) volume.clipminX(l / res_size);});
-  f2.add(this.properties, 'maxX', 0, this.res[0] * res_size, 1).listen().onFinishChange(function(l) {if (volume) volume.clipmaxX(l / res_size);});
-  f2.add(this.properties, 'minY', 0, this.res[1] * res_size, 1).listen().onFinishChange(function(l) {if (volume) volume.clipminY(l / res_size);});
-  f2.add(this.properties, 'maxY', 0, this.res[1] * res_size, 1).listen().onFinishChange(function(l) {if (volume) volume.clipmaxY(l / res_size);});
-  f2.add(this.properties, 'minZ', 0, this.res[2], 1).listen().onFinishChange(function(l) {if (volume) volume.clipminZ(l);});
-  f2.add(this.properties, 'maxZ', 0, this.res[2], 1).listen().onFinishChange(function(l) {if (volume) volume.clipmaxZ(l);});
-  state.properties.server = ''
-  // if (state.properties.server)
-    f2.add({"Обновить" : function() {ajaxPost(state.properties.server + "/update", "data=" + encodeURIComponent(getData(true, true)));}}, 'Обновить');
-  
-  //f2.open();
 
-  var changefn = function(value) {that.draw();};
-  for (var i in f1.__controllers)
-    f1.__controllers[i].onChange(changefn);
-  for (var i in f2.__controllers)
-    f2.__controllers[i].onChange(changefn);
 
   //--------------Brush
 
@@ -9913,7 +9886,9 @@ Slicer.prototype.doLayout = function() {
 
   //Restore the main canvas
   this.container.appendChild(this.canvas);
+  this.container.appendChild(this.brushCanvas);
   this.container.appendChild(this.overlayCanvas);
+  
 
   if (alignTop) {
     this.container.style.bottom = "";
@@ -9924,10 +9899,15 @@ Slicer.prototype.doLayout = function() {
   }
 }
 
-Slicer.prototype.loadImage = function(image) {
+Slicer.prototype.loadImage = function(image, isForBrush) {
   //Texture load
+  if(isForBrush)
+  for (var i=0; i<3; i++)
+    this.brushWebgl.loadTexture(image, this.filter);
+  else
   for (var i=0; i<3; i++)
     this.webgl.loadTexture(image, this.filter);
+
   this.reset();
 }
 
@@ -9958,11 +9938,23 @@ Slicer.prototype.draw = function() {
     this.overlayCanvas.setAttribute("width", this.width);
     this.overlayCanvas.setAttribute("height", this.height);
 
+    this.brushCanvas.width = this.width;
+    this.brushCanvas.height = this.height;
+    this.brushCanvas.setAttribute("width", this.width);
+    this.brushCanvas.setAttribute("height", this.height);
+
     if (this.webgl) {
       this.gl.viewportWidth = this.width;
       this.gl.viewportHeight = this.height;
       this.webgl.viewport = new Viewport(0, 0, this.width, this.height);
     }
+
+    if (this.brushWebgl) {
+      this.brushGl.viewportWidth = this.width;
+      this.brushGl.viewportHeight = this.height;
+      this.brushWebgl.viewport = new Viewport(0, 0, this.width, this.height);
+    }
+
   }
 
   this.webgl.use(this.program);
@@ -9991,22 +9983,62 @@ Slicer.prototype.draw = function() {
   this.gl.scissor(0, 0, this.width, this.height);
   this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
+  //-------------------------------------------------------------------
+
+  if( this.isImportTextureLoaded ) { 
+    this.brushWebgl.use(this.brushProgram);
+    
+    //Uniform variables
+
+    //Gradient texture
+    this.brushGl.activeTexture(this.brushGl.TEXTURE0);
+    //console.log(this.webgl.gradientTexture);
+    //console.log(this.brushWebgl.gradientTexture);
+    this.brushGl.bindTexture(this.brushGl.TEXTURE_2D, this.brushWebgl.gradientTexture);
+    this.brushGl.uniform1i(this.brushProgram.uniforms["palette"], 0);
+
+    //Options
+
+    this.brushGl.uniform1i(this.brushProgram.uniforms["colourmap"], this.properties.usecolourmap);
+
+    // brightness and contrast
+    this.brushGl.uniform1f(this.brushProgram.uniforms["bright"], this.properties.brightness);
+    this.brushGl.uniform1f(this.brushProgram.uniforms["cont"], this.properties.contrast);
+    this.brushGl.uniform1f(this.brushProgram.uniforms["power"], this.properties.power);
+
+    //Image texture
+    this.brushGl.activeTexture(this.brushGl.TEXTURE1);
+    this.brushGl.bindTexture(this.brushGl.TEXTURE_2D, this.brushWebgl.textures[0]);
+    this.brushGl.uniform1i(this.brushProgram.uniforms["texture"], 1);
+
+    //Clear all
+    this.brushGl.scissor(0, 0, this.width, this.height);
+    //console.log(this.brushGl.COLOR_BUFFER_BIT | this.brushGl.DEPTH_BUFFER_BIT);
+    //this.brushGl.clearColor(0.5, 0, 0, 0.5);
+    this.brushGl.clear(this.brushGl.COLOR_BUFFER_BIT | this.brushGl.DEPTH_BUFFER_BIT);
+  }
+  //-------------------------------------------------------
   //Draw each slice viewport
-  for (var i=0; i<this.viewers.length; i++)
+  for (var i=0; i<this.viewers.length; i++) {
+
     this.drawSlice(i);
+    if( this.isImportTextureLoaded )
+    this.drawBrushShader(i);
 
-    this.overlayCanvasContext.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);  
-  
-    if(this.properties.drawRectangles)
-    this.drawIntersections();
+  }
 
-    //console.log(this.properties.drawRectangles);
-    if(this.properties.enableBrush || this.properties.showBrush)
-    this.drawBrush();
+  this.overlayCanvasContext.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);  
+
+  if(this.properties.drawRectangles)
+  this.drawIntersections();
+  //console.log(this.properties.drawRectangles);
+  if(this.properties.enableBrush || this.properties.showBrush)
+  this.drawBrush();
     
 }
 
 Slicer.prototype.drawSlice = function(idx) {
+  //console.log(idx);
   var view = this.viewers[idx];
   var vp = view.viewport;
 
@@ -10068,13 +10100,91 @@ Slicer.prototype.drawSlice = function(idx) {
   //Convert [0,1] selection coords to pixel coords
   this.gl.uniform2i(this.program.uniforms["select"], vp.width * sel[0] + vp.x, vp.height * sel[1] + vp.y);
 
+  //console.log(this.webgl);
   this.webgl.initDraw2d();
 
   this.gl.enable(this.gl.BLEND);
 
   //Draw, single pass
   this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+
   this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.webgl.vertexPositionBuffer.numItems);
+}
+
+Slicer.prototype.drawBrushShader = function(idx) {
+  
+  //console.log(idx);
+  var view = this.viewers[idx];
+  //console.log(view);
+  var vp = view.viewport;
+
+  //Set selection crosshairs
+  var sel;
+  if (view.rotate == -90) {
+
+      sel = [this.slices[view.j] / res_size, 1.0 - this.slices[view.i]];
+
+  }
+  else if (view.rotate == 180) {
+
+      sel = [1 - this.slices[view.i] / res_size, 1 - this.slices[view.j]];
+
+  }
+  else if (view.rotate == 360) {
+
+      sel = [1 - this.slices[view.i], this.slices[view.j]];
+
+  }
+  else {
+
+      if( view.axis===2 )
+        sel = [this.slices[view.i] / res_size, this.slices[view.j] / res_size];
+      else if( view.axis===1 )
+        sel = [this.slices[view.i] / res_size, this.slices[view.j]];
+      else if( view.axis===0 )
+        sel = [this.slices[view.i], this.slices[view.j] / res_size];
+
+  }
+
+  
+  
+  //Swap y-coord
+  if (!this.flipY) sel[1] = 1.0 - sel[1];
+
+  this.brushWebgl.viewport = vp;
+  this.brushGl.scissor(vp.x, vp.y, vp.width, vp.height);
+  //console.log(JSON.stringify(vp));
+
+  //Apply translation to origin, any rotation and scaling (inverse of zoom factor)
+  this.brushWebgl.modelView.identity()
+  this.brushWebgl.modelView.translate([0.5, 0.5, 0])
+  this.brushWebgl.modelView.rotate(-view.rotate, [0, 0, 1]);
+
+  //Apply zoom and flip Y
+  var scale = [1.0/2.0, -1.0/2.0, -1.0];
+  //scale = [this.res[2] / this.res[0],this.res[2] / this.res[1],-1.0];
+  //scale = [0.5,1.3,-1]
+  if (this.flipY) scale[1] = -scale[1];
+  this.brushWebgl.modelView.scale(scale);
+
+  //Texturing
+  //this.gl.uniform1i(this.program.uniforms["slice"], ));
+  this.brushGl.uniform3f(this.brushProgram.uniforms['slice'], this.slices[0] / res_size, this.slices[1] / res_size, this.slices[2]);
+  this.brushGl.uniform2f(this.brushProgram.uniforms["dim"], this.dimx, this.dimy);
+  this.brushGl.uniform3i(this.brushProgram.uniforms["res"], this.res[0], this.res[1], this.res[2]);
+  this.brushGl.uniform1i(this.brushProgram.uniforms["axis"], view.axis);
+  //Convert [0,1] selection coords to pixel coords
+  this.brushGl.uniform2i(this.brushProgram.uniforms["select"], vp.width * sel[0] + vp.x, vp.height * sel[1] + vp.y);
+
+  //console.log(this.webgl);
+  this.brushWebgl.initDraw2d();
+
+  this.brushGl.enable(this.brushGl.BLEND);
+
+  //Draw, single pass
+  this.brushGl.blendFunc(this.brushGl.SRC_ALPHA, this.brushGl.ONE_MINUS_SRC_ALPHA);
+
+  this.brushGl.drawArrays(this.brushGl.TRIANGLE_STRIP, 0, this.brushWebgl.vertexPositionBuffer.numItems);
 }
 
 Slicer.prototype.drawBrush = function() {
@@ -10355,6 +10465,35 @@ Slicer.prototype.importBrush = function() {
 
     image.onload = function () {
 
+      slicer.brushWebgl = new WebGL(slicer.brushCanvas);
+      slicer.brushGl = slicer.brushWebgl.gl;
+    
+      slicer.brushFilter = slicer.brushGl.NEAREST; //Nearest-neighbour (default)
+      //slicer.brushFilter = slicer.brushGl.LINEAR;
+    
+      //Use the default buffers
+      slicer.brushWebgl.init2dBuffers(slicer.gl.TEXTURE2);
+    
+      //Compile the shaders
+      slicer.brushProgram = new WebGLProgram(slicer.brushGl, 'texture-vs', 'texture-fs');
+      if (slicer.brushProgram.errors) OK.debug(slicer.brushProgram.errors);
+      slicer.brushProgram.setup(["aVertexPosition"], ["palette", "texture", "colourmap", "cont", "bright", "power", "slice", "dim", "res", "axis", "select"]);
+
+      slicer.brushGl.clearColor(0, 0, 0, 0);
+      slicer.brushGl.enable(slicer.brushGl.BLEND);
+      slicer.brushGl.blendFunc(slicer.brushGl.SRC_ALPHA, slicer.brushGl.ONE_MINUS_SRC_ALPHA);
+      slicer.brushGl.enable(slicer.brushGl.SCISSOR_TEST);
+      
+
+      slicer.loadImage(image, true);
+
+      console.log($('gradient'));
+
+      slicer.brushWebgl.updateTexture(slicer.brushWebgl.gradientTexture, $('gradient'), slicer.brushGl.TEXTURE2); 
+      
+
+      slicer.isImportTextureLoaded = true;
+
       console.log("Loaded image: " + image.width + " x " + image.height);
 
       var canvas = document.createElement('canvas');
@@ -10404,16 +10543,16 @@ Slicer.prototype.importBrush = function() {
               slicer.labels [ hexColor ] =  {
                 
                     label: hexColor,
-                    color: [r,g,b],
+                    color: hexColor,
                     lineCoords:[],
                 
               }
 
-              slicer.labels [ hexColor ].lineCoords.push({x:x, y:y, z:z});
+              //slicer.labels [ hexColor ].lineCoords.push({x:x, y:y, z:z});
 
             } else {
 
-              slicer.labels [ hexColor ].lineCoords.push({x:x, y:y, z:z});
+              //slicer.labels [ hexColor ].lineCoords.push({x:x, y:y, z:z});
 
             }
 
