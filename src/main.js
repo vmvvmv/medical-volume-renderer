@@ -56,9 +56,17 @@ function initPage() {
 
   //Load json data?
   var json = getSearchVariable("data");
-  // if (APP_SETTINGS){
-  //   json = APP_SETTINGS["json_url"];
-  // }
+  // Develop 
+  APP_SETTINGS = {
+    "json_url": "161_orig.json",
+    "atlas_url": "161_orig",
+    "update_url": "161_bone_array",
+    "app_gui": "",
+    "case_id": "197"
+  }
+  if (APP_SETTINGS){
+    json = APP_SETTINGS["json_url"];
+  }
   //Attempt to load default.json
   if (!json) json = "default.json";
 

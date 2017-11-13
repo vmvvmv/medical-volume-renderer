@@ -9064,9 +9064,17 @@ function initPage() {
 
   //Load json data?
   var json = getSearchVariable("data");
-  // if (APP_SETTINGS){
-  //   json = APP_SETTINGS["json_url"];
-  // }
+  // Develop 
+  APP_SETTINGS = {
+    "json_url": "161_orig.json",
+    "atlas_url": "161_orig",
+    "update_url": "161_bone_array",
+    "app_gui": "",
+    "case_id": "197"
+  }
+  if (APP_SETTINGS){
+    json = APP_SETTINGS["json_url"];
+  }
   //Attempt to load default.json
   if (!json) json = "default.json";
 
@@ -9699,6 +9707,11 @@ Slicer.prototype.addGUI = function(gui) {
   var f3 = this.gui.addFolder('Сегментации');
   var f4 = f3.addFolder('Загрузка');
   
+  f3.add( {"import brush atlas": function(){ 
+    
+     that.importBrush(); 
+    
+  }}, 'import brush atlas'); 
 
   // if (APP_SETTINGS) {
 
@@ -9797,7 +9810,7 @@ Slicer.prototype.addGUI = function(gui) {
   });
 
 
-  // f3.open();
+    f3.open();
 
 }
 
@@ -10587,22 +10600,22 @@ Slicer.prototype.importBrush = function() {
     console.log('brush import finish');
         //console.log(slicer.gui.__folders['Кисточка']);
 
-        var f3 = slicer.gui.__folders['Кисточка'];
+        // var f3 = slicer.gui.__folders['Кисточка'];
         
-            f3.__controllers[f3.__controllers.length-1].remove();
+        //     f3.__controllers[f3.__controllers.length-1].remove();
             
-            f3.add( slicer.currentItem, 'label', Object.keys(slicer.labels) ).onChange(function(val) {
+        //     f3.add( slicer.currentItem, 'label', Object.keys(slicer.labels) ).onChange(function(val) {
                   
-              slicer.currentBrush = slicer.labels[ val ];
+        //       slicer.currentBrush = slicer.labels[ val ];
               
-              //console.log(that.labels);
-              slicer.draw();
+        //       //console.log(that.labels);
+        //       slicer.draw();
               
-              for (var i in f3.__controllers) {
-                f3.__controllers[i].updateDisplay();
-              }
+        //       for (var i in f3.__controllers) {
+        //         f3.__controllers[i].updateDisplay();
+        //       }
                   
-            });
+        //     });
     
     if(slicer.properties.enableBrush || slicer.properties.showBrush) slicer.draw();
 
