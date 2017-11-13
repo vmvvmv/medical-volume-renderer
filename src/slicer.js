@@ -15,7 +15,6 @@ function Slicer(props, image, filter, parentEl) {
   
   this.image = image;
   this.res = props.volume.res;
-  //this.res = [320,320,320];
   this.dims = [props.volume.res[0] * props.volume.scale[0], 
                props.volume.res[1] * props.volume.scale[1], 
                props.volume.res[2] * props.volume.scale[2]];
@@ -44,7 +43,7 @@ function Slicer(props, image, filter, parentEl) {
   this.properties.zoom = 1.0;
 
   //brush---------------------------------------------------
-  this.properties.enableBrush = true;
+  this.properties.enableBrush = false;
   this.properties.drawRectangles = true;
   this.properties.showBrush = true;
   this.properties.brushTransperency = 255;
@@ -57,9 +56,7 @@ function Slicer(props, image, filter, parentEl) {
     lineCoords:[],
 
   }
-  
   this.labels = {};
-
   this.labels[this.currentBrush.label] = this.currentBrush;
 
   this.properties.importAtlasUrl = props.slices.properties.importAtlasUrl||undefined;
@@ -75,9 +72,6 @@ function Slicer(props, image, filter, parentEl) {
 
   this.canvas = document.createElement("canvas");
   this.canvas.style.cssText = "position: absolute; bottom: 0px;   z-index: 0; margin: 0px; padding: 0px; border: none; background: rgba(0,0,0,0); pointer-events: none;";
-
-
-
   this.canvas.mouse = new Mouse(this.canvas, this);
 
   this.webgl = new WebGL(this.canvas);
@@ -94,6 +88,7 @@ function Slicer(props, image, filter, parentEl) {
   if (this.program.errors) OK.debug(this.program.errors);
   this.program.setup(["aVertexPosition"], ["palette", "texture", "colourmap", "cont", "bright", "power", "slice", "dim", "res", "axis", "select"]);
 
+
   this.gl.clearColor(0, 0, 0, 0);
   this.gl.enable(this.gl.BLEND);
   this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
@@ -101,7 +96,6 @@ function Slicer(props, image, filter, parentEl) {
 
   //Load the textures
   this.loadImage(this.image);
-  
   //--------Draw brush with shader---------------------------------
 
   this.brushCanvas = document.createElement("canvas");
@@ -120,7 +114,6 @@ function Slicer(props, image, filter, parentEl) {
   this.doLayout();
 
   //------------------------------------------------
-
   //Hidden?
   if (!this.properties.show) this.toggle();
 
@@ -142,6 +135,20 @@ Slicer.prototype.toggle = function() {
     this.container.style.visibility = 'hidden';
 }
 
+//          ##   ##            
+//           ## ##             
+// ####### ######### #######   
+//           ## ##             
+//          ##   ##            
+                            
+//  ######   ##     ## ####    
+// ##    ##  ##     ##  ##     
+// ##        ##     ##  ##     
+// ##   #### ##     ##  ##     
+// ##    ##  ##     ##  ##     
+// ##    ##  ##     ##  ##     
+//  ######    #######  ####    
+
 Slicer.prototype.addGUI = function(gui) {
   this.gui = gui;
   var that = this;
@@ -157,34 +164,47 @@ Slicer.prototype.addGUI = function(gui) {
   f1.add(this.properties, 'drawRectangles').onChange( function(){ that.draw });
   f1.add(this.properties, 'layout').onFinishChange(function(l) {that.doLayout(); that.draw();});
 
-  // this.properties.resX = this.properties.X;
-  // this.properties.resY = this.properties.Y;
-
-  //f1.add(this.properties, 'X', 0, this.res[0] * res_size, 1).listen().onFinishChange(function( l ) { console.log(l); that.properties.X = l / res_size });
-  //f1.add(this.properties, 'Y', 0, this.res[1] * res_size, 1).listen().onFinishChange(function( l ) { console.log(l); that.properties.Y = l / res_size });
   f1.add(this.properties, 'X', 0, this.res[0] * res_size, 1).listen();
   f1.add(this.properties, 'Y', 0, this.res[1] * res_size, 1).listen();
   f1.add(this.properties, 'Z', 0, this.res[2], 1).listen();
 
-  //f1.open();
-  
-
+  var changefn = function(value) {that.draw();};
+  for (var i in f1.__controllers)
+    f1.__controllers[i].onChange(changefn);
 
   //--------------Brush
 
-  var f3 = this.gui.addFolder('Кисточка');
+  var f3 = this.gui.addFolder('Сегментации');
+  var f4 = f3.addFolder('Загрузка');
+  
 
+  // if (APP_SETTINGS) {
+
+  //   var object = {};
+    
+  //   for (let key of Object.keys(APP_SETTINGS.segmentations)) {
+      
+  //     object[key] = function() {
+
+  //               that.properties.importAtlasUrl = APP_SETTINGS.segmentations[key];
+  //               that.importBrush();
+  //             }
+  //     f4.add( object, key);
+  //     }    
+  //   }
+    
+  var f5 = f3.addFolder('Редактирование');
   var newName = { name: 'new label', color: [214, 188, 86] };
-  this.currentItem = { label: null };
+  var currentItem = { label: null };
 
-  f3.add(newName, 'name').onChange( function(){
+  f5.add(newName, 'name').onChange( function(){
 
     that.currentBrush.name = newName.name;
 
   });
 
 
-  f3.add( {"new label": function() {
+  f5.add( {"new label": function() {
     
     that.currentBrush = {
       
@@ -196,38 +216,33 @@ Slicer.prototype.addGUI = function(gui) {
     
   }}, 'new label');
 
-  f3.add( {"save label": function() {
+  f5.add( {"save label": function() {
     
     that.labels[that.currentBrush.label] = that.currentBrush;
 
-    f3.__controllers[f3.__controllers.length-1].remove();
+    f5.__controllers[f5.__controllers.length-1].remove();
 
-    f3.add( that.currentItem, 'label', Object.keys(that.labels) ).onChange(function(val) {
+    f5.add( currentItem, 'label', Object.keys(that.labels) ).onChange(function(val) {
       
       that.currentBrush = that.labels[ val ];
 
       //console.log(that.labels);
       that.draw();
 
-      for (var i in f3.__controllers) {
-        f3.__controllers[i].updateDisplay();
+      for (var i in f5.__controllers) {
+        f5.__controllers[i].updateDisplay();
       }
       
     });
 
   }}, 'save label');
   
-  f3.add( {"export brush atlas": function(){
+  f5.add( {"export brush atlas": function(){
         
       that.exportBrush();
         
   }}, 'export brush atlas');
 
-  f3.add( {"import brush atlas": function(){
-    
-      that.importBrush();
-    
-  }}, 'import brush atlas');
 
   f3.add(this.properties, 'enableBrush').onChange( function(){
     that.draw();
@@ -249,7 +264,7 @@ Slicer.prototype.addGUI = function(gui) {
 
   });
 
-  f3.add( that.currentItem, 'label', Object.keys(this.labels) ).onChange(function(val) {
+  f3.add( currentItem, 'label', Object.keys(this.labels) ).onChange(function(val) {
         
         that.currentBrush = that.labels[ val ];
         that.draw();
@@ -260,7 +275,7 @@ Slicer.prototype.addGUI = function(gui) {
   });
 
 
-  f3.open();
+  // f3.open();
 
 }
 
@@ -388,7 +403,6 @@ Slicer.prototype.doLayout = function() {
   this.container.appendChild(this.canvas);
   this.container.appendChild(this.brushCanvas);
   this.container.appendChild(this.overlayCanvas);
-  
 
   if (alignTop) {
     this.container.style.bottom = "";
@@ -419,7 +433,6 @@ Slicer.prototype.reset = function() {
 
 Slicer.prototype.updateColourmap = function() {
   this.webgl.updateTexture(this.webgl.gradientTexture, $('gradient'), this.gl.TEXTURE2);  //Use 2nd texture unit
-
   if(this.brushWebgl)
   this.brushWebgl.updateTexture(this.brushWebgl.gradientTexture, $('gradient'), this.brushGl.TEXTURE2);  //Use 2nd texture unit
 
@@ -445,14 +458,12 @@ Slicer.prototype.draw = function() {
     this.brushCanvas.width = this.width;
     this.brushCanvas.height = this.height;
     this.brushCanvas.setAttribute("width", this.width);
-    this.brushCanvas.setAttribute("height", this.height);
-
+    this.brushCanvas.setAttribute("height", this.height)
     if (this.webgl) {
       this.gl.viewportWidth = this.width;
       this.gl.viewportHeight = this.height;
       this.webgl.viewport = new Viewport(0, 0, this.width, this.height);
     }
-
     if (this.brushWebgl) {
       this.brushGl.viewportWidth = this.width;
       this.brushGl.viewportHeight = this.height;
@@ -531,50 +542,40 @@ Slicer.prototype.draw = function() {
 
   }
 
-  this.overlayCanvasContext.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);  
+    this.overlayCanvasContext.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);  
+  
+    if(this.properties.drawRectangles)
+    this.drawIntersections();
 
-  if(this.properties.drawRectangles)
-  this.drawIntersections();
-  //console.log(this.properties.drawRectangles);
-  if(this.properties.enableBrush || this.properties.showBrush)
-  this.drawBrush();
+    //console.log(this.properties.drawRectangles);
+    if(this.properties.enableBrush || this.properties.showBrush)
+    this.drawBrush();
     
 }
 
 Slicer.prototype.drawSlice = function(idx) {
-  //console.log(idx);
   var view = this.viewers[idx];
   var vp = view.viewport;
 
   //Set selection crosshairs
   var sel;
   if (view.rotate == -90) {
-
       sel = [this.slices[view.j] / res_size, 1.0 - this.slices[view.i]];
-
   }
   else if (view.rotate == 180) {
-
       sel = [1 - this.slices[view.i] / res_size, 1 - this.slices[view.j]];
-
   }
   else if (view.rotate == 360) {
-
       sel = [1 - this.slices[view.i], this.slices[view.j]];
-
   }
   else {
-
       if( view.axis===2 )
         sel = [this.slices[view.i] / res_size, this.slices[view.j] / res_size];
       else if( view.axis===1 )
         sel = [this.slices[view.i] / res_size, this.slices[view.j]];
       else if( view.axis===0 )
         sel = [this.slices[view.i], this.slices[view.j] / res_size];
-
   }
-
-  
   
   //Swap y-coord
   if (!this.flipY) sel[1] = 1.0 - sel[1];
@@ -604,14 +605,12 @@ Slicer.prototype.drawSlice = function(idx) {
   //Convert [0,1] selection coords to pixel coords
   this.gl.uniform2i(this.program.uniforms["select"], vp.width * sel[0] + vp.x, vp.height * sel[1] + vp.y);
 
-  //console.log(this.webgl);
   this.webgl.initDraw2d();
 
   this.gl.enable(this.gl.BLEND);
 
   //Draw, single pass
   this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-
   this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.webgl.vertexPositionBuffer.numItems);
 }
 
@@ -931,7 +930,7 @@ Slicer.prototype.exportBrush = function() {
   console.log('export finish');
 
   var exportImage =  this.exportCanvas.toDataURL("image/png");
-  //console.log(exportImage);
+  
   window.open(exportImage, '_blank');
 
 }
@@ -942,19 +941,19 @@ Slicer.prototype.importBrush = function() {
 
   if ( res_size === 1  ) {
     
-    imageName = this.properties.importAtlasUrl + '_l.png';
+    imageName = this.properties.importAtlasUrl + '-l';
     
   } else if ( res_size === 2 ) {
 
-    imageName = this.properties.importAtlasUrl + '_m.png';
+    imageName = this.properties.importAtlasUrl + '-m';
 
   }  else if ( res_size === 4 ) {
     
-    imageName = this.properties.importAtlasUrl + '_s.png';
+    imageName = this.properties.importAtlasUrl + '-s';
     
   }  else if ( res_size ===  8 ) {
     
-    imageName = this.properties.importAtlasUrl + '_xs.png';
+    imageName = this.properties.importAtlasUrl + '-xs';
     
   }
 
@@ -968,7 +967,7 @@ Slicer.prototype.importBrush = function() {
     var imageElement = document.createElement("img");
 
     image.onload = function () {
-
+    
       slicer.brushWebgl = new WebGL(slicer.brushCanvas);
       slicer.brushGl = slicer.brushWebgl.gl;
     
@@ -997,7 +996,6 @@ Slicer.prototype.importBrush = function() {
       
 
       slicer.isImportTextureLoaded = true;
-
       console.log("Loaded image: " + image.width + " x " + image.height);
 
       var canvas = document.createElement('canvas');
@@ -1065,25 +1063,25 @@ Slicer.prototype.importBrush = function() {
       }
 
     console.log('brush import finish');
-    //console.log(slicer.gui.__folders['Кисточка']);
+        //console.log(slicer.gui.__folders['Кисточка']);
 
-    var f3 = slicer.gui.__folders['Кисточка'];
-
-    f3.__controllers[f3.__controllers.length-1].remove();
+        var f3 = slicer.gui.__folders['Кисточка'];
+        
+            f3.__controllers[f3.__controllers.length-1].remove();
+            
+            f3.add( slicer.currentItem, 'label', Object.keys(slicer.labels) ).onChange(function(val) {
+                  
+              slicer.currentBrush = slicer.labels[ val ];
+              
+              //console.log(that.labels);
+              slicer.draw();
+              
+              for (var i in f3.__controllers) {
+                f3.__controllers[i].updateDisplay();
+              }
+                  
+            });
     
-    f3.add( slicer.currentItem, 'label', Object.keys(slicer.labels) ).onChange(function(val) {
-          
-      slicer.currentBrush = slicer.labels[ val ];
-      
-      //console.log(that.labels);
-      slicer.draw();
-      
-      for (var i in f3.__controllers) {
-        f3.__controllers[i].updateDisplay();
-      }
-          
-    });
-
     if(slicer.properties.enableBrush || slicer.properties.showBrush) slicer.draw();
 
     }

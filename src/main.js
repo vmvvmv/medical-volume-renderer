@@ -56,6 +56,9 @@ function initPage() {
 
   //Load json data?
   var json = getSearchVariable("data");
+  // if (APP_SETTINGS){
+  //   json = APP_SETTINGS["json_url"];
+  // }
   //Attempt to load default.json
   if (!json) json = "default.json";
 
@@ -165,7 +168,7 @@ function saveData() {
   }
 }
 
-function getData(compact, matrix) {
+function getData(compact, matrix, trigger=null) {
   if (volume) {
     var vdat = volume.get(matrix);
     var object = state.objects[0];
@@ -195,7 +198,9 @@ function getData(compact, matrix) {
     else
       delete object.colourmap;
 
+    object.trigger = trigger;
     object.intersections = [];
+  
 
     for ( boxKey of Object.keys(volume.interSectionBoxes) ) {
 
@@ -282,27 +287,27 @@ function loadTexture() {
   var orginalTextSize = state.objects[0].volume.originalSize;
 
   //develop
-  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE /2;
+  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE / 2;
  // console.log(state.objects[0].volume.res);
 
   if ( MAX_TEXTURE_SIZE >= orginalTextSize  ) {
 
-    imageName = state.objects[0].volume.url + '_l.png';
+    imageName = state.objects[0].volume.url + '-l';
     res_size = 1;
 
   } else if ( MAX_TEXTURE_SIZE >= orginalTextSize / 2) {
 
-    imageName = state.objects[0].volume.url + '_m.png';
+    imageName = state.objects[0].volume.url + '-m';
     res_size = 2;
 
   }  else if ( MAX_TEXTURE_SIZE >= orginalTextSize / 4) {
     
-    imageName = state.objects[0].volume.url + '_s.png';
+    imageName = state.objects[0].volume.url + '-s';
     res_size = 4;
     
   }  else if ( MAX_TEXTURE_SIZE >= orginalTextSize / 8) {
     
-    imageName = state.objects[0].volume.url + '_xs.png';
+    imageName = state.objects[0].volume.url + '-xs';
     res_size = 8;
     
   }
@@ -367,26 +372,43 @@ function imageLoaded(image) {
   info.show();
   volume.draw(false, true);*/
 
+                            
+//          ##   ##            
+//           ## ##             
+// ####### ######### #######   
+//           ## ##             
+//          ##   ##            
+                            
+//  ######   ##     ## ####    
+// ##    ##  ##     ##  ##     
+// ##        ##     ##  ##     
+// ##   #### ##     ##  ##     
+// ##    ##  ##     ##  ##     
+// ##    ##  ##     ##  ##     
+//  ######    #######  ####    
+
+
   if (!state.properties.nogui) {
     var gui = new dat.GUI();
-    if (state.properties.server)
-      gui.add({"Update" : function() {ajaxPost(state.properties.server + "/update", "data=" + encodeURIComponent(getData(true, true)));}}, 'Update');
-    /* LOCALSTORAGE DISABLED
-    gui.add({"Reset" : function() {resetFromData(reset);}}, 'Reset');*/
-    gui.add({"Restore" : function() {resetFromData(state);}}, 'Restore');
-    gui.add({"Export" : function() {exportData();}}, 'Export');
-    //gui.add({"loadFile" : function() {document.getElementById('fileupload').click();}}, 'loadFile'). name('Load Image file');
-    gui.add({"ColourMaps" : function() {window.colourmaps.toggle();}}, 'ColourMaps');
-
-    var f = gui.addFolder('Ракурсы');
+    
+    gui.add({"Домой" : function() {window.location.href = "/ct_predict/case-"+APP_SETTINGS.case_id;}}, 'Домой');//*/
+    gui.add({"Сброс" : function() {resetFromData(reset);}}, 'Сброс');//*/
+    var f0 = gui.addFolder('Вид');
+    
+    var f1 = f0.addFolder('Ракурсы');
     var ir2 = 1.0 / Math.sqrt(2.0);
     var ir4 = 1.0 / Math.sqrt(4.0);
-    f.add({"Сверху" : function() {volume.rotate = quat4.create([0, 0, 1, 0]);}}, 'Сверху');
-    f.add({"Снизу" : function() {volume.rotate = quat4.create([1, 0, 0, 0]);}}, 'Снизу');
-    f.add({"Спереди" : function() {volume.rotate = quat4.create([ir2, 0, 0, -ir2]);}}, 'Спереди');
-    f.add({"Сзади" : function() {volume.rotate = quat4.create([ir2, 0, 0, ir2]);}}, 'Сзади');
-    f.add({"Справа" : function() {volume.rotate = quat4.create([ir4,ir4,ir4,-ir4]);}}, 'Справа');
-    f.add({"Слева" : function() {volume.rotate = quat4.create([ir4,-ir4,-ir4,-ir4]);}}, 'Слева');
+    f1.add({"Сверху" : function() {volume.rotate = quat4.create([0, 0, 1, 0]);}}, 'Сверху');
+    f1.add({"Снизу" : function() {volume.rotate = quat4.create([1, 0, 0, 0]);}}, 'Снизу');
+    f1.add({"Спереди" : function() {volume.rotate = quat4.create([ir2, 0, 0, -ir2]);}}, 'Спереди');
+    f1.add({"Справа" : function() {volume.rotate = quat4.create([ir4,ir4,ir4,-ir4]);}}, 'Справа');
+    f1.add({"Слева" : function() {volume.rotate = quat4.create([ir4,-ir4,-ir4,-ir4]);}}, 'Слева');
+
+    var f2 = f0.addFolder('Цветовая гамма');
+    f2.add({"Рентген" : function() {volume.renderXRAY();}}, 'Рентген');
+    f2.add({"Анатомик" : function() {volume.renderAnatomic();}}, 'Анатомик');
+    
+    f0.add({"Паллитра" : function() {window.colourmaps.toggle();}}, 'Паллитра');
 
     if (volume) volume.addGUI(gui);
     if (slicer) slicer.addGUI(gui);
@@ -409,8 +431,6 @@ function updateColourmap() {
   if (!colours) return;
   var gradient = $('gradient');
   colours.palette.draw(gradient, false);
-
-  //console.log(gradient);
 
   if (volume && volume.webgl) {
     volume.webgl.updateTexture(volume.webgl.gradientTexture, gradient, volume.gl.TEXTURE1);  //Use 2nd texture unit

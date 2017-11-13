@@ -50,13 +50,13 @@
                 "power": 1,
                 "brightness": 0,
                 "show": true,
-                "zoom": 0.4,
+                "zoom": 0.2,
                 "Y": 250,
                 "X": 250,
                 "Z": 250,
                 "usecolourmap": false,
                 "contrast": 1,
-                "importAtlasUrl": "161_segm_multi"
+                "importAtlasUrl": "161_bone_array"
             }
         },
         "zmin": 0,
