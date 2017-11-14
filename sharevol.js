@@ -9573,7 +9573,7 @@ function Slicer(props, image, filter, parentEl) {
   this.properties.zoom = 1.0;
 
   //brush---------------------------------------------------
-  this.properties.enableBrush = false;
+  this.properties.enableBrush = true;
   this.properties.drawRectangles = true;
   this.properties.showBrush = true;
   this.properties.brushTransperency = 255;
@@ -9639,6 +9639,7 @@ function Slicer(props, image, filter, parentEl) {
   this.colours = new GradientEditor($('palette'), this.updateBrushColourMap);
   
   this.isImportTextureLoaded = false;
+  this.currentItem = { label:''};
   //-----------------------------------------------------
 
   this.overlayCanvas = document.createElement("canvas");
@@ -9662,6 +9663,15 @@ function Slicer(props, image, filter, parentEl) {
 
 function rgbToHex(r, g, b) {
   return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+  } : null;
 }
 
 Slicer.prototype.toggle = function() {
@@ -9801,6 +9811,21 @@ Slicer.prototype.addGUI = function(gui) {
   f3.addColor(this.properties, 'brushColour').onChange(function(){
 
     that.currentBrush.color = that.properties.brushColour;
+
+    var colour = slicer.brushColourMap[that.currentBrush.label];
+    var rgb = hexToRgb(that.properties.brushColour);
+
+    if ( colour !== undefined ) {
+
+      colour.colour = "rgba("+rgb.r+","+rgb.g+","+rgb.b+",1.00)";
+
+      slicer.colours.read(slicer.brushColourMap);
+      
+      slicer.colours.update();
+
+    }
+
+
     that.draw();
 
   });
@@ -10235,18 +10260,6 @@ Slicer.prototype.drawBrush = function() {
 
   //XY BUG mouse coord not in view
 
-  function rgbToHex(r, g, b) {
-    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-  }
-  function hexToRgb(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
-  }
-
 
   for ( key of Object.keys( this.labels ) ) {   
 
@@ -10366,25 +10379,18 @@ Slicer.prototype.drawBrush = function() {
                 for (var j = 0; j < imgData.data.length; j+=4) {
         
                   // R
-                  imgData.data[j] = Math.ceil(brush.color[0]);
+                  imgData.data[j] = rgb.r;
                   // G
-                  imgData.data[j+1] = Math.ceil(brush.color[1]);
+                  imgData.data[j+1] = rgb.g;
                   // B
-                  imgData.data[j+2] = Math.ceil(brush.color[2]);
+                  imgData.data[j+2] = rgb.b;
                   // Alpha
                   imgData.data[j+3] = 255;
                   
                 }
-                
-                        //console.log(row, col, this.currentBrush.lineCoords[i].z * slicer.res[2]);
-                
+                                
                 this.overlayCanvasContext.putImageData(imgData, x, y);
               
-              //console.log('axis' + axis + ' ',rotate,x,y);
-
-              // this.overlayCanvasContext.beginPath();
-              // this.overlayCanvasContext.arc(x, y, brushSize, 0, 2 * Math.PI);
-              // this.overlayCanvasContext.fill();
 
           }
 
@@ -10513,7 +10519,6 @@ Slicer.prototype.importBrush = function() {
       slicer.brushGl = slicer.brushWebgl.gl;
     
       slicer.brushFilter = slicer.brushGl.NEAREST; //Nearest-neighbour (default)
-      //slicer.brushFilter = slicer.brushGl.LINEAR;
     
       //Use the default buffers
       slicer.brushWebgl.init2dBuffers(slicer.gl.TEXTURE2);
@@ -10543,10 +10548,10 @@ Slicer.prototype.importBrush = function() {
       var ctx = canvas.getContext('2d');
 
 
-      // partial parse 
-
       console.log('brush import begin');
 
+      var labelIndex = 0;
+      var labelsColor = {};
 
       var pix = ctx.getImageData(0,0, image.width,image.height).data
       //console.log(pix.length );
@@ -10579,25 +10584,23 @@ Slicer.prototype.importBrush = function() {
             var hexColor =  rgbToHex(r, g, b);
             
 
-            if ( slicer.labels [ hexColor ]  === undefined ) {
+            if ( labelsColor[ hexColor ]  === undefined ) {
 
-              slicer.labels [ hexColor ] =  {
+              labelsColor[ hexColor ] = 1;
+
+              slicer.labels [ labelIndex ] =  {
                 
-                    label: hexColor,
+                    label: labelIndex,
                     color: [r,g,b],
                     lineCoords:[],
                 
               }
 
+              labelIndex++;
+
               slicer.brushColourMap.push({ "position": 0, "colour": "rgba("+r+","+g+","+b+",1.00)" });
 
-              //slicer.labels [ hexColor ].lineCoords.push({x:x, y:y, z:z});
-
-            } else {
-
-              //slicer.labels [ hexColor ].lineCoords.push({x:x, y:y, z:z});
-
-            }
+            } 
 
         }
 
@@ -10610,33 +10613,28 @@ Slicer.prototype.importBrush = function() {
       slicer.brushColourMap[i].position  = 1 / slicer.brushColourMap.length * i;
 
     }
-    //console.log(slicer.brushColourMap);
 
-    //var colourmap = [{ "position": 0, "colour": "rgba(0,0,0,0.00)" }, { "position": 0.023438, "colour": "rgba(60,60,60,1.00)" }, { "position": 0.046875, "colour": "rgba(18,15,0,1.00)" }, { "position": 0.066641, "colour": "rgba(248,144,87,0.38)" }, { "position": 0.103047, "colour": "rgba(252,224,166,1.00)" }, { "position": 0.146016, "colour": "rgba(255,81,0,1.00)" }, { "position": 0.200703, "colour": "rgba(72,0,20,1.00)" }, { "position": 0.236084, "colour": "rgba(246,245,122,1.00)" }, { "position": 0.310078, "colour": "rgba(255,0,0,1.00)" }, { "position": 0.355, "colour": "rgba(255,255,255,0.00)" }, { "position": 0.894062, "colour": "rgba(255,255,255,0.00)" }, { "position": 1, "colour": "rgba(255,255,255,1.00)" }]
-    
     slicer.colours.read(slicer.brushColourMap);
 
     slicer.colours.update();
 
     console.log('brush import finish');
-        //console.log(slicer.gui.__folders['Кисточка']);
 
-        // var f3 = slicer.gui.__folders['Кисточка'];
+    var f3 = slicer.gui.__folders['Сегментации'];
+ 
+    f3.__controllers[f3.__controllers.length-1].remove();
         
-        //     f3.__controllers[f3.__controllers.length-1].remove();
-            
-        //     f3.add( slicer.currentItem, 'label', Object.keys(slicer.labels) ).onChange(function(val) {
-                  
-        //       slicer.currentBrush = slicer.labels[ val ];
+    f3.add( slicer.currentItem, 'label', Object.keys(slicer.labels) ).onChange(function(val) {
               
-        //       //console.log(that.labels);
-        //       slicer.draw();
+        slicer.currentBrush = slicer.labels[ val ];
+        
+        slicer.draw();
+        
+        for (var i in f3.__controllers) {
+          f3.__controllers[i].updateDisplay();
+        }
               
-        //       for (var i in f3.__controllers) {
-        //         f3.__controllers[i].updateDisplay();
-        //       }
-                  
-        //     });
+    });
     
     if(slicer.properties.enableBrush || slicer.properties.showBrush) slicer.draw();
 
