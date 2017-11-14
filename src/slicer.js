@@ -283,13 +283,31 @@ Slicer.prototype.addGUI = function(gui) {
     that.currentBrush.color = that.properties.brushColour;
 
     var colour = slicer.brushColourMap[that.currentBrush.label];
-    var rgb = hexToRgb(that.properties.brushColour);
+
+    var color;
+    
+    if ( that.properties.brushColour instanceof Array) {
+
+      color =   rgbToHex( Math.floor( that.properties.brushColour[0]),
+                              Math.floor( that.properties.brushColour[1]),
+                              Math.floor( that.properties.brushColour[2]));
+    } else {
+
+      color =   that.properties.brushColour;
+
+    }
+
+    var rgb = hexToRgb(color);
+
+    console.log(that.properties.brushColour);
 
     if ( colour !== undefined ) {
 
       colour.colour = "rgba("+rgb.r+","+rgb.g+","+rgb.b+",1.00)";
 
       slicer.colours.read(slicer.brushColourMap);
+
+      //console.log(slicer.brushColourMap);
       
       slicer.colours.update();
 
@@ -1020,7 +1038,7 @@ Slicer.prototype.importBrush = function() {
 
       console.log('brush import begin');
 
-      var labelIndex = 0;
+      var labelIndex = 1;
       var labelsColor = {};
 
       var pix = ctx.getImageData(0,0, image.width,image.height).data
@@ -1078,9 +1096,9 @@ Slicer.prototype.importBrush = function() {
 
     
 
-    for ( var i = 0; i < slicer.brushColourMap.length; i++ ) {
-
-      slicer.brushColourMap[i].position  = 1 / slicer.brushColourMap.length * i;
+    for ( var i = 1; i < slicer.brushColourMap.length; i++ ) {
+      
+      slicer.brushColourMap[i].position  =  1 / slicer.brushColourMap.length * i;
 
     }
 
