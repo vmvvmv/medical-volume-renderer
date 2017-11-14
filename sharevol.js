@@ -9631,6 +9631,11 @@ function Slicer(props, image, filter, parentEl) {
   this.brushCanvas = document.createElement("canvas");
   this.brushCanvas.style.cssText = "position: absolute; bottom: 0px;   z-index: 0; margin: 0px; padding: 0px; border: none; background: rgba(0,0,0,0); pointer-events: none;";
   
+  this.brushGradient = document.createElement("canvas");
+  this.brushGradient.width = 2048;
+  this.brushGradient.height = 1;
+
+  this.colours = new GradientEditor($('palette'), this.updateBrushColourMap);
   
   this.isImportTextureLoaded = false;
   //-----------------------------------------------------
@@ -9968,8 +9973,8 @@ Slicer.prototype.reset = function() {
 
 Slicer.prototype.updateColourmap = function() {
   this.webgl.updateTexture(this.webgl.gradientTexture, $('gradient'), this.gl.TEXTURE2);  //Use 2nd texture unit
-  if(this.brushWebgl)
-  this.brushWebgl.updateTexture(this.brushWebgl.gradientTexture, $('gradient'), this.brushGl.TEXTURE2);  //Use 2nd texture unit
+  // if(this.brushWebgl)
+  // this.brushWebgl.updateTexture(this.brushWebgl.gradientTexture, $('gradient'), this.brushGl.TEXTURE2);  //Use 2nd texture unit
 
   this.draw();
 }
@@ -10522,15 +10527,10 @@ Slicer.prototype.importBrush = function() {
       slicer.brushGl.blendFunc(slicer.brushGl.SRC_ALPHA, slicer.brushGl.ONE_MINUS_SRC_ALPHA);
       slicer.brushGl.enable(slicer.brushGl.SCISSOR_TEST);
       
-
       slicer.loadImage(image, true);
 
-      console.log($('gradient'));
-
-      slicer.brushWebgl.updateTexture(slicer.brushWebgl.gradientTexture, $('gradient'), slicer.brushGl.TEXTURE2); 
-      
-
       slicer.isImportTextureLoaded = true;
+
       console.log("Loaded image: " + image.width + " x " + image.height);
 
       var canvas = document.createElement('canvas');
@@ -10574,13 +10574,14 @@ Slicer.prototype.importBrush = function() {
             z = z /  slicer.res[2] * 1;
 
             var hexColor =  rgbToHex(r, g, b);
+            
 
             if ( slicer.labels [ hexColor ]  === undefined ) {
 
               slicer.labels [ hexColor ] =  {
                 
                     label: hexColor,
-                    color: hexColor,
+                    color: [r,g,b],
                     lineCoords:[],
                 
               }
@@ -10596,6 +10597,14 @@ Slicer.prototype.importBrush = function() {
         }
 
       }
+
+    console.log(slicer.labels);
+
+    var colourmap = [{ "position": 0, "colour": "rgba(0,0,0,0.00)" }, { "position": 0.023438, "colour": "rgba(60,60,60,1.00)" }, { "position": 0.046875, "colour": "rgba(18,15,0,1.00)" }, { "position": 0.066641, "colour": "rgba(248,144,87,0.38)" }, { "position": 0.103047, "colour": "rgba(252,224,166,1.00)" }, { "position": 0.146016, "colour": "rgba(255,81,0,1.00)" }, { "position": 0.200703, "colour": "rgba(72,0,20,1.00)" }, { "position": 0.236084, "colour": "rgba(246,245,122,1.00)" }, { "position": 0.310078, "colour": "rgba(255,0,0,1.00)" }, { "position": 0.355, "colour": "rgba(255,255,255,0.00)" }, { "position": 0.894062, "colour": "rgba(255,255,255,0.00)" }, { "position": 1, "colour": "rgba(255,255,255,1.00)" }]
+    
+    slicer.colours.read(colourmap);
+
+    slicer.colours.update();
 
     console.log('brush import finish');
         //console.log(slicer.gui.__folders['Кисточка']);
@@ -10622,6 +10631,17 @@ Slicer.prototype.importBrush = function() {
     }
   }
   );
+
+}
+
+Slicer.prototype.updateBrushColourMap  = function () {
+  
+  if (!slicer.colours) return;
+  
+  slicer.colours.palette.draw(slicer.brushGradient, false);
+
+  if (slicer.brushWebgl)
+  slicer.brushWebgl.updateTexture(slicer.brushWebgl.gradientTexture, slicer.brushGradient, slicer.brushGl.TEXTURE2);  //Use 2nd texture unit
 
 }
 
