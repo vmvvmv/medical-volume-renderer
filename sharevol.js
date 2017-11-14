@@ -9634,6 +9634,7 @@ function Slicer(props, image, filter, parentEl) {
   this.brushGradient = document.createElement("canvas");
   this.brushGradient.width = 2048;
   this.brushGradient.height = 1;
+  this.brushColourMap = [];
 
   this.colours = new GradientEditor($('palette'), this.updateBrushColourMap);
   
@@ -10530,6 +10531,8 @@ Slicer.prototype.importBrush = function() {
       slicer.loadImage(image, true);
 
       slicer.isImportTextureLoaded = true;
+      slicer.brushColourMap = [];
+      slicer.brushColourMap.push({ "position": 0, "colour": "rgba(0,0,0,0.00)" });
 
       console.log("Loaded image: " + image.width + " x " + image.height);
 
@@ -10586,6 +10589,8 @@ Slicer.prototype.importBrush = function() {
                 
               }
 
+              slicer.brushColourMap.push({ "position": 0, "colour": "rgba("+r+","+g+","+b+",1.00)" });
+
               //slicer.labels [ hexColor ].lineCoords.push({x:x, y:y, z:z});
 
             } else {
@@ -10598,11 +10603,18 @@ Slicer.prototype.importBrush = function() {
 
       }
 
-    console.log(slicer.labels);
-
-    var colourmap = [{ "position": 0, "colour": "rgba(0,0,0,0.00)" }, { "position": 0.023438, "colour": "rgba(60,60,60,1.00)" }, { "position": 0.046875, "colour": "rgba(18,15,0,1.00)" }, { "position": 0.066641, "colour": "rgba(248,144,87,0.38)" }, { "position": 0.103047, "colour": "rgba(252,224,166,1.00)" }, { "position": 0.146016, "colour": "rgba(255,81,0,1.00)" }, { "position": 0.200703, "colour": "rgba(72,0,20,1.00)" }, { "position": 0.236084, "colour": "rgba(246,245,122,1.00)" }, { "position": 0.310078, "colour": "rgba(255,0,0,1.00)" }, { "position": 0.355, "colour": "rgba(255,255,255,0.00)" }, { "position": 0.894062, "colour": "rgba(255,255,255,0.00)" }, { "position": 1, "colour": "rgba(255,255,255,1.00)" }]
     
-    slicer.colours.read(colourmap);
+
+    for ( var i = 0; i < slicer.brushColourMap.length; i++ ) {
+
+      slicer.brushColourMap[i].position  = 1 / slicer.brushColourMap.length * i;
+
+    }
+    //console.log(slicer.brushColourMap);
+
+    //var colourmap = [{ "position": 0, "colour": "rgba(0,0,0,0.00)" }, { "position": 0.023438, "colour": "rgba(60,60,60,1.00)" }, { "position": 0.046875, "colour": "rgba(18,15,0,1.00)" }, { "position": 0.066641, "colour": "rgba(248,144,87,0.38)" }, { "position": 0.103047, "colour": "rgba(252,224,166,1.00)" }, { "position": 0.146016, "colour": "rgba(255,81,0,1.00)" }, { "position": 0.200703, "colour": "rgba(72,0,20,1.00)" }, { "position": 0.236084, "colour": "rgba(246,245,122,1.00)" }, { "position": 0.310078, "colour": "rgba(255,0,0,1.00)" }, { "position": 0.355, "colour": "rgba(255,255,255,0.00)" }, { "position": 0.894062, "colour": "rgba(255,255,255,0.00)" }, { "position": 1, "colour": "rgba(255,255,255,1.00)" }]
+    
+    slicer.colours.read(slicer.brushColourMap);
 
     slicer.colours.update();
 
