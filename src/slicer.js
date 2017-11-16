@@ -299,7 +299,7 @@ Slicer.prototype.addGUI = function(gui) {
 
     var rgb = hexToRgb(color);
 
-    console.log(that.properties.brushColour);
+    //console.log(that.properties.brushColour);
 
     if ( colour !== undefined ) {
 

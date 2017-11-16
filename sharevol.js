@@ -9303,7 +9303,7 @@ function loadTexture() {
   var orginalTextSize = state.objects[0].volume.originalSize;
 
   //develop
-  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE / 2;
+  MAX_TEXTURE_SIZE = MAX_TEXTURE_SIZE;
  // console.log(state.objects[0].volume.res);
 
   if ( MAX_TEXTURE_SIZE >= orginalTextSize  ) {
@@ -9829,7 +9829,7 @@ Slicer.prototype.addGUI = function(gui) {
 
     var rgb = hexToRgb(color);
 
-    console.log(that.properties.brushColour);
+    //console.log(that.properties.brushColour);
 
     if ( colour !== undefined ) {
 
